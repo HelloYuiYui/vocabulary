@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { a } from '../data/themes.ts'
+import { a } from '../data/helpers.ts'
 import { canOverride, grade, isCorrect, tone } from './grade.ts'
 import type { Answer, Gender, Item } from './types.ts'
 
-const item = (...fr: [Answer, ...Answer[]]): Item => ({ en: 'prompt', fr })
+const item = (...fr: [Answer, ...Answer[]]): Item => ({
+  type: 'word',
+  en: 'prompt',
+  fr,
+})
 
 const stairs = item(a("l'escalier", 'm'), a('les escaliers', 'm'))
 const wardrobe = item(a("l'armoire", 'f'))
@@ -52,6 +56,11 @@ describe('grade', () => {
   it('ignores case, hyphens and punctuation', () => {
     const groundFloor = item(a('le rez-de-chaussée'))
     expect(grade('Le rez de chaussée !', null, groundFloor).verdict).toBe('ok')
+  })
+
+  it('accepts oe for œ as an accent slip', () => {
+    expect(grade('le coeur', null, item(a('le cœur'))).verdict).toBe('accent')
+    expect(grade("l'oeil", 'm', item(a("l'œil", 'm'))).verdict).toBe('accent')
   })
 
   it('treats whitespace-only input as empty', () => {

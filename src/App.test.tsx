@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
+import { chezSoi } from './data/a1/chezSoi.ts'
 import { V1_KEY, V2_KEY } from './storage/storage.ts'
 
 // A random of 0.999 makes shuffled() keep the theme order.
@@ -33,6 +34,8 @@ const reviewOnly = (en: string) =>
     }),
   )
 
+const total = chezSoi.items.length
+
 const stored = (): unknown => JSON.parse(localStorage.getItem(V2_KEY) ?? '{}')
 
 describe('cards mode', () => {
@@ -40,7 +43,7 @@ describe('cards mode', () => {
     const user = setup()
     await startTheme(user, /Chez soi/)
 
-    expect(screen.getByText('1 / 16')).toBeInTheDocument()
+    expect(screen.getByText(`1 / ${total}`)).toBeInTheDocument()
     expect(screen.getByText('the living room')).toBeInTheDocument()
     const input = screen.getByLabelText("Ta réponse, avec l'article")
     expect(input).toHaveFocus()
@@ -51,7 +54,7 @@ describe('cards mode', () => {
 
     await user.keyboard('{Enter}')
     expect(screen.getByText('the bedroom')).toBeInTheDocument()
-    expect(screen.getByText('2 / 16')).toBeInTheDocument()
+    expect(screen.getByText(`2 / ${total}`)).toBeInTheDocument()
 
     await user.type(screen.getByRole('textbox'), 'chambre{Enter}')
     expect(
@@ -139,17 +142,19 @@ describe('list mode', () => {
     await user.type(first, 'le salon{Enter}')
     expect(first).toBeDisabled()
     expect(screen.getByLabelText('the bedroom')).toHaveFocus()
-    expect(screen.getByText('1 / 16 corrigées · 1 justes')).toBeInTheDocument()
+    expect(
+      screen.getByText(`1 / ${total} corrigées · 1 justes`),
+    ).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('the bedroom'), 'la porte')
+    await user.type(screen.getByLabelText('the bedroom'), 'la piscine')
     await user.click(screen.getByRole('button', { name: 'Tout corriger' }))
 
     expect(screen.getByText('Bilan')).toBeInTheDocument()
-    expect(screen.getByText('/ 16')).toBeInTheDocument()
+    expect(screen.getByText(`/ ${total}`)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Tout corriger' })).toBeDisabled()
-    expect(screen.getByText('la porte')).toHaveClass('line-through')
+    expect(screen.getByText('la piscine')).toHaveClass('line-through')
     expect(stored()).toMatchObject({
-      scores: { 'chez-soi': { right: 1, total: 16 } },
+      scores: { 'chez-soi': { right: 1, total } },
     })
 
     // Overriding below the results updates the score.
@@ -159,14 +164,18 @@ describe('list mode', () => {
       })[0]!,
     )
     expect(stored()).toMatchObject({
-      scores: { 'chez-soi': { right: 2, total: 16 } },
+      scores: { 'chez-soi': { right: 2, total } },
     })
 
     await user.click(
       screen.getAllByRole('button', { name: 'Retour aux thèmes' })[0]!,
     )
-    expect(screen.getByText(/dernier score 2\/16/)).toBeInTheDocument()
-    expect(screen.getByText(/mots à revoir/)).toHaveTextContent('Tu as 14 mots')
+    expect(
+      screen.getByText(`dernier score 2/${total}`, { exact: false }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/mots à revoir/)).toHaveTextContent(
+      `Tu as ${total - 2} mots`,
+    )
   })
 })
 

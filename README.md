@@ -39,7 +39,8 @@ Pushing to `main` deploys to GitHub Pages through `.github/workflows/pages.yml`.
 index.html                  page shell and Google Fonts
 src/main.tsx                entry point
 src/App.tsx                 view state, saved progress, session dispatch
-src/data/themes.ts          vocabulary, one export per theme
+src/data/a1/, src/data/a2/  vocabulary, one file per theme
+src/data/themes.ts          the THEMES list, in checklist order
 src/domain/                 grading, session reducer, Anki export (no React)
 src/storage/                localStorage load, save and migration
 src/components/             one file per component, styled with Tailwind
@@ -50,10 +51,11 @@ docs/delf-checklist.md      A1 to B2 theme checklist, a roadmap for new themes
 
 ## Adding vocabulary
 
-Edit `src/data/themes.ts`. Each theme has an `id`, `name`, `level`, `desc` and `items`. Each item has an English prompt, a list of accepted French answers with the preferred one first, and an optional note:
+Each theme lives in its own file under `src/data/<level>/` and has an `id`, `name`, `level`, `desc` and `items`. Items are built with `word()` or `sentence()`: an English prompt, the accepted French answers with the preferred one first, and an optional note in French:
 
 ```ts
-{ en: 'the stairs', fr: [a("l'escalier", 'm'), a('les escaliers', 'm')], note: 'Optional explanation.' }
+word('the stairs', [a("l'escalier", 'm'), a('les escaliers', 'm')], 'Optional note.'),
+sentence('Where is the station?', [a('Où est la gare ?')]),
 ```
 
-When the article hides the gender (`l'`, `les`), pass it as the second argument to `a()`. Add the new theme to `THEMES` at the bottom of the file. The tests check that genders are set where needed and that ids and prompts are unique, since saved progress is keyed on them.
+Use `sentence()` for prompts ending in `.`, `?` or `!`, and `word()` for everything else, including verb phrases like "to have a shower". When the article hides the gender (`l'`, `les`), pass it as the second argument to `a()`. Add a new theme to `THEMES` in `src/data/themes.ts`. The tests check that genders and item types are set correctly and that ids and prompts are unique, since saved progress is keyed on them.

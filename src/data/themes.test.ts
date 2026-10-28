@@ -23,6 +23,17 @@ describe('answer genders', () => {
   })
 })
 
+describe('item types', () => {
+  it('marks prompts ending in . ? or ! as sentences, and only those', () => {
+    const wrong = THEMES.flatMap((t) =>
+      t.items
+        .filter((item) => (item.type === 'sentence') !== /[.?!]$/.test(item.en))
+        .map((item) => `${t.id}: ${item.en}`),
+    )
+    expect(wrong).toEqual([])
+  })
+})
+
 // Storage keys are built from theme ids and English prompts.
 describe('storage keys', () => {
   it('has unique theme ids', () => {

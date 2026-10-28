@@ -8,9 +8,13 @@ export const norm = (s: string): string =>
     .replace(/\s+/g, ' ')
     .trim()
 
-/** Removes accents. */
+/** Removes accents and unfolds the ligatures œ and æ, which most keyboards lack. */
 export const bare = (s: string): string =>
-  s.normalize('NFD').replace(/[̀-ͯ]/g, '')
+  s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
 
 const ARTICLE = /^(l'|le |la |les |un |une |des |du |de la |de l')/
 

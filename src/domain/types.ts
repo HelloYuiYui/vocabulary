@@ -6,7 +6,14 @@ export interface Answer {
   gender?: Gender // only when the article hides it (l', les)
 }
 
+/**
+ * A word is a single word or set expression, including verb phrases such as
+ * "to have a shower". A sentence is a full utterance ending in . ? or !
+ */
+export type ItemType = 'word' | 'sentence'
+
 export interface Item {
+  type: ItemType
   en: string // English prompt, unique within its theme
   fr: [Answer, ...Answer[]] // first entry is the preferred answer
   note?: string
