@@ -46,6 +46,8 @@ describe('loadStored', () => {
         { themeId: 'ville', en: 'the church' },
       ],
       scores: { 'chez-soi': { right: 9, total: 13, at } },
+      sessionLimit: null,
+      themeProgress: {},
     }
     expect(loadStored(THEMES, now)).toEqual(expected)
     expect(get(V2_KEY)).toEqual(expected)
@@ -90,7 +92,32 @@ describe('loadStored', () => {
       mode: 'cards',
       review: [{ themeId: 'chez-soi', en: 'the sofa' }],
       scores: { ok: { right: 1, total: 2, at } },
+      sessionLimit: null,
+      themeProgress: {},
     })
+  })
+
+  it('loads sessionLimit and themeProgress', () => {
+    put(V2_KEY, {
+      ...DEFAULTS,
+      sessionLimit: 30,
+      themeProgress: { 'chez-soi': 5, ville: 10 },
+    })
+    const result = loadStored(THEMES, now)
+    expect(result.sessionLimit).toBe(30)
+    expect(result.themeProgress).toEqual({ 'chez-soi': 5, ville: 10 })
+  })
+
+  it('defaults invalid sessionLimit and filters invalid themeProgress', () => {
+    put(V2_KEY, {
+      ...DEFAULTS,
+      sessionLimit: 'invalid',
+      themeProgress: { valid: 5, zero: 0, negative: -1, float: 1.5 },
+    })
+    const result = loadStored(THEMES, now)
+    expect(result.sessionLimit).toBe(null)
+    // 0 is valid (start of theme), but negative and float are not
+    expect(result.themeProgress).toEqual({ valid: 5, zero: 0 })
   })
 
   it.each([
@@ -133,6 +160,8 @@ describe('saveStored', () => {
       mode: 'list',
       review: [{ themeId: 'sante', en: 'to cough' }],
       scores: { sante: { right: 10, total: 14, at } },
+      sessionLimit: 30,
+      themeProgress: { sante: 5 },
     }
     saveStored(stored)
     expect(loadStored(THEMES, now)).toEqual(stored)

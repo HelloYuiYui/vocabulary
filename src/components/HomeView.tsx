@@ -4,6 +4,7 @@ import { Actions } from './Actions.tsx'
 import { Button } from './Button.tsx'
 import { ModeToggle } from './ModeToggle.tsx'
 import { ReviewBand } from './ReviewBand.tsx'
+import { SessionLimitSelector } from './SessionLimitSelector.tsx'
 import { ThemeGrid } from './ThemeGrid.tsx'
 
 interface HomeViewProps {
@@ -12,6 +13,7 @@ interface HomeViewProps {
   selected: ReadonlySet<string>
   onToggleTheme: (themeId: string, selected: boolean) => void
   onModeChange: (mode: Mode) => void
+  onSessionLimitChange: (limit: number | null) => void
   onStart: (themes: Theme[]) => void
   onReview: () => void
   onClearReview: () => void
@@ -23,12 +25,17 @@ export function HomeView({
   selected,
   onToggleTheme,
   onModeChange,
+  onSessionLimitChange,
   onStart,
   onReview,
   onClearReview,
 }: HomeViewProps) {
   const chosen = themes.filter((t) => selected.has(t.id))
   const questions = chosen.reduce((sum, t) => sum + t.items.length, 0)
+  const sessionSize =
+    stored.sessionLimit === null
+      ? questions
+      : Math.min(stored.sessionLimit, questions)
   return (
     <section className="flex flex-col gap-5">
       {stored.review.length > 0 && (
@@ -42,9 +49,13 @@ export function HomeView({
         <h2>Choisis tes thèmes</h2>
         <Actions>
           <ModeToggle mode={stored.mode} onChange={onModeChange} />
+          <SessionLimitSelector
+            limit={stored.sessionLimit}
+            onChange={onSessionLimitChange}
+          />
           <span className="text-[0.95rem] text-muted">
             {chosen.length
-              ? `${chosen.length} thème${chosen.length > 1 ? 's' : ''} · ${questions} questions`
+              ? `${chosen.length} thème${chosen.length > 1 ? 's' : ''} · ${sessionSize}${stored.sessionLimit !== null && questions > sessionSize ? `/${questions}` : ''} questions`
               : 'Aucun thème choisi'}
           </span>
           <Button
