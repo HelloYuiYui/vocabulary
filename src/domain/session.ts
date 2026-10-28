@@ -140,6 +140,12 @@ export function entriesFromKeys(
   })
 }
 
+/** Groups entries by theme, in order of each theme's first entry. */
+export function groupedByTheme(entries: Entry[]): Entry[] {
+  const themeIds = [...new Set(entries.map((e) => e.themeId))]
+  return themeIds.flatMap((id) => entries.filter((e) => e.themeId === id))
+}
+
 export function shuffled<T>(
   items: T[],
   random: () => number = Math.random,

@@ -4,6 +4,7 @@ import { ankiText } from './anki.ts'
 import {
   entriesFor,
   entriesFromKeys,
+  groupedByTheme,
   initialSession,
   recordSession,
   responsesOf,
@@ -199,6 +200,22 @@ describe('entries', () => {
     ]
     expect(entriesFromKeys(keys, byId)).toEqual([
       { themeId: 'chez-soi', item: sofa },
+    ])
+  })
+
+  it('groups entries by theme in first-appearance order', () => {
+    const e = (themeId: string, item: Item): Entry => ({ themeId, item })
+    const mixed = [
+      e('b', stairs),
+      e('a', kitchen),
+      e('b', sofa),
+      e('a', stairs),
+    ]
+    expect(groupedByTheme(mixed)).toEqual([
+      e('b', stairs),
+      e('b', sofa),
+      e('a', kitchen),
+      e('a', stairs),
     ])
   })
 
