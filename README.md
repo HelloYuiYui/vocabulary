@@ -1,6 +1,6 @@
 # Cahier de vocabulaire
 
-A small static site for testing French vocabulary by DELF theme. You get a word or phrase in English and type it in French. Answers are checked for accents, articles and gender, and missed words go into a review list you can copy into Anki.
+A small web app for testing French vocabulary by DELF theme. You get a word or phrase in English and type it in French. Answers are checked for accents, articles and gender, and missed words go into a review list you can copy into Anki.
 
 ## Features
 
@@ -11,32 +11,49 @@ A small static site for testing French vocabulary by DELF theme. You get a word 
 
 ## Running it
 
-No build step and no dependencies. Open `index.html` in a browser, or serve the folder:
+React and TypeScript, built with Vite and managed with pnpm. The project pins Node 26 (LTS); pnpm downloads it for the project's scripts if your system Node differs.
 
 ```sh
-npx serve .
-# or
-python3 -m http.server
+pnpm install
+pnpm dev          # dev server
+pnpm build        # type-check and build to dist/
+pnpm preview      # serve the build
 ```
 
-It deploys as-is to GitHub Pages, Netlify or any static host.
+Checks, all run in CI:
+
+```sh
+pnpm test         # Vitest: domain, storage and component tests
+pnpm lint         # ESLint
+pnpm typecheck    # tsc
+pnpm format       # Prettier (format:check in CI)
+```
+
+## Deployment
+
+Pushing to `main` deploys to GitHub Pages through `.github/workflows/pages.yml`. In the repository settings, set Pages to deploy from GitHub Actions. The base path defaults to `/cahier-de-vocabulaire/`; set `BASE_PATH` to build for another host or path, for example `BASE_PATH=/ pnpm build`.
 
 ## Structure
 
 ```
-index.html        page markup
-css/style.css     styles and light/dark theme tokens
-js/themes.js      vocabulary data (THEMES)
-js/app.js         grading, quiz and list modes, results, storage
-docs/delf-checklist.md   A1 to B2 theme checklist, a roadmap for new themes
+index.html                  page shell and Google Fonts
+src/main.tsx                entry point
+src/App.tsx                 view state, saved progress, session dispatch
+src/data/themes.ts          vocabulary, one export per theme
+src/domain/                 grading, session reducer, Anki export (no React)
+src/storage/                localStorage load, save and migration
+src/components/             one file per component, styled with Tailwind
+src/styles/tokens.css       light and dark colour tokens
+src/styles/index.css        Tailwind entry and token mapping
+docs/delf-checklist.md      A1 to B2 theme checklist, a roadmap for new themes
 ```
 
 ## Adding vocabulary
 
-Edit `js/themes.js`. Each theme has an `id`, `name`, `level`, `desc` and `items`. Each item has an English prompt, a list of accepted French answers with the preferred one first, and an optional note:
+Edit `src/data/themes.ts`. Each theme has an `id`, `name`, `level`, `desc` and `items`. Each item has an English prompt, a list of accepted French answers with the preferred one first, and an optional note:
 
-```js
-{ en: "the stairs", fr: ["l'escalier:m", "les escaliers:m"], note: "Optional explanation." }
+```ts
+{ en: 'the stairs', fr: [a("l'escalier", 'm'), a('les escaliers', 'm')], note: 'Optional explanation.' }
 ```
 
-When the article hides the gender (`l'`, `les`), append `:m` or `:f` to the answer.
+When the article hides the gender (`l'`, `les`), pass it as the second argument to `a()`. Add the new theme to `THEMES` at the bottom of the file. The tests check that genders are set where needed and that ids and prompts are unique, since saved progress is keyed on them.
