@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { a } from '../data/themes.ts'
+import { a, word } from '../data/helpers.ts'
 import { ankiText } from './anki.ts'
 import {
   entriesFor,
@@ -17,9 +17,9 @@ import {
 } from './session.ts'
 import type { Item, Theme } from './types.ts'
 
-const stairs: Item = { en: 'the stairs', fr: [a("l'escalier", 'm')] }
-const kitchen: Item = { en: 'the kitchen', fr: [a('la cuisine')] }
-const sofa: Item = { en: 'the sofa', fr: [a('le canapé')] }
+const stairs = word('the stairs', [a("l'escalier", 'm')])
+const kitchen = word('the kitchen', [a('la cuisine')])
+const sofa = word('the sofa', [a('le canapé')])
 const home: Theme = {
   id: 'chez-soi',
   name: 'Chez soi',

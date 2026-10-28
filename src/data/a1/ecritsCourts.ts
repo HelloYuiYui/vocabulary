@@ -1,0 +1,132 @@
+import type { Theme } from '../../domain/types.ts'
+import { a, sentence, word } from '../helpers.ts'
+
+export const ecritsCourts: Theme = {
+  id: 'ecrits-courts',
+  name: 'Écrits courts',
+  level: 'A1',
+  desc: 'Remplir un formulaire, écrire une carte postale ou un petit message.',
+  items: [
+    word('the form (to fill in)', [a('le formulaire')]),
+    word('the signature', [a('la signature')]),
+    word('the postcode', [a('le code postal')]),
+    word('the marital status', [
+      a('la situation familiale'),
+      a("l'état civil", 'm'),
+    ]),
+    word('the occupation (on a form)', [a('la profession')]),
+    word('the sex (on a form)', [a('le sexe')]),
+    word('male (on a form)', [a('masculin')]),
+    word('female (on a form)', [a('féminin')]),
+    word('in capital letters', [
+      a('en majuscules'),
+      a('en lettres majuscules'),
+    ]),
+    word('the postcard', [a('la carte postale')]),
+    word('the letter (mail)', [a('la lettre')]),
+    word('the envelope', [a("l'enveloppe", 'f')]),
+    word('the stamp', [a('le timbre')]),
+    word('the message', [a('le message')]),
+    word('the text message', [a('le texto'), a('le SMS')]),
+    word(
+      'the email',
+      [a("l'e-mail", 'm'), a('le mail'), a('le courriel')],
+      'Le courriel : mot recommandé au Québec et dans les textes officiels.',
+    ),
+    word('the subject (of an email)', [a("l'objet", 'm')]),
+    word('the attachment', [a('la pièce jointe')]),
+    word('to fill in (a form)', [a('remplir')]),
+    word('to sign', [a('signer')]),
+    word('to write', [a('écrire')]),
+    word('to send', [a('envoyer')]),
+    word('to receive', [a('recevoir')]),
+    word('to reply', [a('répondre')]),
+    word(
+      'Dear Marie (opening, to a friend)',
+      [a('Chère Marie')],
+      'Cher pour un homme, chère pour une femme.',
+    ),
+    word('Dear Paul (opening, to a friend)', [a('Cher Paul')]),
+    word('Dear Sir or Madam (formal opening)', [
+      a('Madame, Monsieur'),
+      a('Monsieur, Madame'),
+    ]),
+    word('Love (closing, to a friend)', [
+      a('Bisous'),
+      a('Bises'),
+      a('Grosses bises'),
+      a("Je t'embrasse"),
+    ]),
+    word('Best wishes (friendly closing)', [
+      a('Amitiés'),
+      a('Amicalement'),
+      a('Bien amicalement'),
+    ]),
+    word('Kind regards (closing a formal email)', [
+      a('Cordialement'),
+      a('Bien cordialement'),
+      a('Bien à vous'),
+    ]),
+    sentence('See you soon!', [a('À bientôt !')]),
+    sentence('Greetings from Nice!', [
+      a('Bons baisers de Nice !'),
+      a('Grosses bises de Nice !'),
+      a('Bonjour de Nice !'),
+    ]),
+    sentence("I'm writing to you from Brittany.", [
+      a("Je t'écris de Bretagne."),
+      a('Je vous écris de Bretagne.'),
+    ]),
+    sentence('The weather is lovely here.', [
+      a('Il fait très beau ici.'),
+      a('Il fait beau ici.'),
+    ]),
+    sentence("We're having a great time.", [
+      a('On passe un super moment.'),
+      a('Nous passons un très bon moment.'),
+      a('On passe de très bonnes vacances.'),
+      a('Nous passons de très bonnes vacances.'),
+      a("On s'amuse bien."),
+    ]),
+    sentence('Thank you for your message.', [
+      a('Merci pour ton message.'),
+      a('Merci de ton message.'),
+      a('Merci pour votre message.'),
+      a('Merci de votre message.'),
+    ]),
+    sentence("I'll call you tomorrow.", [
+      a("Je t'appelle demain."),
+      a('Je te téléphone demain.'),
+      a("Je t'appellerai demain."),
+      a('Je vous appelle demain.'),
+    ]),
+    sentence('Can you call me back?', [
+      a('Tu peux me rappeler ?'),
+      a('Peux-tu me rappeler ?'),
+      a('Est-ce que tu peux me rappeler ?'),
+      a('Vous pouvez me rappeler ?'),
+      a('Pouvez-vous me rappeler ?'),
+    ]),
+    sentence("I'm running late, sorry!", [
+      a('Je suis en retard, désolé !'),
+      a('Je suis en retard, désolée !'),
+      a('Désolé, je suis en retard !'),
+      a('Désolée, je suis en retard !'),
+    ]),
+    sentence('Meet you at the café at six.', [
+      a('Rendez-vous au café à six heures.'),
+      a('Rendez-vous au café à dix-huit heures.'),
+      a('On se retrouve au café à six heures.'),
+      a('On se retrouve au café à dix-huit heures.'),
+    ]),
+    sentence('Happy birthday!', [
+      a('Joyeux anniversaire !'),
+      a('Bon anniversaire !'),
+    ]),
+    sentence('Sign here, please.', [a("Signez ici, s'il vous plaît.")]),
+    sentence('Write in capital letters.', [
+      a('Écrivez en majuscules.'),
+      a('Écris en majuscules.'),
+    ]),
+  ],
+}
