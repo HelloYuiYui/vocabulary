@@ -5,6 +5,8 @@ export interface StoredV2 {
   mode: Mode
   review: ItemKey[]
   scores: Record<string, Score>
+  sessionLimit: number | null // null = unlimited, else 15/30/50
+  themeProgress: Record<string, number> // themeId -> item offset
 }
 
 export const V1_KEY = 'cahier-vocab-v1'
@@ -15,6 +17,8 @@ export const DEFAULTS: StoredV2 = {
   mode: 'cards',
   review: [],
   scores: {},
+  sessionLimit: null,
+  themeProgress: {},
 }
 
 // Storage can be missing or blocked, so every access is guarded.
@@ -42,6 +46,12 @@ const isMode = (v: unknown): v is Mode => v === 'cards' || v === 'list'
 const isCount = (v: unknown): v is number =>
   typeof v === 'number' && Number.isInteger(v) && v >= 0
 
+const isPositiveInt = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isInteger(v) && v > 0
+
+const isSessionLimit = (v: unknown): v is number | null =>
+  v === null || isPositiveInt(v)
+
 const isItemKey = (v: unknown): v is ItemKey =>
   isObject(v) && typeof v.themeId === 'string' && typeof v.en === 'string'
 
@@ -67,6 +77,10 @@ function parseV2(raw: unknown): StoredV2 | undefined {
     mode: isMode(raw.mode) ? raw.mode : DEFAULTS.mode,
     review: Array.isArray(raw.review) ? raw.review.filter(isItemKey) : [],
     scores: recordOf(raw.scores, isScore),
+    sessionLimit: isSessionLimit(raw.sessionLimit)
+      ? raw.sessionLimit
+      : DEFAULTS.sessionLimit,
+    themeProgress: recordOf(raw.themeProgress, isCount),
   }
 }
 
@@ -95,6 +109,8 @@ export function migrateV1(raw: unknown, now: Date): StoredV2 {
     mode: isMode(raw.mode) ? raw.mode : DEFAULTS.mode,
     review,
     scores,
+    sessionLimit: DEFAULTS.sessionLimit,
+    themeProgress: DEFAULTS.themeProgress,
   }
 }
 

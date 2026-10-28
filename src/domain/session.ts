@@ -130,6 +130,57 @@ export function entriesFor(themes: Theme[]): Entry[] {
   return themes.flatMap((t) => t.items.map((item) => ({ themeId: t.id, item })))
 }
 
+export interface ProgressResult {
+  entries: Entry[]
+  nextProgress: Record<string, number>
+}
+
+/**
+ * Selects entries starting from each theme's saved offset, cycling round-robin
+ * across themes up to the given limit. Returns entries and the updated offsets.
+ */
+export function entriesWithProgress(
+  themes: Theme[],
+  progress: Record<string, number>,
+  limit: number | null,
+): ProgressResult {
+  // Filter out empty themes to avoid division by zero
+  const nonEmpty = themes.filter((t) => t.items.length > 0)
+  if (nonEmpty.length === 0) return { entries: [], nextProgress: {} }
+
+  // Without a limit, return all entries and don't advance progress
+  if (limit === null) {
+    return { entries: entriesFor(nonEmpty), nextProgress: {} }
+  }
+
+  const entries: Entry[] = []
+  const offsets = nonEmpty.map((t) => (progress[t.id] ?? 0) % t.items.length)
+  const counts = nonEmpty.map(() => 0)
+  const sizes = nonEmpty.map((t) => t.items.length)
+  const total = sizes.reduce((a, b) => a + b, 0)
+
+  // Round-robin until we hit the limit or exhaust all items
+  let themeIdx = 0
+  while (entries.length < limit && entries.length < total) {
+    const theme = nonEmpty[themeIdx]!
+    const size = sizes[themeIdx]!
+    if (counts[themeIdx]! < size) {
+      const itemIdx = (offsets[themeIdx]! + counts[themeIdx]!) % size
+      entries.push({ themeId: theme.id, item: theme.items[itemIdx]! })
+      counts[themeIdx]!++
+    }
+    themeIdx = (themeIdx + 1) % nonEmpty.length
+  }
+
+  // Compute next offsets: advance by however many items we took from each theme
+  const nextProgress: Record<string, number> = {}
+  nonEmpty.forEach((t, i) => {
+    nextProgress[t.id] = (offsets[i]! + counts[i]!) % sizes[i]!
+  })
+
+  return { entries, nextProgress }
+}
+
 export function entriesFromKeys(
   keys: ItemKey[],
   themeById: ReadonlyMap<string, Theme>,

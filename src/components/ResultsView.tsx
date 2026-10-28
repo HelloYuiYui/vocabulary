@@ -104,7 +104,7 @@ export function ResultsView({
             <ul>
               {responses.map((r, i) => (
                 <li
-                  key={i}
+                  key={`${i}-${r.entry.themeId}-${r.entry.item.en}`}
                   className="grid grid-cols-2 gap-3 border-b border-dashed border-rule-strong py-[7px] max-[520px]:grid-cols-1 max-[520px]:gap-0"
                 >
                   <span>{r.entry.item.en}</span>

@@ -4,6 +4,7 @@ import { ankiText } from './anki.ts'
 import {
   entriesFor,
   entriesFromKeys,
+  entriesWithProgress,
   groupedByTheme,
   initialSession,
   recordSession,
@@ -223,6 +224,68 @@ describe('entries', () => {
     const order = shuffled([1, 2, 3, 4], () => 0)
     expect(order).toEqual([2, 3, 4, 1])
     expect(shuffled([1, 2, 3, 4], () => 0.999)).toEqual([1, 2, 3, 4])
+  })
+})
+
+describe('entriesWithProgress', () => {
+  const bed = word('the bed', [a('le lit')])
+  const town: Theme = {
+    id: 'ville',
+    name: 'En ville',
+    level: 'A1',
+    desc: '',
+    items: [bed, kitchen],
+  }
+
+  it('returns all entries when limit is null', () => {
+    const { entries, nextProgress } = entriesWithProgress([home], {}, null)
+    expect(entries).toHaveLength(3)
+    expect(nextProgress).toEqual({})
+  })
+
+  it('selects round-robin from multiple themes', () => {
+    const { entries, nextProgress } = entriesWithProgress(
+      [home, town],
+      {},
+      4,
+    )
+    // Round-robin: home[0], town[0], home[1], town[1]
+    expect(entries.map((e) => e.item.en)).toEqual([
+      'the stairs',
+      'the bed',
+      'the kitchen',
+      'the kitchen', // town[1] is kitchen
+    ])
+    // home: took 2 of 3 -> offset 2; town: took 2 of 2 -> wraps to 0
+    expect(nextProgress).toEqual({ 'chez-soi': 2, ville: 0 })
+  })
+
+  it('starts from saved offsets', () => {
+    const { entries, nextProgress } = entriesWithProgress(
+      [home],
+      { 'chez-soi': 1 },
+      2,
+    )
+    expect(entries.map((e) => e.item.en)).toEqual(['the kitchen', 'the sofa'])
+    expect(nextProgress).toEqual({ 'chez-soi': 0 }) // wraps to 0
+  })
+
+  it('wraps around when offset exceeds items length', () => {
+    const { entries } = entriesWithProgress([home], { 'chez-soi': 100 }, 2)
+    // 100 % 3 = 1, so starts at kitchen
+    expect(entries.map((e) => e.item.en)).toEqual(['the kitchen', 'the sofa'])
+  })
+
+  it('handles limit larger than total items', () => {
+    const { entries, nextProgress } = entriesWithProgress([home], {}, 100)
+    expect(entries).toHaveLength(3)
+    expect(nextProgress).toEqual({ 'chez-soi': 0 }) // full cycle wraps to 0
+  })
+
+  it('returns empty for no themes', () => {
+    const { entries, nextProgress } = entriesWithProgress([], {}, 10)
+    expect(entries).toEqual([])
+    expect(nextProgress).toEqual({})
   })
 })
 

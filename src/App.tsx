@@ -6,8 +6,8 @@ import { ListSession } from './components/ListSession.tsx'
 import { ResultsView } from './components/ResultsView.tsx'
 import { THEME_BY_ID, THEMES } from './data/themes.ts'
 import {
-  entriesFor,
   entriesFromKeys,
+  entriesWithProgress,
   groupedByTheme,
   initialSession,
   recordSession,
@@ -25,6 +25,7 @@ export default function App() {
   const [session, setSession] = useState(initialSession)
   const [run, setRun] = useState(0) // remounts the session views on restart
   const sessionRef = useRef(session)
+  const pendingProgressRef = useRef<Record<string, number>>({})
 
   // Like useReducer's dispatch, but records the session as soon as an action
   // finishes it, or changes it afterwards (an override below the results).
@@ -34,10 +35,25 @@ export default function App() {
     if (next === prev) return
     sessionRef.current = next
     setSession(next)
-    if (next.finished) setStored((s) => recordSession(s, next))
+    if (next.finished) {
+      // Capture and clear progress before setStored (React may call the callback twice)
+      const progressToSave = pendingProgressRef.current
+      pendingProgressRef.current = {}
+      setStored((s) => {
+        const recorded = recordSession(s, next)
+        if (Object.keys(progressToSave).length > 0) {
+          return {
+            ...recorded,
+            themeProgress: { ...recorded.themeProgress, ...progressToSave },
+          }
+        }
+        return recorded
+      })
+    }
   }
 
-  const start = (entries: Entry[], label: string) => {
+  const start = (entries: Entry[], label: string, progress?: Record<string, number>) => {
+    pendingProgressRef.current = progress ?? {}
     const mode = stored.mode
     const ordered =
       mode === 'cards' ? shuffled(entries) : groupedByTheme(entries)
@@ -64,12 +80,21 @@ export default function App() {
             })
           }
           onModeChange={(mode) => setStored((s) => ({ ...s, mode }))}
-          onStart={(themes) =>
-            start(
-              entriesFor(themes),
-              themes.length === 1 && themes[0] ? themes[0].name : 'mix',
-            )
+          onSessionLimitChange={(sessionLimit) =>
+            setStored((s) => ({ ...s, sessionLimit }))
           }
+          onStart={(themes) => {
+            const { entries, nextProgress } = entriesWithProgress(
+              themes,
+              stored.themeProgress,
+              stored.sessionLimit,
+            )
+            start(
+              entries,
+              themes.length === 1 && themes[0] ? themes[0].name : 'mix',
+              nextProgress,
+            )
+          }}
           onReview={() =>
             start(entriesFromKeys(stored.review, THEME_BY_ID), 'mix')
           }
