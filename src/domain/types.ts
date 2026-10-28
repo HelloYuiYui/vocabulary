@@ -19,3 +19,17 @@ export interface Theme {
   desc: string
   items: Item[]
 }
+
+export type Mode = 'cards' | 'list'
+
+/** Identifies an item across sessions: a theme id and an English prompt. */
+export interface ItemKey {
+  themeId: string
+  en: string
+}
+
+export interface Score {
+  right: number
+  total: number
+  at: string // ISO date
+}
