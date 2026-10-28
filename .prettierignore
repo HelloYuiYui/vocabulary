@@ -1,0 +1,7 @@
+dist
+pnpm-lock.yaml
+*.md
+css
+js
+legacy.html
+.claude

@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* Colours come only from the tokens, so drop Tailwind's default palette. */
+@theme {
+  --color-*: initial;
+}
+
+/* The font names match the tokens: the unlayered tokens in tokens.css win over
+   the copies Tailwind writes into its theme layer, so the classes resolve. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-pen: var(--pen);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-line: var(--line);
+  --color-masc: var(--masc);
+  --color-fem: var(--fem);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-hand: var(--font-hand);
+}
+
+@layer base {
+  html {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font: 16px/1.55 var(--font-body);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid var(--pen);
+    outline-offset: 2px;
+  }
+}

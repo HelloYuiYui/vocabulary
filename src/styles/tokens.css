@@ -1,0 +1,53 @@
+/* Design tokens. Layout: a single French "cahier" page. Seyès grands-carreaux ruling with a red margin; the learner writes in blue ink, corrections come back in red pen. */
+:root {
+  --paper: #f5f7fc;
+  --sheet: #fbfcff;
+  --ink: #1d2f6f;
+  --text: #22263a;
+  --muted: #5c6585;
+  --rule: #dde4f5;
+  --rule-strong: #b9c6ea;
+  --pen: #c8374d;
+  --ok: #2b7a4b;
+  --warn: #a8660f;
+  --line: #d6dcef;
+  --masc: #2759b8;
+  --fem: #a8327a;
+  --font-display: 'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --font-hand: 'Kalam', 'Comic Neue', 'Segoe Print', cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #10142a;
+    --sheet: #161b35;
+    --ink: #b9c7ff;
+    --text: #e3e6f3;
+    --muted: #9098bd;
+    --rule: #1f2647;
+    --rule-strong: #2c3663;
+    --pen: #ff7d8f;
+    --ok: #6fcf97;
+    --warn: #f0b45a;
+    --line: #2a3158;
+    --masc: #8fb4ff;
+    --fem: #f39bd0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --paper: #10142a;
+  --sheet: #161b35;
+  --ink: #b9c7ff;
+  --text: #e3e6f3;
+  --muted: #9098bd;
+  --rule: #1f2647;
+  --rule-strong: #2c3663;
+  --pen: #ff7d8f;
+  --ok: #6fcf97;
+  --warn: #f0b45a;
+  --line: #2a3158;
+  --masc: #8fb4ff;
+  --fem: #f39bd0;
+  color-scheme: dark;
+}
