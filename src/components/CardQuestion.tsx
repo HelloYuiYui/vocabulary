@@ -1,10 +1,12 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { canOverride } from '../domain/grade.ts'
+import type { PathCopy } from '../data/types.ts'
 import { norm } from '../domain/normalise.ts'
 import type { Draft, Entry, Response } from '../domain/session.ts'
 import { Actions } from './Actions.tsx'
 import { AnswerField } from './AnswerField.tsx'
 import { Button } from './Button.tsx'
+import { ClozePrompt } from './ClozePrompt.tsx'
 import { VerdictPanel } from './VerdictPanel.tsx'
 import { useCopy } from './languageContext.ts'
 
@@ -15,6 +17,8 @@ interface CardQuestionProps {
   onDunno: () => void
   onNext: () => void
   onOverride: () => void
+  /** On the path: an item with a sentence is then shown as a cloze card. */
+  pathCopy?: PathCopy
 }
 
 /** One card: the prompt, the answer, then the verdict. Remount it per card. */
@@ -25,6 +29,7 @@ export function CardQuestion({
   onDunno,
   onNext,
   onOverride,
+  pathCopy,
 }: CardQuestionProps) {
   const copy = useCopy()
   const [draft, setDraft] = useState<Draft>({ input: '', gender: null })
@@ -33,6 +38,7 @@ export function CardQuestion({
   const overrideRef = useRef<HTMLButtonElement>(null)
   const id = useId()
   const revealed = response !== undefined
+  const sentence = pathCopy ? item.sentence : undefined
 
   // Once revealed, Enter anywhere goes to the next card, except on the
   // override button, which Enter activates instead.
@@ -58,14 +64,23 @@ export function CardQuestion({
 
   return (
     <>
-      <div>
-        <p className="text-[0.8rem] tracking-[0.08em] text-muted uppercase">
-          {copy.card.prompt}
-        </p>
-        <p className="font-display text-[clamp(1.4rem,4vw,2rem)] leading-[1.2] font-bold text-balance text-text">
-          {item.en}
-        </p>
-      </div>
+      {pathCopy && sentence ? (
+        <ClozePrompt
+          sentence={sentence}
+          hint={item.en}
+          revealed={revealed}
+          copy={pathCopy}
+        />
+      ) : (
+        <div>
+          <p className="text-[0.8rem] tracking-[0.08em] text-muted uppercase">
+            {copy.card.prompt}
+          </p>
+          <p className="font-display text-[clamp(1.4rem,4vw,2rem)] leading-[1.2] font-bold text-balance text-text">
+            {item.en}
+          </p>
+        </div>
+      )}
       {/* "contents" lets the field and buttons sit in the page's own flow. */}
       <form autoComplete="off" onSubmit={submit} className="contents">
         <div className="flex flex-col gap-1.5">
@@ -94,7 +109,11 @@ export function CardQuestion({
       </form>
       {response && (
         <>
-          <VerdictPanel result={response.result} item={item} />
+          <VerdictPanel
+            result={response.result}
+            item={item}
+            formLabel={pathCopy?.formNeeded}
+          />
           <Actions>
             <Button ref={nextRef} variant="primary" onClick={onNext}>
               {copy.card.next}
