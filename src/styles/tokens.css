@@ -13,9 +13,12 @@
   --line: #d6dcef;
   --masc: #2759b8;
   --fem: #a8327a;
-  --font-display: 'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif;
-  --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
-  --font-hand: 'Kalam', 'Comic Neue', 'Segoe Print', cursive;
+  /* The first fonts have no Cyrillic; the second ones fill in those letters. */
+  --font-display:
+  'Bricolage Grotesque', 'Manrope', 'Avenir Next', system-ui, sans-serif;
+  --font-body:
+  'Atkinson Hyperlegible', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
+  --font-hand: 'Kalam', 'Caveat', 'Comic Neue', 'Segoe Print', cursive;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {

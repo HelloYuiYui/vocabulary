@@ -4,13 +4,14 @@ import type { Item } from '../domain/types.ts'
 import { Actions } from './Actions.tsx'
 import { Button } from './Button.tsx'
 import { cx } from './cx.ts'
-import { FrenchAnswer } from './FrenchAnswer.tsx'
-import { TONE_CLASSES, VERDICT_LABELS } from './verdictCopy.ts'
+import { AnswerText } from './AnswerText.tsx'
+import { TONE_CLASSES } from './verdictCopy.ts'
+import { useCopy } from './languageContext.ts'
 
 interface VerdictPanelProps {
   result: GradeResult
   item: Item
-  /** Shows "En fait, ma réponse était juste" when the verdict allows it. */
+  /** Shows the override button when the verdict allows it. */
   onOverride?: () => void
   compact?: boolean
 }
@@ -21,13 +22,14 @@ export function VerdictPanel({
   onOverride,
   compact,
 }: VerdictPanelProps) {
-  const others = item.fr.filter((a) => a.text !== answer.text)
+  const copy = useCopy()
+  const others = item.answers.filter((a) => a.text !== answer.text)
   return (
     <div className="flex flex-col gap-1">
       <span
         className={cx('text-[0.95rem] font-bold', TONE_CLASSES[tone(verdict)])}
       >
-        {VERDICT_LABELS[verdict]}
+        {copy.verdicts[verdict]}
       </span>
       {verdict !== 'ok' && (
         <span
@@ -36,21 +38,21 @@ export function VerdictPanel({
             compact ? 'text-[1.25rem]' : 'text-[1.5rem]',
           )}
         >
-          <FrenchAnswer answer={answer} />
+          <AnswerText answer={answer} />
         </span>
       )}
       {verdict === 'ok' && answer.gender && (
         <span className="text-[0.9rem] text-muted">
-          <FrenchAnswer answer={answer} />
+          <AnswerText answer={answer} />
         </span>
       )}
       {others.length > 0 && (
         <span className="text-[0.9rem] text-muted">
-          Aussi accepté :{' '}
+          {copy.alsoAccepted}{' '}
           {others.map((a, i) => (
             <Fragment key={a.text}>
               {i > 0 && ' · '}
-              <FrenchAnswer answer={a} />
+              <AnswerText answer={a} />
             </Fragment>
           ))}
         </span>
@@ -63,7 +65,7 @@ export function VerdictPanel({
       {onOverride && canOverride(verdict) && (
         <Actions>
           <Button variant="ghost" size="xs" onClick={onOverride}>
-            En fait, ma réponse était juste
+            {copy.override}
           </Button>
         </Actions>
       )}

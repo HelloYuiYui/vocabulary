@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { a, word } from '../data/helpers.ts'
+import { a, sentence, word } from '../data/helpers.ts'
 import { ankiText } from './anki.ts'
 import {
   entriesFor,
@@ -244,11 +244,7 @@ describe('entriesWithProgress', () => {
   })
 
   it('selects round-robin from multiple themes', () => {
-    const { entries, nextProgress } = entriesWithProgress(
-      [home, town],
-      {},
-      4,
-    )
+    const { entries, nextProgress } = entriesWithProgress([home, town], {}, 4)
     // Round-robin: home[0], town[0], home[1], town[1]
     expect(entries.map((e) => e.item.en)).toEqual([
       'the stairs',
@@ -286,6 +282,45 @@ describe('entriesWithProgress', () => {
     const { entries, nextProgress } = entriesWithProgress([], {}, 10)
     expect(entries).toEqual([])
     expect(nextProgress).toEqual({})
+  })
+
+  describe('with an item filter', () => {
+    const where = sentence('Where is the kitchen?', [a('Où est la cuisine ?')])
+    const big = sentence('The kitchen is big.', [a('La cuisine est grande.')])
+    const mixed: Theme = { ...home, items: [stairs, where, kitchen, big, sofa] }
+    const prompts = (es: Entry[]) => es.map((e) => e.item.en)
+
+    it('keeps only the chosen type', () => {
+      expect(
+        prompts(entriesWithProgress([mixed], {}, null, 'sentence').entries),
+      ).toEqual(['Where is the kitchen?', 'The kitchen is big.'])
+      expect(
+        prompts(entriesWithProgress([mixed], {}, null, 'word').entries),
+      ).toEqual(['the stairs', 'the kitchen', 'the sofa'])
+    })
+
+    it('keeps a separate offset per filter', () => {
+      const progress = { 'chez-soi': 4, 'chez-soi:word': 1 }
+      const { entries, nextProgress } = entriesWithProgress(
+        [mixed],
+        progress,
+        1,
+        'word',
+      )
+      expect(prompts(entries)).toEqual(['the kitchen'])
+      expect(nextProgress).toEqual({ 'chez-soi:word': 2 })
+    })
+
+    it('skips themes with nothing of the chosen type', () => {
+      const { entries, nextProgress } = entriesWithProgress(
+        [home],
+        {},
+        5,
+        'sentence',
+      )
+      expect(entries).toEqual([])
+      expect(nextProgress).toEqual({})
+    })
   })
 })
 

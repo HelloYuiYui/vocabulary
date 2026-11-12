@@ -12,10 +12,13 @@ export interface Answer {
  */
 export type ItemType = 'word' | 'sentence'
 
+/** Which item types a session asks. */
+export type ItemFilter = ItemType | 'all'
+
 export interface Item {
   type: ItemType
   en: string // English prompt, unique within its theme
-  fr: [Answer, ...Answer[]] // first entry is the preferred answer
+  answers: [Answer, ...Answer[]] // first entry is the preferred answer
   note?: string
 }
 

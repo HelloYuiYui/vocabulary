@@ -1,10 +1,10 @@
-import { THEME_BY_ID } from '../data/themes.ts'
 import type { SessionAction, SessionState } from '../domain/session.ts'
 import { Actions } from './Actions.tsx'
 import { Announcer } from './Announcer.tsx'
 import { Button } from './Button.tsx'
 import { CardQuestion } from './CardQuestion.tsx'
 import { Eyebrow } from './Eyebrow.tsx'
+import { useLanguage } from './languageContext.ts'
 import { Notebook } from './Notebook.tsx'
 import { verdictMessage } from './verdictCopy.ts'
 
@@ -14,6 +14,7 @@ interface CardSessionProps {
 }
 
 export function CardSession({ session, dispatch }: CardSessionProps) {
+  const { copy, themes } = useLanguage()
   const { entries, cursor } = session
   const entry = entries[cursor]
   if (!entry) return null
@@ -22,7 +23,9 @@ export function CardSession({ session, dispatch }: CardSessionProps) {
     <section>
       <Notebook>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Eyebrow as="span">{THEME_BY_ID.get(entry.themeId)?.name}</Eyebrow>
+          <Eyebrow as="span">
+            {themes.find((t) => t.id === entry.themeId)?.name}
+          </Eyebrow>
           <span className="text-[0.9rem] text-muted tabular-nums">
             {cursor + 1} / {entries.length}
           </span>
@@ -50,10 +53,12 @@ export function CardSession({ session, dispatch }: CardSessionProps) {
       </Notebook>
       <Actions className="mt-3">
         <Button variant="ghost" onClick={() => dispatch({ type: 'finish' })}>
-          Arrêter et voir le bilan
+          {copy.card.stop}
         </Button>
       </Actions>
-      <Announcer message={response ? verdictMessage(response.result) : ''} />
+      <Announcer
+        message={response ? verdictMessage(response.result, copy.verdicts) : ''}
+      />
     </section>
   )
 }

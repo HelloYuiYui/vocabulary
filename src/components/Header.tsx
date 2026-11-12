@@ -1,16 +1,23 @@
+import type { Language } from '../data/types.ts'
 import { Eyebrow } from './Eyebrow.tsx'
+import { useCopy } from './languageContext.ts'
+import { LanguageToggle } from './LanguageToggle.tsx'
 
-export function Header() {
+interface HeaderProps {
+  /** Shows the language switcher; left out during a session. */
+  onLanguageChange?: (language: Language) => void
+}
+
+export function Header({ onLanguageChange }: HeaderProps) {
+  const copy = useCopy()
   return (
     <header>
-      <Eyebrow>DELF · A1 → B1</Eyebrow>
-      <h1>Cahier de vocabulaire</h1>
-      <p className="mt-2.5 max-w-[62ch] text-muted">
-        On te donne le mot en anglais, tu l'écris en français. Les accents et
-        les articles comptent. Quand l'article cache le genre, comme dans{' '}
-        <em>l'escalier</em> ou <em>les charges</em>, choisis masculin ou féminin
-        à côté de ta réponse. Les mots ratés vont dans ta liste « à revoir ».
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Eyebrow>{copy.header.eyebrow}</Eyebrow>
+        {onLanguageChange && <LanguageToggle onChange={onLanguageChange} />}
+      </div>
+      <h1>{copy.header.title}</h1>
+      <p className="mt-2.5 max-w-[62ch] text-muted">{copy.header.intro}</p>
     </header>
   )
 }

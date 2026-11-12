@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { Score, Theme } from '../domain/types.ts'
 import { Button } from './Button.tsx'
-import { FrenchAnswer } from './FrenchAnswer.tsx'
+import { AnswerText } from './AnswerText.tsx'
+import { useCopy } from './languageContext.ts'
 
 interface ThemeCardProps {
   theme: Theme
@@ -16,8 +17,11 @@ export function ThemeCard({
   selected,
   onToggle,
 }: ThemeCardProps) {
+  const copy = useCopy()
   const [open, setOpen] = useState(false)
   const id = `theme-${theme.id}`
+  const sentences = theme.items.filter((it) => it.type === 'sentence').length
+  const words = theme.items.length - sentences
   return (
     <article className="flex min-w-0 flex-col gap-2.5 rounded-[10px] border-[1.5px] border-line bg-sheet p-4 has-checked:border-ink has-checked:ring-1 has-checked:ring-ink">
       <div className="flex items-start gap-2.5">
@@ -38,8 +42,8 @@ export function ThemeCard({
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-[0.85rem] text-muted">
         <span>
-          {theme.items.length} mots et phrases
-          {score && ` · dernier score ${score.right}/${score.total}`}
+          {copy.themeCard.stats(words, sentences)}
+          {score && copy.themeCard.lastScore(score.right, score.total)}
         </span>
         <Button
           variant="ghost"
@@ -47,7 +51,7 @@ export function ThemeCard({
           aria-expanded={open}
           onClick={() => setOpen(!open)}
         >
-          {open ? 'Cacher les mots' : 'Voir les mots'}
+          {open ? copy.themeCard.hide : copy.themeCard.show}
         </Button>
       </div>
       {open && (
@@ -59,7 +63,7 @@ export function ThemeCard({
             >
               <span>{item.en}</span>
               <span className="font-hand text-[1.02rem] text-ink">
-                <FrenchAnswer answer={item.fr[0]} />
+                <AnswerText answer={item.answers[0]} />
               </span>
             </li>
           ))}

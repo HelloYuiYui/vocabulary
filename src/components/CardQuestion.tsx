@@ -6,6 +6,7 @@ import { Actions } from './Actions.tsx'
 import { AnswerField } from './AnswerField.tsx'
 import { Button } from './Button.tsx'
 import { VerdictPanel } from './VerdictPanel.tsx'
+import { useCopy } from './languageContext.ts'
 
 interface CardQuestionProps {
   entry: Entry
@@ -25,6 +26,7 @@ export function CardQuestion({
   onNext,
   onOverride,
 }: CardQuestionProps) {
+  const copy = useCopy()
   const [draft, setDraft] = useState<Draft>({ input: '', gender: null })
   const inputRef = useRef<HTMLInputElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
@@ -58,7 +60,7 @@ export function CardQuestion({
     <>
       <div>
         <p className="text-[0.8rem] tracking-[0.08em] text-muted uppercase">
-          En français :
+          {copy.card.prompt}
         </p>
         <p className="font-display text-[clamp(1.4rem,4vw,2rem)] leading-[1.2] font-bold text-balance text-text">
           {item.en}
@@ -68,9 +70,7 @@ export function CardQuestion({
       <form autoComplete="off" onSubmit={submit} className="contents">
         <div className="flex flex-col gap-1.5">
           <label htmlFor={id} className="text-[0.9rem] text-muted">
-            {/^(the|a|an) /i.test(item.en)
-              ? "Ta réponse, avec l'article"
-              : 'Ta réponse'}
+            {copy.card.answerLabel(item.en)}
           </label>
           <AnswerField
             id={id}
@@ -78,7 +78,7 @@ export function CardQuestion({
             draft={draft}
             onChange={setDraft}
             disabled={revealed}
-            placeholder="écris ici…"
+            placeholder={copy.card.placeholder}
             large
             autoFocus
           />
@@ -86,9 +86,9 @@ export function CardQuestion({
         {!response && (
           <Actions>
             <Button variant="primary" type="submit">
-              Vérifier
+              {copy.card.check}
             </Button>
-            <Button onClick={onDunno}>Je ne sais pas</Button>
+            <Button onClick={onDunno}>{copy.card.dunno}</Button>
           </Actions>
         )}
       </form>
@@ -97,11 +97,11 @@ export function CardQuestion({
           <VerdictPanel result={response.result} item={item} />
           <Actions>
             <Button ref={nextRef} variant="primary" onClick={onNext}>
-              Suivant ↵
+              {copy.card.next}
             </Button>
             {canOverride(response.result.verdict) && (
               <Button ref={overrideRef} variant="ghost" onClick={onOverride}>
-                En fait, ma réponse était juste
+                {copy.override}
               </Button>
             )}
           </Actions>
