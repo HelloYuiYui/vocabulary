@@ -1,7 +1,7 @@
 import { matchesFilter } from '../domain/session.ts'
 import type { ItemFilter, Mode, Theme } from '../domain/types.ts'
+import type { ReactNode } from 'react'
 import type { StoredV2 } from '../storage/storage.ts'
-import { Actions } from './Actions.tsx'
 import { Button } from './Button.tsx'
 import { ItemFilterToggle } from './ItemFilterToggle.tsx'
 import { ModeToggle } from './ModeToggle.tsx'
@@ -56,35 +56,45 @@ export function HomeView({
           onClear={onClearReview}
         />
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2>{copy.home.chooseThemes}</h2>
-        <Actions>
-          <ModeToggle mode={stored.mode} onChange={onModeChange} />
-          <ItemFilterToggle
-            filter={stored.itemFilter}
-            onChange={onItemFilterChange}
-          />
-          <SessionLimitSelector
-            limit={stored.sessionLimit}
-            onChange={onSessionLimitChange}
-          />
-          <span className="text-[0.95rem] text-muted">
-            {chosen.length
-              ? copy.home.selection(
-                  chosen.length,
-                  sessionSize,
-                  questions > sessionSize ? questions : undefined,
-                )
-              : copy.home.noTheme}
-          </span>
-          <Button
-            variant="primary"
-            disabled={questions === 0}
-            onClick={() => onStart(chosen)}
-          >
-            {copy.home.start}
-          </Button>
-        </Actions>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2>{copy.home.chooseThemes}</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[0.9rem] text-muted">
+              {chosen.length
+                ? copy.home.selection(
+                    chosen.length,
+                    sessionSize,
+                    questions > sessionSize ? questions : undefined,
+                  )
+                : copy.home.noTheme}
+            </span>
+            <Button
+              variant="primary"
+              disabled={questions === 0}
+              onClick={() => onStart(chosen)}
+            >
+              {copy.home.start}
+            </Button>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <Setting label={copy.home.mode.label}>
+            <ModeToggle mode={stored.mode} onChange={onModeChange} />
+          </Setting>
+          <Setting label={copy.home.itemFilter.label}>
+            <ItemFilterToggle
+              filter={stored.itemFilter}
+              onChange={onItemFilterChange}
+            />
+          </Setting>
+          <Setting label={copy.home.sessionLimit.label}>
+            <SessionLimitSelector
+              limit={stored.sessionLimit}
+              onChange={onSessionLimitChange}
+            />
+          </Setting>
+        </div>
       </div>
       <ThemeGrid
         themes={themes}
@@ -93,5 +103,17 @@ export function HomeView({
         onToggle={onToggleTheme}
       />
     </section>
+  )
+}
+
+/** One setting: a small caption beside its control. */
+function Setting({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <span aria-hidden="true" className="text-[0.82rem] text-muted">
+        {label}
+      </span>
+      {children}
+    </div>
   )
 }

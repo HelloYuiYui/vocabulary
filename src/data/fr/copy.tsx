@@ -74,8 +74,8 @@ export const copy: Copy = {
   override: 'En fait, ma réponse était juste',
   gender: {
     label: 'Genre',
-    m: { short: 'masc.', long: 'masculin' },
-    f: { short: 'fém.', long: 'féminin' },
+    m: { short: 'M', long: 'masculin' },
+    f: { short: 'F', long: 'féminin' },
   },
   results: {
     title: 'Bilan',

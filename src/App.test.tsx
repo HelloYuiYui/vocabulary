@@ -113,7 +113,7 @@ describe('cards mode', () => {
     await user.clear(input)
     await user.type(input, "l'escalier")
     const picker = screen.getByRole('radiogroup', { name: 'Genre' })
-    await user.click(within(picker).getByRole('radio', { name: 'masc.' }))
+    await user.click(within(picker).getByRole('radio', { name: 'M' }))
     await user.click(screen.getByRole('button', { name: 'Vérifier' }))
 
     expect(screen.getAllByText('Juste !')[0]).toBeInTheDocument()
