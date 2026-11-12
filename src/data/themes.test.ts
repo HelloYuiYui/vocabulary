@@ -3,7 +3,9 @@ import type { Theme } from '../domain/types.ts'
 import { bg } from './bg/index.ts'
 import { fr } from './fr/index.ts'
 import { pl } from './pl/index.ts'
+import { a, cloze, pathTheme, plain, sentence, sub } from './helpers.ts'
 import { LANGUAGES } from './language.ts'
+import { pathProblems } from './pathChecks.ts'
 
 const answersOf = (themes: Theme[]) =>
   themes.flatMap((t) =>
@@ -71,5 +73,134 @@ describe.each(LANGUAGES)('$code themes', ({ themes }) => {
   it.each(themes)('has unique prompts in $id', (theme) => {
     const prompts = theme.items.map((item) => item.en)
     expect(new Set(prompts).size).toBe(prompts.length)
+  })
+})
+
+describe.each(LANGUAGES)('$code themes on the path', ({ code, themes }) => {
+  it('have sound sub-themes and sentences', () => {
+    expect(themes.flatMap((t) => pathProblems(t, code === 'fr'))).toEqual([])
+  })
+})
+
+describe('pathProblems', () => {
+  const mere = cloze(
+    'mere',
+    'the mother',
+    [a('la mère')],
+    "C'est {la mère} de Paul.",
+    "This is Paul's mother.",
+  )
+  const themeOf = (...subThemes: ReturnType<typeof sub>[]) =>
+    pathTheme({ id: 't', name: 'T', level: 'A1', desc: 'd', subThemes })
+  const problemsOf = (...items: Parameters<typeof sub>[2]) =>
+    pathProblems(themeOf(sub('s', 'S', items)), true)
+
+  it('finds nothing wrong with a sound theme', () => {
+    expect(problemsOf(mere, plain('zero', 'zero', [a('zéro')]))).toEqual([])
+  })
+
+  it('ignores a theme without sub-themes', () => {
+    const theme = { id: 't', name: 'T', level: 'A1' as const, desc: 'd' }
+    expect(pathProblems({ ...theme, items: [mere] }, true)).toEqual([])
+  })
+
+  it('reports repeated sub-theme and item ids', () => {
+    const theme = themeOf(sub('s', 'S', [mere]), sub('s', 'S', [mere]))
+    expect(pathProblems(theme, true)).toEqual([
+      't: sub-theme id "s" is used twice',
+      't: item id "mere" is used twice',
+    ])
+  })
+
+  it('reports items that are not the sub-themes flattened', () => {
+    const theme = { ...themeOf(sub('s', 'S', [mere])), items: [] }
+    expect(pathProblems(theme, true)).toEqual([
+      't: items are not the sub-themes flattened',
+    ])
+  })
+
+  it('reports an empty or oversized sub-theme', () => {
+    const many = Array.from({ length: 13 }, (_, i) =>
+      plain(`n${i}`, `n${i}`, [a('x')]),
+    )
+    expect(pathProblems(themeOf(sub('s', 'S', [])), true)).toEqual([
+      't: sub-theme "s" has 0 items, not 1 to 12',
+    ])
+    expect(problemsOf(...many)).toEqual([
+      't: sub-theme "s" has 13 items, not 1 to 12',
+    ])
+  })
+
+  it('reports a missing or malformed id', () => {
+    const noId = { ...mere }
+    delete noId.id
+    expect(problemsOf(noId)).toEqual(['t: "the mother" has no slug id'])
+    expect(problemsOf({ ...mere, id: 'La Mère' })).toEqual([
+      't: "La Mère" has no slug id',
+    ])
+  })
+
+  it('reports a whole-sentence item', () => {
+    const item = { ...sentence('Hello.', [a('Bonjour.')]), id: 'hello' }
+    expect(problemsOf(item)).toEqual(['t: "hello" is a whole-sentence item'])
+  })
+
+  it.each(['No blank.', 'Two {a} and {b}.', 'Empty {} here.'])(
+    'reports a sentence without exactly one blank: %s',
+    (text) => {
+      expect(problemsOf(cloze('x', 'x', [a('x')], text, 'x'))).toEqual([
+        't: "x" needs exactly one {blank}',
+      ])
+    },
+  )
+
+  it('reports a missing translation', () => {
+    expect(problemsOf(cloze('x', 'x', [a('x')], '{x}.', ' '))).toEqual([
+      't: "x" has no translation',
+    ])
+  })
+
+  it("reports a blank starting with l' or les that has no gender", () => {
+    const oncle = cloze(
+      'o',
+      'the uncle',
+      [a("l'oncle", 'm')],
+      "{L'oncle}.",
+      'x',
+    )
+    const amis = cloze('a', 'friends', [a('les amis', 'm')], '{les amis}.', 'x')
+    expect(problemsOf(oncle, amis)).toEqual([
+      't: "o" needs a gender for its blank',
+      't: "a" needs a gender for its blank',
+    ])
+  })
+
+  it('reports a gender on a blank that shows it', () => {
+    const item = cloze('x', 'x', [a('la mère')], '{la mère}.', 'x', {
+      gender: 'f',
+    })
+    expect(problemsOf(item)).toEqual([
+      't: "x" has a gender its blank does not need',
+    ])
+  })
+
+  it.each(['ma mère', 'du pain', "de l'eau", 'leurs enfants'])(
+    'reports a possessive or partitive in the blank: %s',
+    (blank) => {
+      expect(problemsOf(cloze('x', 'x', [a('x')], `{${blank}}.`, 'x'))).toEqual(
+        ['t: "x" has a possessive or partitive in its blank'],
+      )
+    },
+  )
+
+  it('allows words that merely begin like a possessive', () => {
+    const item = cloze('x', 'x', [a('x')], '{la maison}.', 'x')
+    const montagne = cloze('y', 'y', [a('y')], '{montagne}.', 'y')
+    expect(problemsOf(item, montagne)).toEqual([])
+  })
+
+  it('applies the French article rules to French only', () => {
+    const item = cloze('x', 'x', [a('x')], '{les x}.', 'x')
+    expect(pathProblems(themeOf(sub('s', 'S', [item])), false)).toEqual([])
   })
 })
