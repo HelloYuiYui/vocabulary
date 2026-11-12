@@ -6,11 +6,15 @@ type Answers = [Answer, ...Answer[]]
 export const a = (text: string, gender?: Gender): Answer =>
   gender ? { text, gender } : { text }
 
-const item = (type: ItemType, en: string, fr: Answers, note?: string): Item =>
-  note ? { type, en, fr, note } : { type, en, fr }
+const item = (
+  type: ItemType,
+  en: string,
+  answers: Answers,
+  note?: string,
+): Item => (note ? { type, en, answers, note } : { type, en, answers })
 
-export const word = (en: string, fr: Answers, note?: string): Item =>
-  item('word', en, fr, note)
+export const word = (en: string, answers: Answers, note?: string): Item =>
+  item('word', en, answers, note)
 
-export const sentence = (en: string, fr: Answers, note?: string): Item =>
-  item('sentence', en, fr, note)
+export const sentence = (en: string, answers: Answers, note?: string): Item =>
+  item('sentence', en, answers, note)

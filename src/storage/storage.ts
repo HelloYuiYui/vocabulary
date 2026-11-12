@@ -1,4 +1,10 @@
-import type { ItemKey, Mode, Score, Theme } from '../domain/types.ts'
+import type {
+  ItemFilter,
+  ItemKey,
+  Mode,
+  Score,
+  Theme,
+} from '../domain/types.ts'
 
 export interface StoredV2 {
   version: 2
@@ -6,9 +12,17 @@ export interface StoredV2 {
   review: ItemKey[]
   scores: Record<string, Score>
   sessionLimit: number | null // null = unlimited, else 15/30/50
-  themeProgress: Record<string, number> // themeId -> item offset
+  themeProgress: Record<string, number> // progressKey() -> item offset
+  itemFilter: ItemFilter
 }
 
+/** A language's entries in localStorage. Only French has v1 data to migrate. */
+export interface StorageKeys {
+  v1?: string
+  v2: string
+}
+
+// French keeps the keys it had before other languages were added.
 export const V1_KEY = 'cahier-vocab-v1'
 export const V2_KEY = 'cahier-vocab-v2'
 
@@ -19,6 +33,7 @@ export const DEFAULTS: StoredV2 = {
   scores: {},
   sessionLimit: null,
   themeProgress: {},
+  itemFilter: 'all',
 }
 
 // Storage can be missing or blocked, so every access is guarded.
@@ -43,6 +58,8 @@ type Json = Record<string, unknown>
 const isObject = (v: unknown): v is Json =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
 const isMode = (v: unknown): v is Mode => v === 'cards' || v === 'list'
+const isItemFilter = (v: unknown): v is ItemFilter =>
+  v === 'all' || v === 'word' || v === 'sentence'
 const isCount = (v: unknown): v is number =>
   typeof v === 'number' && Number.isInteger(v) && v >= 0
 
@@ -81,6 +98,9 @@ function parseV2(raw: unknown): StoredV2 | undefined {
       ? raw.sessionLimit
       : DEFAULTS.sessionLimit,
     themeProgress: recordOf(raw.themeProgress, isCount),
+    itemFilter: isItemFilter(raw.itemFilter)
+      ? raw.itemFilter
+      : DEFAULTS.itemFilter,
   }
 }
 
@@ -111,6 +131,7 @@ export function migrateV1(raw: unknown, now: Date): StoredV2 {
     scores,
     sessionLimit: DEFAULTS.sessionLimit,
     themeProgress: DEFAULTS.themeProgress,
+    itemFilter: DEFAULTS.itemFilter,
   }
 }
 
@@ -131,14 +152,30 @@ function prune(stored: StoredV2, themes: Theme[]): StoredV2 {
  * Loads saved progress. When only v1 data exists it is migrated and written
  * as v2; the v1 entry is left in place so the old site still works.
  */
-export function loadStored(themes: Theme[], now: Date = new Date()): StoredV2 {
-  const v2 = parseV2(read(V2_KEY))
+export function loadStored(
+  themes: Theme[],
+  keys: StorageKeys,
+  now: Date = new Date(),
+): StoredV2 {
+  const v2 = parseV2(read(keys.v2))
   if (v2) return prune(v2, themes)
-  const v1 = read(V1_KEY)
+  const v1 = keys.v1 === undefined ? undefined : read(keys.v1)
   if (v1 === undefined) return DEFAULTS
   const migrated = prune(migrateV1(v1, now), themes)
-  write(V2_KEY, migrated)
+  write(keys.v2, migrated)
   return migrated
 }
 
-export const saveStored = (stored: StoredV2): void => write(V2_KEY, stored)
+export const saveStored = (stored: StoredV2, keys: StorageKeys): void =>
+  write(keys.v2, stored)
+
+/** The code of the language last chosen, shared by every language. */
+export const LANGUAGE_KEY = 'cahier-vocab-language'
+
+export function loadLanguageCode(): string | undefined {
+  const code = read(LANGUAGE_KEY)
+  return typeof code === 'string' ? code : undefined
+}
+
+export const saveLanguageCode = (code: string): void =>
+  write(LANGUAGE_KEY, code)

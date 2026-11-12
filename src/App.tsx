@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CardSession } from './components/CardSession.tsx'
 import { Header } from './components/Header.tsx'
 import { HomeView } from './components/HomeView.tsx'
+import { LanguageContext } from './components/languageContext.ts'
 import { ListSession } from './components/ListSession.tsx'
 import { ResultsView } from './components/ResultsView.tsx'
-import { THEME_BY_ID, THEMES } from './data/themes.ts'
+import { languageFor, themesById } from './data/language.ts'
+import type { Language } from './data/types.ts'
 import {
   entriesFromKeys,
   entriesWithProgress,
@@ -16,10 +18,41 @@ import {
   type Entry,
   type SessionAction,
 } from './domain/session.ts'
+import { loadLanguageCode, saveLanguageCode } from './storage/storage.ts'
 import { usePersistentState } from './storage/usePersistentState.ts'
 
 export default function App() {
-  const [stored, setStored] = usePersistentState()
+  const [language, setLanguage] = useState(() =>
+    languageFor(loadLanguageCode()),
+  )
+
+  useEffect(() => {
+    document.documentElement.lang = language.code
+    document.title = language.copy.header.title
+  }, [language])
+
+  // The key starts each language afresh, with its own saved progress.
+  return (
+    <LanguageContext value={language}>
+      <Cahier
+        key={language.code}
+        language={language}
+        onLanguageChange={(next) => {
+          saveLanguageCode(next.code)
+          setLanguage(next)
+        }}
+      />
+    </LanguageContext>
+  )
+}
+
+interface CahierProps {
+  language: Language
+  onLanguageChange: (language: Language) => void
+}
+
+function Cahier({ language, onLanguageChange }: CahierProps) {
+  const [stored, setStored] = usePersistentState(language)
   const [view, setView] = useState<'home' | 'session'>('home')
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [session, setSession] = useState(initialSession)
@@ -52,7 +85,11 @@ export default function App() {
     }
   }
 
-  const start = (entries: Entry[], label: string, progress?: Record<string, number>) => {
+  const start = (
+    entries: Entry[],
+    label: string,
+    progress?: Record<string, number>,
+  ) => {
     pendingProgressRef.current = progress ?? {}
     const mode = stored.mode
     const ordered =
@@ -65,10 +102,12 @@ export default function App() {
 
   return (
     <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
-      <Header />
+      <Header
+        onLanguageChange={view === 'home' ? onLanguageChange : undefined}
+      />
       {view === 'home' ? (
         <HomeView
-          themes={THEMES}
+          themes={language.themes}
           stored={stored}
           selected={selected}
           onToggleTheme={(id, on) =>
@@ -83,11 +122,15 @@ export default function App() {
           onSessionLimitChange={(sessionLimit) =>
             setStored((s) => ({ ...s, sessionLimit }))
           }
+          onItemFilterChange={(itemFilter) =>
+            setStored((s) => ({ ...s, itemFilter }))
+          }
           onStart={(themes) => {
             const { entries, nextProgress } = entriesWithProgress(
               themes,
               stored.themeProgress,
               stored.sessionLimit,
+              stored.itemFilter,
             )
             start(
               entries,
@@ -96,7 +139,10 @@ export default function App() {
             )
           }}
           onReview={() =>
-            start(entriesFromKeys(stored.review, THEME_BY_ID), 'mix')
+            start(
+              entriesFromKeys(stored.review, themesById(language.themes)),
+              'mix',
+            )
           }
           onClearReview={() => setStored((s) => ({ ...s, review: [] }))}
         />

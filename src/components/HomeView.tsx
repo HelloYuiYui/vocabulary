@@ -1,11 +1,14 @@
-import type { Mode, Theme } from '../domain/types.ts'
+import { matchesFilter } from '../domain/session.ts'
+import type { ItemFilter, Mode, Theme } from '../domain/types.ts'
 import type { StoredV2 } from '../storage/storage.ts'
 import { Actions } from './Actions.tsx'
 import { Button } from './Button.tsx'
+import { ItemFilterToggle } from './ItemFilterToggle.tsx'
 import { ModeToggle } from './ModeToggle.tsx'
 import { ReviewBand } from './ReviewBand.tsx'
 import { SessionLimitSelector } from './SessionLimitSelector.tsx'
 import { ThemeGrid } from './ThemeGrid.tsx'
+import { useCopy } from './languageContext.ts'
 
 interface HomeViewProps {
   themes: Theme[]
@@ -14,6 +17,7 @@ interface HomeViewProps {
   onToggleTheme: (themeId: string, selected: boolean) => void
   onModeChange: (mode: Mode) => void
   onSessionLimitChange: (limit: number | null) => void
+  onItemFilterChange: (filter: ItemFilter) => void
   onStart: (themes: Theme[]) => void
   onReview: () => void
   onClearReview: () => void
@@ -26,12 +30,19 @@ export function HomeView({
   onToggleTheme,
   onModeChange,
   onSessionLimitChange,
+  onItemFilterChange,
   onStart,
   onReview,
   onClearReview,
 }: HomeViewProps) {
+  const copy = useCopy()
   const chosen = themes.filter((t) => selected.has(t.id))
-  const questions = chosen.reduce((sum, t) => sum + t.items.length, 0)
+  const questions = chosen.reduce(
+    (sum, t) =>
+      sum +
+      t.items.filter((item) => matchesFilter(item, stored.itemFilter)).length,
+    0,
+  )
   const sessionSize =
     stored.sessionLimit === null
       ? questions
@@ -46,24 +57,32 @@ export function HomeView({
         />
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2>Choisis tes thèmes</h2>
+        <h2>{copy.home.chooseThemes}</h2>
         <Actions>
           <ModeToggle mode={stored.mode} onChange={onModeChange} />
+          <ItemFilterToggle
+            filter={stored.itemFilter}
+            onChange={onItemFilterChange}
+          />
           <SessionLimitSelector
             limit={stored.sessionLimit}
             onChange={onSessionLimitChange}
           />
           <span className="text-[0.95rem] text-muted">
             {chosen.length
-              ? `${chosen.length} thème${chosen.length > 1 ? 's' : ''} · ${sessionSize}${stored.sessionLimit !== null && questions > sessionSize ? `/${questions}` : ''} questions`
-              : 'Aucun thème choisi'}
+              ? copy.home.selection(
+                  chosen.length,
+                  sessionSize,
+                  questions > sessionSize ? questions : undefined,
+                )
+              : copy.home.noTheme}
           </span>
           <Button
             variant="primary"
-            disabled={chosen.length === 0}
+            disabled={questions === 0}
             onClick={() => onStart(chosen)}
           >
-            Commencer
+            {copy.home.start}
           </Button>
         </Actions>
       </div>

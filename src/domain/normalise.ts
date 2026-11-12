@@ -8,13 +8,17 @@ export const norm = (s: string): string =>
     .replace(/\s+/g, ' ')
     .trim()
 
-/** Removes accents and unfolds the ligatures œ and æ, which most keyboards lack. */
+/**
+ * Removes accents and unfolds the ligatures œ and æ, which most keyboards lack.
+ * Polish ł has no decomposition, so it is folded by hand.
+ */
 export const bare = (s: string): string =>
   s
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/œ/g, 'oe')
     .replace(/æ/g, 'ae')
+    .replace(/ł/g, 'l')
 
 const ARTICLE = /^(l'|le |la |les |un |une |des |du |de la |de l')/
 

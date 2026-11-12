@@ -3,10 +3,10 @@ import { a } from '../data/helpers.ts'
 import { canOverride, grade, isCorrect, tone } from './grade.ts'
 import type { Answer, Gender, Item } from './types.ts'
 
-const item = (...fr: [Answer, ...Answer[]]): Item => ({
+const item = (...answers: [Answer, ...Answer[]]): Item => ({
   type: 'word',
   en: 'prompt',
-  fr,
+  answers,
 })
 
 const stairs = item(a("l'escalier", 'm'), a('les escaliers', 'm'))
@@ -65,6 +65,40 @@ describe('grade', () => {
 
   it('treats whitespace-only input as empty', () => {
     expect(grade('   ', null, bedroom).verdict).toBe('empty')
+  })
+})
+
+// The French article rules never match Cyrillic, so Bulgarian is graded on
+// spelling alone.
+describe('grade in Bulgarian', () => {
+  const calm = item(a('спокоен'), a('спокойна'))
+  const herSon = item(a('Синът ѝ е на три години.'))
+
+  it('ignores case and punctuation', () => {
+    expect(grade('Спокойна', null, calm).verdict).toBe('ok')
+    expect(grade('синът ѝ е на три години', null, herSon).verdict).toBe('ok')
+  })
+
+  it('accepts и for й or ѝ as an accent slip', () => {
+    expect(grade('спокоина', null, calm).verdict).toBe('accent')
+    expect(grade('Синът и е на три години.', null, herSon).verdict).toBe(
+      'accent',
+    )
+  })
+
+  it('rejects a wrong word', () => {
+    expect(grade('нервен', null, calm).verdict).toBe('bad')
+  })
+})
+
+describe('grade in Polish', () => {
+  const husband = item(a('mąż'))
+  const bald = item(a('łysy'), a('łysa'))
+
+  it('accepts missing Polish letters, ł included, as an accent slip', () => {
+    expect(grade('mąż', null, husband).verdict).toBe('ok')
+    expect(grade('maz', null, husband).verdict).toBe('accent')
+    expect(grade('Lysa', null, bald).verdict).toBe('accent')
   })
 })
 

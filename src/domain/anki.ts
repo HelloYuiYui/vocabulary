@@ -6,4 +6,4 @@ export const plainAnswer = (answer: Answer): string =>
 
 /** Tab-separated "English\tFrench" lines, one Anki card per item. */
 export const ankiText = (items: Item[]): string =>
-  items.map((item) => `${item.en}\t${plainAnswer(item.fr[0])}`).join('\n')
+  items.map((item) => `${item.en}\t${plainAnswer(item.answers[0])}`).join('\n')

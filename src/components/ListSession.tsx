@@ -1,5 +1,4 @@
 import { Fragment, useRef, useState } from 'react'
-import { THEME_BY_ID } from '../data/themes.ts'
 import {
   isRight,
   responsesOf,
@@ -11,6 +10,7 @@ import {
 import { Announcer } from './Announcer.tsx'
 import { Button } from './Button.tsx'
 import { Eyebrow } from './Eyebrow.tsx'
+import { useLanguage } from './languageContext.ts'
 import { ListRow } from './ListRow.tsx'
 import { Notebook } from './Notebook.tsx'
 import { verdictMessage } from './verdictCopy.ts'
@@ -25,6 +25,7 @@ interface ListSessionProps {
 
 /** The worksheet: every prompt on one page, grouped by theme. */
 export function ListSession({ session, dispatch, onHome }: ListSessionProps) {
+  const { copy, themes } = useLanguage()
   const { entries, responses } = session
   const [drafts, setDrafts] = useState<Record<number, Draft>>({})
   const [lastChecked, setLastChecked] = useState<number | 'all' | null>(null)
@@ -40,7 +41,11 @@ export function ListSession({ session, dispatch, onHome }: ListSessionProps) {
   })
 
   const answered = responsesOf(session)
-  const progress = `${answered.length} / ${entries.length} corrigées · ${answered.filter(isRight).length} justes`
+  const progress = copy.list.progress(
+    answered.length,
+    entries.length,
+    answered.filter(isRight).length,
+  )
   const lastResponse =
     typeof lastChecked === 'number' ? responses[lastChecked] : undefined
 
@@ -55,20 +60,17 @@ export function ListSession({ session, dispatch, onHome }: ListSessionProps) {
     <section className="flex flex-col gap-5">
       <Notebook>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <Eyebrow as="span">Exercice · traduis en français</Eyebrow>
+          <Eyebrow as="span">{copy.list.eyebrow}</Eyebrow>
           <Button variant="ghost" onClick={onHome}>
-            Retour aux thèmes
+            {copy.backToThemes}
           </Button>
         </div>
-        <p className="text-[0.9rem] text-muted">
-          Entrée corrige la ligne et passe à la suivante. Tu peux aussi tout
-          remplir puis tout corriger d'un coup.
-        </p>
+        <p className="text-[0.9rem] text-muted">{copy.list.help}</p>
         <div className="flex flex-col gap-2">
           {groups.map((group) => (
             <Fragment key={group.rows[0]?.index}>
               <p className="pt-2 font-display text-[1.15rem] font-bold text-ink">
-                {THEME_BY_ID.get(group.themeId)?.name}
+                {themes.find((t) => t.id === group.themeId)?.name}
               </p>
               <ol className="flex flex-col">
                 {group.rows.map(({ index, entry }) => (
@@ -107,7 +109,7 @@ export function ListSession({ session, dispatch, onHome }: ListSessionProps) {
             setLastChecked('all')
           }}
         >
-          Tout corriger
+          {copy.list.checkAll}
         </Button>
       </div>
       <Announcer
@@ -115,7 +117,7 @@ export function ListSession({ session, dispatch, onHome }: ListSessionProps) {
           lastChecked === 'all'
             ? progress
             : lastResponse
-              ? verdictMessage(lastResponse.result)
+              ? verdictMessage(lastResponse.result, copy.verdicts)
               : ''
         }
       />

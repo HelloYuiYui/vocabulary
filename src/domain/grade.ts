@@ -38,7 +38,7 @@ export function grade(
   gender: Gender | null,
   item: Item,
 ): GradeResult {
-  const answers = item.fr
+  const { answers } = item
   const n = norm(input)
   if (!n) return { verdict: 'empty', answer: answers[0] }
 

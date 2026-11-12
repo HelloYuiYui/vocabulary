@@ -1,5 +1,13 @@
 import { canOverride, grade, isCorrect, type GradeResult } from './grade.ts'
-import type { Gender, Item, ItemKey, Mode, Score, Theme } from './types.ts'
+import type {
+  Gender,
+  Item,
+  ItemFilter,
+  ItemKey,
+  Mode,
+  Score,
+  Theme,
+} from './types.ts'
 
 export interface Entry {
   themeId: string
@@ -85,7 +93,7 @@ export function sessionReducer(
     case 'dunno':
       return respond(state, action.index, EMPTY_DRAFT, (item) => ({
         verdict: 'dunno',
-        answer: item.fr[0],
+        answer: item.answers[0],
       }))
     case 'override': {
       const response = state.responses[action.index]
@@ -130,22 +138,39 @@ export function entriesFor(themes: Theme[]): Entry[] {
   return themes.flatMap((t) => t.items.map((item) => ({ themeId: t.id, item })))
 }
 
+export const matchesFilter = (item: Item, filter: ItemFilter): boolean =>
+  filter === 'all' || item.type === filter
+
+/**
+ * Key for a theme's saved offset. Each filter walks a different list of
+ * items, so each keeps its own place; 'all' uses the bare theme id.
+ */
+export const progressKey = (themeId: string, filter: ItemFilter): string =>
+  filter === 'all' ? themeId : `${themeId}:${filter}`
+
 export interface ProgressResult {
   entries: Entry[]
   nextProgress: Record<string, number>
 }
 
 /**
- * Selects entries starting from each theme's saved offset, cycling round-robin
- * across themes up to the given limit. Returns entries and the updated offsets.
+ * Selects the items matching the filter, starting from each theme's saved
+ * offset and cycling round-robin across themes up to the given limit. Returns
+ * entries and the updated offsets.
  */
 export function entriesWithProgress(
   themes: Theme[],
   progress: Record<string, number>,
   limit: number | null,
+  filter: ItemFilter = 'all',
 ): ProgressResult {
   // Filter out empty themes to avoid division by zero
-  const nonEmpty = themes.filter((t) => t.items.length > 0)
+  const nonEmpty = themes
+    .map((t) => ({
+      ...t,
+      items: t.items.filter((item) => matchesFilter(item, filter)),
+    }))
+    .filter((t) => t.items.length > 0)
   if (nonEmpty.length === 0) return { entries: [], nextProgress: {} }
 
   // Without a limit, return all entries and don't advance progress
@@ -154,7 +179,10 @@ export function entriesWithProgress(
   }
 
   const entries: Entry[] = []
-  const offsets = nonEmpty.map((t) => (progress[t.id] ?? 0) % t.items.length)
+  const keys = nonEmpty.map((t) => progressKey(t.id, filter))
+  const offsets = nonEmpty.map(
+    (t, i) => (progress[keys[i]!] ?? 0) % t.items.length,
+  )
   const counts = nonEmpty.map(() => 0)
   const sizes = nonEmpty.map((t) => t.items.length)
   const total = sizes.reduce((a, b) => a + b, 0)
@@ -174,8 +202,8 @@ export function entriesWithProgress(
 
   // Compute next offsets: advance by however many items we took from each theme
   const nextProgress: Record<string, number> = {}
-  nonEmpty.forEach((t, i) => {
-    nextProgress[t.id] = (offsets[i]! + counts[i]!) % sizes[i]!
+  keys.forEach((key, i) => {
+    nextProgress[key] = (offsets[i]! + counts[i]!) % sizes[i]!
   })
 
   return { entries, nextProgress }

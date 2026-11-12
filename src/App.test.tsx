@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
-import { chezSoi } from './data/a1/chezSoi.ts'
+import { chezSoi } from './data/fr/a1/chezSoi.ts'
 import { V1_KEY, V2_KEY } from './storage/storage.ts'
 
 // A random of 0.999 makes shuffled() keep the theme order.
@@ -218,6 +218,19 @@ describe('results', () => {
     )
     expect(screen.getByText('1 / 1')).toBeInTheDocument()
     expect(screen.getByText('the living room')).toBeInTheDocument()
+  })
+})
+
+describe('item filter', () => {
+  const sentences = chezSoi.items.filter((it) => it.type === 'sentence')
+
+  it('asks only sentences and remembers the choice', async () => {
+    const user = setup()
+    await user.click(screen.getByRole('button', { name: 'Phrases' }))
+    await startTheme(user, /Chez soi/)
+    expect(screen.getByText(`1 / ${sentences.length}`)).toBeInTheDocument()
+    expect(screen.getByText(sentences[0]!.en)).toBeInTheDocument()
+    expect(localStorage.getItem(V2_KEY)).toContain('"itemFilter":"sentence"')
   })
 })
 

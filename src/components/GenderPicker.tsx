@@ -1,6 +1,6 @@
 import type { Gender } from '../domain/types.ts'
 import { cx } from './cx.ts'
-import { GENDER_LABELS } from './genderLabels.ts'
+import { useCopy } from './languageContext.ts'
 
 const GENDERS: Gender[] = ['m', 'f']
 
@@ -17,10 +17,11 @@ export function GenderPicker({
   onChange,
   disabled,
 }: GenderPickerProps) {
+  const copy = useCopy()
   return (
     <span
       role="radiogroup"
-      aria-label="Genre"
+      aria-label={copy.gender.label}
       className="inline-flex flex-none overflow-hidden rounded-full border-[1.5px] border-line bg-sheet"
     >
       {GENDERS.map((gender) => (
@@ -40,7 +41,7 @@ export function GenderPicker({
             disabled={disabled}
             className="absolute size-px opacity-0"
           />
-          {GENDER_LABELS[gender].short}
+          {copy.gender[gender].short}
         </label>
       ))}
     </span>

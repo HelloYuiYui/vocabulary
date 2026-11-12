@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Copy } from '../data/types.ts'
 import { ankiText } from '../domain/anki.ts'
 import { hidesGender } from '../domain/normalise.ts'
 import {
@@ -12,25 +13,17 @@ import { Actions } from './Actions.tsx'
 import { Button } from './Button.tsx'
 import { cx } from './cx.ts'
 import { Eyebrow } from './Eyebrow.tsx'
-import { FrenchAnswer } from './FrenchAnswer.tsx'
-import { GENDER_LABELS } from './genderLabels.ts'
+import { AnswerText } from './AnswerText.tsx'
+import { useCopy } from './languageContext.ts'
 import { Notebook } from './Notebook.tsx'
 
-function scoreLine(right: number, done: number): string {
-  if (done === 0) return 'Aucune réponse cette fois.'
-  if (right === done)
-    return 'Sans faute. Ce thème est acquis, passe au suivant.'
-  if (right / done >= 0.7)
-    return 'Bonne base. Garde les mots ci-dessous dans ta liste.'
-  return 'Ce thème mérite une session de plus. Commence par les mots ci-dessous.'
-}
-
 /** What the learner typed, with the gender they picked when it mattered. */
-function givenText({ input, gender }: Response): string {
+function givenText(
+  { input, gender }: Response,
+  labels: Copy['gender'],
+): string {
   const text = input.trim()
-  return gender && hidesGender(text)
-    ? `${text} ${GENDER_LABELS[gender].short}`
-    : text
+  return gender && hidesGender(text) ? `${text} ${labels[gender].short}` : text
 }
 
 const prefersReducedMotion = () =>
@@ -50,6 +43,7 @@ export function ResultsView({
   onHome,
   scrollIntoView,
 }: ResultsViewProps) {
+  const ui = useCopy()
   const responses = responsesOf(session)
   const right = responses.filter(isRight).length
   const missed = responses.filter((r) => !isRight(r))
@@ -87,7 +81,7 @@ export function ResultsView({
   return (
     <section ref={sectionRef}>
       <Notebook>
-        <Eyebrow>Bilan</Eyebrow>
+        <Eyebrow>{ui.results.title}</Eyebrow>
         <p className="font-display text-[clamp(2.6rem,8vw,4rem)] leading-none font-extrabold text-ink tabular-nums">
           {right}
           <small className="text-[0.45em] font-medium text-muted">
@@ -96,11 +90,11 @@ export function ResultsView({
           </small>
         </p>
         <p className="max-w-[62ch] text-[0.95rem] text-text">
-          {scoreLine(right, responses.length)}
+          {ui.results.scoreLine(right, responses.length)}
         </p>
         {responses.length > 0 && (
           <div className="flex flex-col gap-2">
-            <h3>Tes réponses</h3>
+            <h3>{ui.results.yourAnswers}</h3>
             <ul>
               {responses.map((r, i) => (
                 <li
@@ -114,10 +108,10 @@ export function ResultsView({
                       isRight(r) ? 'text-ok' : 'text-pen',
                     )}
                   >
-                    <FrenchAnswer answer={r.result.answer} />
+                    <AnswerText answer={r.result.answer} />
                     {!isRight(r) && r.input.trim() && (
                       <span className="ml-2.5 text-[0.95em] text-muted line-through">
-                        {givenText(r)}
+                        {givenText(r, ui.gender)}
                       </span>
                     )}
                   </span>
@@ -133,18 +127,16 @@ export function ResultsView({
                 variant="primary"
                 onClick={() => onAgain(missed.map((r) => r.entry))}
               >
-                Refaire les mots ratés
+                {ui.results.retry}
               </Button>
-              <Button onClick={copyForAnki}>Copier pour Anki</Button>
+              <Button onClick={copyForAnki}>{ui.results.copyForAnki}</Button>
             </>
           )}
           <Button variant="ghost" onClick={onHome}>
-            Retour aux thèmes
+            {ui.backToThemes}
           </Button>
           {copy.state === 'copied' && (
-            <span className="text-[0.9rem] text-ok">
-              Copié : une carte par ligne, séparée par une tabulation.
-            </span>
+            <span className="text-[0.9rem] text-ok">{ui.results.copied}</span>
           )}
         </Actions>
         {copy.state === 'manual' && (
@@ -152,7 +144,7 @@ export function ResultsView({
             ref={copyBoxRef}
             readOnly
             value={copy.text}
-            aria-label="Liste à copier"
+            aria-label={ui.results.copyBox}
             className="min-h-[120px] w-full rounded-md border border-line bg-sheet p-2 font-mono text-[0.85rem] leading-[1.4] text-text"
           />
         )}

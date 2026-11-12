@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { THEMES } from '../data/themes.ts'
+import { THEMES } from '../data/fr/themes.ts'
 import {
   DEFAULTS,
   V1_KEY,
@@ -8,6 +8,8 @@ import {
   saveStored,
   type StoredV2,
 } from './storage.ts'
+
+const keys = { v1: V1_KEY, v2: V2_KEY }
 
 const now = new Date('2026-10-28T12:00:00Z')
 const at = now.toISOString()
@@ -21,7 +23,7 @@ afterEach(() => vi.restoreAllMocks())
 
 describe('loadStored', () => {
   it('returns defaults when nothing is saved', () => {
-    expect(loadStored(THEMES, now)).toEqual(DEFAULTS)
+    expect(loadStored(THEMES, keys, now)).toEqual(DEFAULTS)
     expect(localStorage.getItem(V2_KEY)).toBeNull()
   })
 
@@ -48,15 +50,16 @@ describe('loadStored', () => {
       scores: { 'chez-soi': { right: 9, total: 13, at } },
       sessionLimit: null,
       themeProgress: {},
+      itemFilter: 'all',
     }
-    expect(loadStored(THEMES, now)).toEqual(expected)
+    expect(loadStored(THEMES, keys, now)).toEqual(expected)
     expect(get(V2_KEY)).toEqual(expected)
     expect(get(V1_KEY)).toEqual(v1)
   })
 
   it('splits v1 keys at the first bar only', () => {
     put(V1_KEY, { review: ['routine|to wake up'] })
-    expect(loadStored(THEMES, now).review).toEqual([
+    expect(loadStored(THEMES, keys, now).review).toEqual([
       { themeId: 'routine', en: 'to wake up' },
     ])
   })
@@ -64,7 +67,7 @@ describe('loadStored', () => {
   it('prefers v2 over v1', () => {
     put(V1_KEY, { mode: 'list' })
     put(V2_KEY, { ...DEFAULTS, mode: 'cards' })
-    expect(loadStored(THEMES, now).mode).toBe('cards')
+    expect(loadStored(THEMES, keys, now).mode).toBe('cards')
   })
 
   it('drops review entries for removed items and duplicates', () => {
@@ -73,7 +76,7 @@ describe('loadStored', () => {
       ...DEFAULTS,
       review: [key, key, { themeId: 'chez-soi', en: 'gone' }],
     })
-    expect(loadStored(THEMES, now).review).toEqual([key])
+    expect(loadStored(THEMES, keys, now).review).toEqual([key])
   })
 
   it('keeps valid fields of partly corrupt v2 data', () => {
@@ -87,13 +90,14 @@ describe('loadStored', () => {
         worse: { right: 3, total: 2, at },
       },
     })
-    expect(loadStored(THEMES, now)).toEqual({
+    expect(loadStored(THEMES, keys, now)).toEqual({
       version: 2,
       mode: 'cards',
       review: [{ themeId: 'chez-soi', en: 'the sofa' }],
       scores: { ok: { right: 1, total: 2, at } },
       sessionLimit: null,
       themeProgress: {},
+      itemFilter: 'all',
     })
   })
 
@@ -103,7 +107,7 @@ describe('loadStored', () => {
       sessionLimit: 30,
       themeProgress: { 'chez-soi': 5, ville: 10 },
     })
-    const result = loadStored(THEMES, now)
+    const result = loadStored(THEMES, keys, now)
     expect(result.sessionLimit).toBe(30)
     expect(result.themeProgress).toEqual({ 'chez-soi': 5, ville: 10 })
   })
@@ -114,10 +118,15 @@ describe('loadStored', () => {
       sessionLimit: 'invalid',
       themeProgress: { valid: 5, zero: 0, negative: -1, float: 1.5 },
     })
-    const result = loadStored(THEMES, now)
+    const result = loadStored(THEMES, keys, now)
     expect(result.sessionLimit).toBe(null)
     // 0 is valid (start of theme), but negative and float are not
     expect(result.themeProgress).toEqual({ valid: 5, zero: 0 })
+  })
+
+  it('defaults an unknown item filter to all', () => {
+    put(V2_KEY, { ...DEFAULTS, itemFilter: 'phrases' })
+    expect(loadStored(THEMES, keys, now).itemFilter).toBe('all')
   })
 
   it.each([
@@ -128,7 +137,7 @@ describe('loadStored', () => {
   ])('falls back to defaults for %s', (_, raw) => {
     localStorage.setItem(V1_KEY, raw)
     localStorage.setItem(V2_KEY, raw)
-    expect(loadStored(THEMES, now)).toEqual(DEFAULTS)
+    expect(loadStored(THEMES, keys, now)).toEqual(DEFAULTS)
   })
 })
 
@@ -140,16 +149,16 @@ describe('without storage', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('blocked', 'SecurityError')
     })
-    expect(loadStored(THEMES, now)).toEqual(DEFAULTS)
-    expect(() => saveStored(DEFAULTS)).not.toThrow()
+    expect(loadStored(THEMES, keys, now)).toEqual(DEFAULTS)
+    expect(() => saveStored(DEFAULTS, keys)).not.toThrow()
   })
 
   it('survives localStorage itself throwing', () => {
     vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
       throw new DOMException('blocked', 'SecurityError')
     })
-    expect(loadStored(THEMES, now)).toEqual(DEFAULTS)
-    expect(() => saveStored(DEFAULTS)).not.toThrow()
+    expect(loadStored(THEMES, keys, now)).toEqual(DEFAULTS)
+    expect(() => saveStored(DEFAULTS, keys)).not.toThrow()
   })
 })
 
@@ -161,9 +170,10 @@ describe('saveStored', () => {
       review: [{ themeId: 'sante', en: 'to cough' }],
       scores: { sante: { right: 10, total: 14, at } },
       sessionLimit: 30,
-      themeProgress: { sante: 5 },
+      themeProgress: { sante: 5, 'sante:sentence': 3 },
+      itemFilter: 'sentence',
     }
-    saveStored(stored)
-    expect(loadStored(THEMES, now)).toEqual(stored)
+    saveStored(stored, keys)
+    expect(loadStored(THEMES, keys, now)).toEqual(stored)
   })
 })
