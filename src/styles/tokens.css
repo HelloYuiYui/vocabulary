@@ -15,9 +15,9 @@
   --fem: #a8327a;
   /* The first fonts have no Cyrillic; the second ones fill in those letters. */
   --font-display:
-  'Bricolage Grotesque', 'Manrope', 'Avenir Next', system-ui, sans-serif;
+    'Bricolage Grotesque', 'Manrope', 'Avenir Next', system-ui, sans-serif;
   --font-body:
-  'Atkinson Hyperlegible', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
+    'Atkinson Hyperlegible', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
   --font-hand: 'Kalam', 'Caveat', 'Comic Neue', 'Segoe Print', cursive;
 }
 @media (prefers-color-scheme: dark) {

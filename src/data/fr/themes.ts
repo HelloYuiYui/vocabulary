@@ -35,4 +35,3 @@ export const THEMES: Theme[] = [
   sante,
   logement,
 ]
-
