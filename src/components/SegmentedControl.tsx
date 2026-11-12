@@ -21,7 +21,7 @@ export function SegmentedControl<T>({
     <div
       role="group"
       aria-label={label}
-      className="inline-flex overflow-hidden rounded-lg border-[1.5px] border-ink"
+      className="inline-flex max-w-full gap-0.5 rounded-[7px] bg-line/60 p-0.5"
     >
       {options.map((opt) => (
         <button
@@ -29,7 +29,7 @@ export function SegmentedControl<T>({
           type="button"
           aria-pressed={value === opt.value}
           onClick={() => onChange(opt.value)}
-          className="cursor-pointer px-3.5 py-2 font-bold text-ink hover:brightness-108 aria-pressed:bg-ink aria-pressed:text-sheet"
+          className="cursor-pointer rounded-[5px] px-2.5 py-0.5 text-[0.82rem] text-muted hover:text-ink aria-pressed:bg-sheet aria-pressed:font-bold aria-pressed:text-ink aria-pressed:shadow-sm"
         >
           {opt.label}
         </button>
