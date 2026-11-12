@@ -6,6 +6,9 @@ export const pathCopy: PathCopy = {
   listen: 'Écouter la phrase',
   review: (count) =>
     count === 1 ? '1 carte à revoir' : `${count} cartes à revoir`,
+  cards: (count) => (count === 1 ? '1 carte' : `${count} cartes`),
+  left: (count) => (count === 1 ? 'reste 1 carte' : `restent ${count} cartes`),
+  leave: 'Arrêter',
   subThemeDone: 'fait',
   locked: 'À venir',
   quiz: 'Je connais déjà ce thème',

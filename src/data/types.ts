@@ -67,6 +67,9 @@ export interface PathCopy {
   formNeeded: string // before the form the sentence needed
   listen: string // accessible name of the audio button
   review: (count: number) => string
+  cards: (count: number) => string // the size of a sub-theme
+  left: (count: number) => string // cards still to answer right in a sitting
+  leave: string // leaves a sitting without recording it
   subThemeDone: string
   locked: string
   quiz: string
