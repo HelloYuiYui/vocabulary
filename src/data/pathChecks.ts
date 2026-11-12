@@ -1,10 +1,15 @@
 import { parseSentence } from '../domain/sentence.ts'
-import type { Theme } from '../domain/types.ts'
+import type { Answer, Gender, Theme } from '../domain/types.ts'
 
 const ID = /^[a-z0-9-]+$/
 const HIDES_GENDER = /^(l['’]|les )/i
 const NOT_IN_BLANK =
   /^((mon|ma|mes|ton|ta|tes|son|sa|ses|notre|nos|votre|vos|leur|leurs|du|de la) |de l['’])/i
+
+/** The gender an answer carries, or the one its article shows. */
+const genderOf = ({ text, gender }: Answer): Gender | undefined =>
+  gender ??
+  (/^(le|un) /i.test(text) ? 'm' : /^(la|une) /i.test(text) ? 'f' : undefined)
 
 const repeated = (values: string[]): string[] => [
   ...new Set(values.filter((v, i) => values.indexOf(v) !== i)),
@@ -51,6 +56,9 @@ export function pathProblems(theme: Theme, french: boolean): string[] {
         say(`"${name}" needs a gender for its blank`)
       if (!(french && hidden) && item.sentence.gender)
         say(`"${name}" has a gender its blank does not need`)
+      const { gender } = item.sentence
+      if (french && gender && !item.answers.some((a) => genderOf(a) === gender))
+        say(`"${name}" has a blank whose gender matches no answer`)
       if (french && NOT_IN_BLANK.test(parts.blank))
         say(`"${name}" has a possessive or partitive in its blank`)
     }

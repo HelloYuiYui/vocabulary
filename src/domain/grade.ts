@@ -15,6 +15,8 @@ export type Verdict =
 export interface GradeResult {
   verdict: Verdict
   answer: Answer // the matched answer, or the preferred one
+  /** A cloze card's form in its sentence, when a right answer differs from it. */
+  form?: Answer
 }
 
 export type Tone = 'ok' | 'near' | 'bad'

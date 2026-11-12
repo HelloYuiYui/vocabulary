@@ -199,6 +199,34 @@ describe('pathProblems', () => {
     expect(problemsOf(item, montagne)).toEqual([])
   })
 
+  it('reports a blank whose gender no dictionary form has', () => {
+    const oncle = cloze('o', 'x', [a("l'oncle", 'm')], "{l'oncle}.", 'x', {
+      gender: 'f',
+    })
+    const amie = cloze('a', 'y', [a('une amie')], "{l'amie}.", 'y', {
+      gender: 'm',
+    })
+    expect(problemsOf(oncle, amie)).toEqual([
+      't: "o" has a blank whose gender matches no answer',
+      't: "a" has a blank whose gender matches no answer',
+    ])
+  })
+
+  it('accepts a blank whose gender one of the dictionary forms has', () => {
+    const twins = cloze(
+      'j',
+      'the twins',
+      [a('les jumeaux', 'm'), a('les jumelles', 'f')],
+      '{les jumelles}.',
+      'x',
+      { gender: 'f' },
+    )
+    const amie = cloze('a', 'y', [a('une amie')], "{l'amie}.", 'y', {
+      gender: 'f',
+    })
+    expect(problemsOf(twins, amie)).toEqual([])
+  })
+
   it('applies the French article rules to French only', () => {
     const item = cloze('x', 'x', [a('x')], '{les x}.', 'x')
     expect(pathProblems(themeOf(sub('s', 'S', [item])), false)).toEqual([])
