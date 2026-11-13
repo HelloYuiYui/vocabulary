@@ -139,7 +139,7 @@ export const description: Theme = pathTheme({
         'She has long hair.',
         {
           gender: 'm',
-          note: 'Toujours au pluriel pour la chevelure. Un poil : sur le corps. Avec « avoir », on garde l'article défini : avoir les cheveux longs.',
+          note: "Toujours au pluriel pour la chevelure. Un poil : sur le corps. Avec « avoir », on garde l'article défini : avoir les cheveux longs.",
         },
       ),
       cloze(
