@@ -157,6 +157,7 @@ describe('review', () => {
         't1/mere': { box: 1, due: '2026-11-13', seen: 0, right: 0 },
         't1/pere': { box: 2, due: '2026-11-12', seen: 1, right: 1 },
         't1/frere': { box: 1, due: '2026-11-14', seen: 0, right: 0 },
+        't1/soeur': { box: 5, due: '2026-12-01', seen: 9, right: 9 },
       },
     })
     const { user } = setup()
@@ -171,6 +172,7 @@ describe('review', () => {
       't1/mere': { box: 2, due: '2026-11-16', seen: 1, right: 1 },
       't1/pere': { box: 1, due: '2026-11-14', seen: 2, right: 1 },
       't1/frere': { box: 1, due: '2026-11-14', seen: 0, right: 0 },
+      't1/soeur': { box: 5, due: '2026-12-01', seen: 9, right: 9 },
     })
     expect(screen.queryByRole('button', { name: /à revoir/ })).toBeNull()
   })
@@ -193,9 +195,7 @@ describe('the skip quiz', () => {
     // The quiz draws one card from each sub-theme in turn.
     for (const text of ['la mère', 'le frère', 'le père', 'la sœur'])
       await answer(user, text)
-    expect(
-      screen.getByText('4/4 : thème passé, le suivant est ouvert.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('4/4 : thème passé.')).toBeInTheDocument()
     await back(user)
 
     expect(

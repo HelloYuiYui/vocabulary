@@ -14,12 +14,19 @@ const isPlural = (article: string) => article === 'les' || article === 'des'
 /**
  * An answer that differs from an accepted one only by its article. The right
  * gender with the wrong kind of article (la for une, des for les) still shows
- * the learner knows the word; the wrong gender does not.
+ * the learner knows the word; the wrong gender does not. Nor does le or la
+ * before a noun that elides (le ami, la école), whichever form it matched.
  */
-function articleVerdict(input: string, answer: Answer): GradeResult['verdict'] {
+function articleVerdict(
+  input: string,
+  answer: Answer,
+  accepted: Answer[],
+): GradeResult['verdict'] {
   const typed = leadingArticle(fold(input))
   const wanted = leadingArticle(fold(answer.text))
   if (!typed || !wanted || wanted === "l'") return 'article'
+  const elides = accepted.some((a) => leadingArticle(fold(a.text)) === "l'")
+  if (elides && (typed === 'le' || typed === 'la')) return 'article'
   if (isPlural(typed) && isPlural(wanted)) return 'ok'
   const typedGender = SHOWN[typed]
   const nounGender = answer.gender ?? SHOWN[wanted]
@@ -39,13 +46,11 @@ export function gradeCloze(
 ): GradeResult {
   if (!item.sentence) return grade(input, gender, item)
   const form = sentenceAnswer(item.sentence)
-  const result = grade(input, gender, {
-    ...item,
-    answers: [form, ...item.answers],
-  })
+  const accepted: [Answer, ...Answer[]] = [form, ...item.answers]
+  const result = grade(input, gender, { ...item, answers: accepted })
   const verdict =
     result.verdict === 'article'
-      ? articleVerdict(input, result.answer)
+      ? articleVerdict(input, result.answer, accepted)
       : result.verdict
   const graded: GradeResult = { verdict, answer: result.answer }
   if (isCorrect(verdict) && fold(input) !== fold(form.text)) graded.form = form

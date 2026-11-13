@@ -1,6 +1,11 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Language, PathConfig } from '../data/types.ts'
-import { dueEntries, isSubDone, recordSitting } from '../domain/path.ts'
+import {
+  dueCount,
+  dueEntries,
+  isSubDone,
+  recordSitting,
+} from '../domain/path.ts'
 import { shuffled, type Entry } from '../domain/session.ts'
 import {
   initialSitting,
@@ -101,7 +106,8 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
       />
     )
 
-  const due = dueEntries(pathThemes, progress, new Date())
+  const now = new Date()
+  const due = dueEntries(pathThemes, progress, now)
 
   return (
     <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
@@ -112,7 +118,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
         <PathView
           themes={pathThemes}
           progress={progress}
-          dueCount={due.length}
+          dueCount={dueCount(pathThemes, progress, now)}
           copy={copy}
           showLegacy={showLegacy}
           onReview={() => start('review', shuffled(due))}

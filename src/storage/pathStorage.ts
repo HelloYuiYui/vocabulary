@@ -4,7 +4,7 @@ import {
   subKey,
   type PathProgress,
 } from '../domain/path.ts'
-import type { CardState } from '../domain/schedule.ts'
+import { enrol, type CardState } from '../domain/schedule.ts'
 import type { Theme } from '../domain/types.ts'
 
 // Storage can be missing or blocked, so every access is guarded.
@@ -56,8 +56,15 @@ const known = (v: unknown, valid: ReadonlySet<string>): string[] =>
  * Loads a language's path progress. Each field is validated on its own, and
  * anything that points at a theme, sub-theme or card no longer on the path
  * is dropped. Missing, corrupt or unreadable data gives empty progress.
+ *
+ * A card added to a sub-theme the learner has already finished would never
+ * be asked, so it enters review here, due tomorrow.
  */
-export function loadPath(key: string, themes: Theme[]): PathProgress {
+export function loadPath(
+  key: string,
+  themes: Theme[],
+  now: Date = new Date(),
+): PathProgress {
   const raw = read(key)
   if (!isObject(raw) || raw.version !== 1) return EMPTY_PROGRESS
 
@@ -78,11 +85,16 @@ export function loadPath(key: string, themes: Theme[]): PathProgress {
       if (card) cards[k] = card
     }
 
-  return {
-    done: known(raw.done, subKeys),
-    cards,
-    notesSeen: known(raw.notesSeen, themeIds),
-  }
+  const done = known(raw.done, subKeys)
+  const finished = new Set(done)
+  for (const theme of themes)
+    for (const sub of theme.subThemes ?? []) {
+      if (!finished.has(subKey(theme.id, sub.id))) continue
+      for (const item of sub.items)
+        if (item.id) cards[cardKey(theme.id, item.id)] ??= enrol(now)
+    }
+
+  return { done, cards, notesSeen: known(raw.notesSeen, themeIds) }
 }
 
 export const savePath = (key: string, progress: PathProgress): void =>

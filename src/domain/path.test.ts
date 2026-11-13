@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { a, pathTheme, plain, sub } from '../data/helpers.ts'
 import {
   cardKey,
+  dueCount,
   dueEntries,
   EMPTY_PROGRESS,
   isSubDone,
@@ -240,6 +241,46 @@ describe('recordSitting', () => {
     expect(recordSitting(EMPTY_PROGRESS, lost, T, NOW)).toBe(EMPTY_PROGRESS)
     const quiz = sitting('quiz', cards, { themeId: 'gone' })
     expect(recordSitting(EMPTY_PROGRESS, quiz, T, NOW)).toBe(EMPTY_PROGRESS)
+  })
+})
+
+describe('dueCount', () => {
+  const many = (count: number, due: string): PathProgress => ({
+    ...EMPTY_PROGRESS,
+    cards: Object.fromEntries(
+      Array.from({ length: count }, (_, i) => [
+        `big/n${i}`,
+        { box: 1, due, seen: 0, right: 0 },
+      ]),
+    ),
+  })
+  const big = pathTheme({
+    id: 'big',
+    name: 'big',
+    level: 'A1',
+    desc: 'd',
+    subThemes: [0, 1, 2, 3].map((s) =>
+      sub(
+        `s${s}`,
+        `s${s}`,
+        Array.from({ length: 12 }, (_, i) =>
+          plain(`n${s * 12 + i}`, `n${s * 12 + i}`, [a('x')]),
+        ),
+      ),
+    ),
+  })
+
+  it('counts every due card, though a sitting takes at most 30', () => {
+    const progress = many(45, '2026-11-01')
+    expect(dueCount([big], progress, NOW)).toBe(45)
+    expect(dueEntries([big], progress, NOW)).toHaveLength(30)
+  })
+
+  it('leaves out cards that are not due or whose item is gone', () => {
+    const progress = many(50, '2026-11-01')
+    progress.cards['big/n0'] = { box: 1, due: '2026-12-01', seen: 0, right: 0 }
+    // n48 and n49 are not in the theme.
+    expect(dueCount([big], progress, NOW)).toBe(47)
   })
 })
 

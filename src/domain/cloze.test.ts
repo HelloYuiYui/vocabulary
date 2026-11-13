@@ -42,6 +42,15 @@ const items = {
     "J'{habite} à Lyon.",
     'I live in Lyon.',
   ),
+  // Dictionary forms elide; the sentence uses an article that does not.
+  ami: cloze('ami', 'the friend', [a("l'ami", 'm')], "J'ai {un ami}.", 'x'),
+  ecole: cloze(
+    'ecole',
+    'the school',
+    [a("l'école", 'f')],
+    "C'est {une école}.",
+    'x',
+  ),
 } satisfies Record<string, Item>
 
 type Row = [keyof typeof items, string, Gender | null, Verdict, string?]
@@ -63,6 +72,15 @@ const rows: Row[] = [
   ['oncle', "l'oncle", 'f', 'gender'],
   ['oncle', 'un oncle', null, 'elision', 'l’oncle'],
   ['oncle', 'le oncle', null, 'article'],
+  ['ami', 'un ami', null, 'ok'],
+  ['ami', "l'ami", 'm', 'ok', 'un ami'],
+  ['ami', 'le ami', null, 'article'],
+  ['ami', 'la ami', null, 'article'],
+  ['ami', 'une ami', null, 'gender'],
+  ['ecole', 'une école', null, 'ok'],
+  ['ecole', 'la école', null, 'article'],
+  ['ecole', 'la ecole', null, 'article'],
+  ['ecole', 'le école', null, 'article'],
   ['enfants', 'les enfants', 'm', 'ok', 'des enfants'],
   ['enfants', 'des enfants', null, 'ok'],
   ['habiter', 'habite', null, 'ok'],

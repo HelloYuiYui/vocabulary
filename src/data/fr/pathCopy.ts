@@ -25,8 +25,7 @@ export const pathCopy: PathCopy = {
       count === 1
         ? '1 carte a demandé plus d’un essai.'
         : `${count} cartes ont demandé plus d’un essai.`,
-    quizPassed: (right, total) =>
-      `${right}/${total} : thème passé, le suivant est ouvert.`,
+    quizPassed: (right, total) => `${right}/${total} : thème passé.`,
     quizFailed: (right, total) => `${right}/${total} : le thème reste à faire.`,
   },
 }

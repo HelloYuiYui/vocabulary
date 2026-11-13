@@ -56,7 +56,11 @@ export function schedule(
 }
 
 /** Keys of the cards due today or earlier: longest overdue first, at most the limit. */
-export function dueKeys(cards: Record<string, CardState>, now: Date): string[] {
+export function dueKeys(
+  cards: Record<string, CardState>,
+  now: Date,
+  limit: number = REVIEW_LIMIT,
+): string[] {
   const today = localDay(now)
   return Object.entries(cards)
     .filter(([, state]) => state.due <= today)
@@ -64,6 +68,6 @@ export function dueKeys(cards: Record<string, CardState>, now: Date): string[] {
       ([ka, a], [kb, b]) =>
         a.due.localeCompare(b.due) || (ka < kb ? -1 : ka > kb ? 1 : 0),
     )
-    .slice(0, REVIEW_LIMIT)
+    .slice(0, limit)
     .map(([key]) => key)
 }

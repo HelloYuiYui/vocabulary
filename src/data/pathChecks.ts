@@ -56,8 +56,11 @@ export function pathProblems(theme: Theme, french: boolean): string[] {
         say(`"${name}" needs a gender for its blank`)
       if (!(french && hidden) && item.sentence.gender)
         say(`"${name}" has a gender its blank does not need`)
-      const { gender } = item.sentence
-      if (french && gender && !item.answers.some((a) => genderOf(a) === gender))
+      // The blank's gender: stated when its article hides it, shown otherwise.
+      const gender = item.sentence.gender ?? genderOf({ text: parts.blank })
+      // Only answers that carry or show a gender can contradict the blank.
+      const genders = item.answers.flatMap((a) => genderOf(a) ?? [])
+      if (french && gender && genders.length > 0 && !genders.includes(gender))
         say(`"${name}" has a blank whose gender matches no answer`)
       if (french && NOT_IN_BLANK.test(parts.blank))
         say(`"${name}" has a possessive or partitive in its blank`)

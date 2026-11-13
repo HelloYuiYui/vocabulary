@@ -98,6 +98,19 @@ describe('loadPath', () => {
     expect(loadPath(KEY, THEMES)).toEqual(SAVED)
   })
 
+  it('enrols a card that was added to a sub-theme already finished', () => {
+    put({ version: 1, done: ['t1/s1', 't1/s2'], cards: { 't1/a': CARD } })
+    expect(loadPath(KEY, THEMES, new Date(2026, 10, 12, 9, 0)).cards).toEqual({
+      't1/a': CARD,
+      't1/b': { box: 1, due: '2026-11-13', seen: 0, right: 0 },
+    })
+  })
+
+  it('does not enrol the cards of a sub-theme that is not finished', () => {
+    put({ version: 1, done: ['t1/s1'], cards: { 't1/a': CARD } })
+    expect(loadPath(KEY, THEMES).cards).toEqual({ 't1/a': CARD })
+  })
+
   it('returns empty progress when storage throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('blocked')

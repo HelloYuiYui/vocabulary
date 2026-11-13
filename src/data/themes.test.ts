@@ -212,6 +212,15 @@ describe('pathProblems', () => {
     ])
   })
 
+  it('reports a blank whose own article contradicts the item', () => {
+    const mere = cloze('m', 'x', [a('la mère')], '{un mère}.', 'x')
+    const pere = cloze('p', 'y', [a('le père')], '{La père}.', 'y')
+    expect(problemsOf(mere, pere)).toEqual([
+      't: "m" has a blank whose gender matches no answer',
+      't: "p" has a blank whose gender matches no answer',
+    ])
+  })
+
   it('accepts a blank whose gender one of the dictionary forms has', () => {
     const twins = cloze(
       'j',

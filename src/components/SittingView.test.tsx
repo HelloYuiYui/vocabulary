@@ -167,9 +167,7 @@ describe('SittingEnd', () => {
   it('reports a passed quiz with counts', async () => {
     const { user } = setup('quiz', cardsOf(2))
     await answer(user, 'le pain')
-    expect(
-      screen.getByText('1/1 : thème passé, le suivant est ouvert.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('1/1 : thème passé.')).toBeInTheDocument()
   })
 
   it('reports a failed quiz with counts, and does not ask a card twice', async () => {

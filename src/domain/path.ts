@@ -1,4 +1,10 @@
-import { dueKeys, enrol, schedule, type CardState } from './schedule.ts'
+import {
+  dueKeys,
+  enrol,
+  REVIEW_LIMIT,
+  schedule,
+  type CardState,
+} from './schedule.ts'
 import type { Entry } from './session.ts'
 import { quizPassed, type SittingState } from './sitting.ts'
 import type { Theme } from './types.ts'
@@ -56,18 +62,42 @@ export function themeStatuses(
   })
 }
 
-/** The cards due today or earlier, as entries; cards whose item is gone are skipped. */
-export function dueEntries(
-  themes: Theme[],
-  progress: PathProgress,
-  now: Date,
-): Entry[] {
+/** Every card of these themes that can be scheduled, by its key. */
+function entriesByKey(themes: Theme[]): Map<string, Entry> {
   const entries = new Map<string, Entry>()
   for (const theme of themes)
     for (const item of theme.items)
       if (item.id)
         entries.set(cardKey(theme.id, item.id), { themeId: theme.id, item })
-  return dueKeys(progress.cards, now).flatMap((key) => entries.get(key) ?? [])
+  return entries
+}
+
+/**
+ * The cards for one review sitting: those due today or earlier, longest
+ * overdue first, at most the review limit. Cards whose item is gone are
+ * skipped.
+ */
+export function dueEntries(
+  themes: Theme[],
+  progress: PathProgress,
+  now: Date,
+): Entry[] {
+  const entries = entriesByKey(themes)
+  return dueKeys(progress.cards, now, Infinity)
+    .flatMap((key) => entries.get(key) ?? [])
+    .slice(0, REVIEW_LIMIT)
+}
+
+/** How many cards are due in all, however many one sitting takes. */
+export function dueCount(
+  themes: Theme[],
+  progress: PathProgress,
+  now: Date,
+): number {
+  const entries = entriesByKey(themes)
+  return dueKeys(progress.cards, now, Infinity).filter((key) =>
+    entries.has(key),
+  ).length
 }
 
 /** Adds a first review state for each of these items that has none. */
