@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { canOverride } from '../domain/grade.ts'
 import type { PathCopy } from '../data/types.ts'
-import { norm } from '../domain/normalise.ts'
+import { hidesGender, norm } from '../domain/normalise.ts'
 import type { Draft, Entry, Response } from '../domain/session.ts'
 import { Actions } from './Actions.tsx'
 import { AnswerField } from './AnswerField.tsx'
@@ -55,10 +55,17 @@ export function CardQuestion({
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [revealed, onNext])
 
+  // On the path, an answer whose article hides the gender (l', les) cannot
+  // be checked until masculine or feminine is picked.
+  const genderMissing =
+    pathCopy !== undefined && hidesGender(draft.input) && !draft.gender
+  const [askedForGender, setAskedForGender] = useState(false)
+
   const submit = (e: FormEvent) => {
     e.preventDefault()
     if (revealed) return
     if (!norm(draft.input)) inputRef.current?.focus()
+    else if (genderMissing) setAskedForGender(true)
     else onAnswer(draft)
   }
 
@@ -97,6 +104,11 @@ export function CardQuestion({
             large
             autoFocus
           />
+          {pathCopy && askedForGender && genderMissing && !revealed && (
+            <p role="alert" className="text-[0.9rem] font-bold text-warn">
+              {pathCopy.pickGender}
+            </p>
+          )}
         </div>
         {!response && (
           <Actions>

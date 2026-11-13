@@ -108,6 +108,18 @@ describe('PathView', () => {
     )
   })
 
+  it('shows finished sub-themes in the done colour, and only those', () => {
+    show(done('t1/s1'))
+    const first = theme('Thème un').getByRole('button', { name: /Premier/ })
+    const second = theme('Thème un').getByRole('button', { name: /Second/ })
+    expect(first).toHaveAttribute('data-done', 'true')
+    expect(first).toHaveClass('border-ok', 'text-ok')
+    expect(first).not.toHaveClass('border-ink', 'text-ink')
+    expect(second).not.toHaveAttribute('data-done')
+    expect(second).toHaveClass('border-ink', 'text-ink')
+    expect(second).not.toHaveClass('border-ok', 'text-ok')
+  })
+
   it('keeps a finished theme open for practice', () => {
     show(done('t1/s1', 't1/s2'))
     expect(

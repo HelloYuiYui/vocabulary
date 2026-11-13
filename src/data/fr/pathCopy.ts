@@ -5,6 +5,7 @@ export const pathCopy: PathCopy = {
     "Suis le parcours, thème par thème. Dans chaque phrase, écris en français le mot qui manque. Les accents et les articles comptent. Quand l'article cache le genre, comme dans « l'escalier » ou « les charges », choisis masculin ou féminin à côté de ta réponse. Les cartes apprises reviennent plus tard, pour les revoir.",
   sentencePrompt: 'Complète la phrase',
   formNeeded: 'Dans la phrase :',
+  pickGender: 'Choisis masculin ou féminin avant de vérifier.',
   listen: 'Écouter la phrase',
   review: (count) =>
     count === 1 ? '1 carte à revoir' : `${count} cartes à revoir`,
