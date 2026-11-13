@@ -1,23 +1,27 @@
 # Cahier de vocabulaire
 
-A small web app for learning French vocabulary by DELF theme. French opens on a path: themes in order, each split into small sub-themes, where you fill in the missing word of a French sentence. Answers are checked for accents, articles and gender, and the cards you have learnt come back for review.
+A small web app for learning French vocabulary by DELF theme. Each language opens on a path: themes in order, each split into small sub-themes, where you fill in the missing word of a sentence. Answers are checked for accents and, in French, articles and gender, and the cards you have learnt come back for review.
 
-It also teaches Bulgarian (_Тетрадка с думи_) and Polish (_Zeszyt słówek_), each with the first four A1 themes so far. These two still use the older theme picker, where you get a word in English and type it. Switch language at the top of the home page; each language keeps its own progress. See [Languages](#languages).
+It also teaches Bulgarian (_Тетрадка с думи_) and Polish (_Zeszyt słówek_), each with the first four A1 themes so far. Switch language at the top of the home page; each language keeps its own progress. See [Languages](#languages).
 
-## The path (French)
+The Bulgarian and Polish sentences and grammar notes were drafted by an AI model and are still being checked by native speakers.
+
+## The path
 
 - **Themes in order.** The first theme is open; the next opens when every sub-theme of the current one is done. Inside a theme, take the sub-themes in any order.
-- **Cloze cards.** A French sentence with one blank, and an English hint in the blank. After you answer, the card shows the whole sentence, its translation and any note.
-- **Two accepted forms.** The form in the sentence is right, and so is the dictionary form; the card then shows the form the sentence needed. Gender stays strict.
+- **Cloze cards.** A sentence in the language being learnt with one blank, and an English hint in the blank. After you answer, the card shows the whole sentence, its translation and any note.
+- **Two accepted forms.** The form in the sentence is right, and so is the dictionary form; the card then shows the form the sentence needed. This matters most in Polish and Bulgarian, where the word in a sentence is often not its dictionary form. In French, gender stays strict.
 - **Sittings.** A missed card comes round again until every card has been answered right once. Leaving early records nothing.
 - **Review.** Finished cards return after 1, 3, 7, 14 and 30 days (Leitner boxes). A button above the path shows how many are due; a sitting takes at most 30.
 - **Skip quiz.** "Je connais déjà ce thème" on an open theme: up to 20 cards, no second tries, 80% finishes the theme and opens the next.
 - **Grammar notes.** At most one short reference card per theme, shown before its first sitting and reachable afterwards.
 - **Audio.** A play button appears after answering when a sentence has a recording. None are included yet.
 
-Four themes are on the path so far: _Se présenter_, _Famille et entourage_, _Chiffres, dates, heure_ and _Description simple_. The twelve others are hidden by default. Add `?legacy=1` to the address once to show an "Autres thèmes" button under the path, which opens them in the theme picker; `?legacy=0` hides it again. The choice is remembered per browser.
+In Bulgarian and Polish, all four themes are on the path. In French, four themes are on the path so far: _Se présenter_, _Famille et entourage_, _Chiffres, dates, heure_ and _Description simple_. The twelve other French themes are hidden by default. Add `?legacy=1` to the address once to show an "Autres thèmes" button under the path, which opens them in the theme picker; `?legacy=0` hides it again. The choice is remembered per browser.
 
-## The theme picker (Bulgarian, Polish, and French behind `?legacy=1`)
+## The theme picker (French behind `?legacy=1`)
+
+The older way of practising, kept for the French themes that are not on the path yet: you get a word or phrase in English and type it in French.
 
 - Two modes: one card at a time, or a full worksheet list on one page.
 - Ask only words, only sentences, or both. With a session limit, each choice keeps its own place in every theme.
@@ -86,9 +90,10 @@ sub('parents-et-enfants', 'Parents et enfants', [
 - The blank holds an article plus the noun, or the bare word for verbs, adjectives and the rest. Possessives and partitives stay outside it.
 - Pass `gender` when the blank starts with `l'` or `les`.
 - Don't put the blank straight after an elided word (`J'{habite}`): write `Nous {habitons}`.
-- An id is a storage key: never change it once it is merged. A word without a natural sentence can use `plain()`.
+- An id is a storage key: never change it once it is merged. Use ASCII slugs, transliterating Cyrillic (`mayka`). A word without a natural sentence can use `plain()`.
+- The French-only rules above (articles, `gender`, elision) do not apply to Bulgarian and Polish. There the blank holds the word in whatever form the sentence needs, and the answers list the dictionary forms. Bulgarian sentences must hold no Latin letters, and Polish ones only the Polish alphabet.
 - A theme may have one `note` (title, rule, table, exceptions), written in English with French examples.
-- Add the theme's id to `path.themes` in `src/data/fr/index.ts` to put it on the path.
+- Add the theme's id to `path.themes` in the language's `index.ts` to put it on the path.
 
 The data tests check all of this, so a bad card fails before it ships.
 
@@ -113,7 +118,8 @@ A language pack is a folder under `src/data/<code>/` with:
 
 - `themes.ts` and the theme files, as above;
 - `copy.tsx`, every piece of interface text, typed by `Copy` in `src/data/types.ts`, so a missing string fails the type check;
-- `index.ts`, exporting the `Language`: its code, its name for the switcher, its themes, its copy and its localStorage key. Each language needs its own key so that progress never mixes; the chosen language itself is kept under `cahier-vocab-language`.
+- `pathCopy.ts`, the path's interface text, typed by `PathCopy`;
+- `index.ts`, exporting the `Language`: its code, its name for the switcher, its themes, its copy, its `path` (theme ids in order, a storage key and the path text) and its localStorage key. Each language needs its own key so that progress never mixes; the chosen language itself is kept under `cahier-vocab-language`.
 
 To add one, copy `src/data/bg/`, translate it, and add it to `LANGUAGES` in `src/data/language.ts`; it then appears in the switcher. Components read the current pack with `useLanguage()` or `useCopy()` from `src/components/languageContext.ts`. If the alphabet isn't covered by the fonts in `index.html`, add a font that covers it as a fallback in `src/styles/tokens.css`, as Bulgarian does with Cyrillic.
 

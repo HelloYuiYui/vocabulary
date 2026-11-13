@@ -82,6 +82,39 @@ describe.each(LANGUAGES)('$code themes on the path', ({ code, themes }) => {
   })
 })
 
+describe('paths', () => {
+  const onPath = LANGUAGES.flatMap((l) =>
+    l.path ? [{ ...l, path: l.path }] : [],
+  )
+
+  it('puts every language on the path', () => {
+    expect(onPath.map((l) => l.code)).toEqual(['fr', 'bg', 'pl'])
+  })
+
+  it.each(onPath)(
+    '$code names only themes that exist and have sub-themes',
+    (l) => {
+      for (const id of l.path.themes) {
+        const found = l.themes.find((t) => t.id === id)
+        expect(found?.subThemes?.length, id).toBeGreaterThan(0)
+      }
+      expect(new Set(l.path.themes).size).toBe(l.path.themes.length)
+    },
+  )
+
+  it('keeps each language’s path progress under its own key', () => {
+    const keys = onPath.map((l) => l.path.storageKey)
+    expect(new Set(keys).size).toBe(keys.length)
+    const old = LANGUAGES.flatMap((l) => [l.storage.v2, l.storage.v1 ?? ''])
+    expect(keys.filter((k) => old.includes(k))).toEqual([])
+  })
+
+  it('leaves no Bulgarian or Polish theme off the path', () => {
+    for (const l of onPath.filter((l) => l.code !== 'fr'))
+      expect(l.themes.map((t) => t.id)).toEqual(l.path.themes)
+  })
+})
+
 describe('pathProblems', () => {
   const mere = cloze(
     'mere',
