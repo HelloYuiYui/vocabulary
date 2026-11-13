@@ -14,13 +14,16 @@ interface VerdictPanelProps {
   /** Shows the override button when the verdict allows it. */
   onOverride?: () => void
   compact?: boolean
+  /** Introduces a cloze card's form in its sentence, when the result has one. */
+  formLabel?: string
 }
 
 export function VerdictPanel({
-  result: { verdict, answer },
+  result: { verdict, answer, form },
   item,
   onOverride,
   compact,
+  formLabel,
 }: VerdictPanelProps) {
   const copy = useCopy()
   const others = item.answers.filter((a) => a.text !== answer.text)
@@ -44,6 +47,17 @@ export function VerdictPanel({
       {verdict === 'ok' && answer.gender && (
         <span className="text-[0.9rem] text-muted">
           <AnswerText answer={answer} />
+        </span>
+      )}
+      {form && formLabel && (
+        <span className="text-[0.9rem] text-muted">
+          {formLabel}{' '}
+          <span
+            data-testid="needed-form"
+            className="font-hand text-[1.25rem] text-pen"
+          >
+            <AnswerText answer={form} />
+          </span>
         </span>
       )}
       {others.length > 0 && (

@@ -1,0 +1,119 @@
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { fr } from '../data/fr/index.ts'
+import { pathCopy } from '../data/fr/pathCopy.ts'
+import { a, cloze, word } from '../data/helpers.ts'
+import type { GradeResult } from '../domain/grade.ts'
+import type { Response } from '../domain/session.ts'
+import type { Item } from '../domain/types.ts'
+import { CardQuestion } from './CardQuestion.tsx'
+import { LanguageContext } from './languageContext.ts'
+
+const TRANSLATION = 'She is a wonderful mother.'
+const mere = cloze(
+  'mere',
+  'the mother',
+  [a('la mère')],
+  "C'est {une mère} formidable.",
+  TRANSLATION,
+  { audio: 'mere.mp3' },
+)
+const silent = cloze('pere', 'the father', [a('le père')], '{Le père}.', 'x')
+const salon = word('the living room', [a('le salon')])
+
+const answered = (item: Item, result: GradeResult): Response => ({
+  entry: { themeId: 't', item },
+  input: 'x',
+  gender: null,
+  result,
+  overridden: false,
+})
+
+const show = (item: Item, response?: Response, withPath = true) =>
+  render(
+    <LanguageContext value={fr}>
+      <CardQuestion
+        entry={{ themeId: 't', item }}
+        response={response}
+        onAnswer={() => {}}
+        onDunno={() => {}}
+        onNext={() => {}}
+        onOverride={() => {}}
+        pathCopy={withPath ? pathCopy : undefined}
+      />
+    </LanguageContext>,
+  )
+
+const listen = () => screen.queryByRole('button', { name: 'Écouter la phrase' })
+const sentence = () => screen.getByTestId('cloze-sentence').textContent
+
+describe('a cloze card', () => {
+  it('shows the sentence with the hint in the blank, and nothing that gives it away', () => {
+    show(mere)
+    expect(screen.getByText('Complète la phrase')).toBeInTheDocument()
+    expect(sentence()).toBe("C'est the mother formidable.")
+    expect(screen.queryByText(/une mère/)).toBeNull()
+    expect(screen.queryByText(TRANSLATION)).toBeNull()
+    expect(listen()).toBeNull()
+  })
+
+  it('labels and focuses the answer box', () => {
+    show(mere)
+    expect(screen.getByLabelText("Ta réponse, avec l'article")).toHaveFocus()
+  })
+
+  it('shows the full sentence, the translation and the audio button once answered', () => {
+    show(mere, answered(mere, { verdict: 'ok', answer: { text: 'une mère' } }))
+    expect(sentence()).toBe("C'est une mère formidable.")
+    expect(screen.getByText(TRANSLATION)).toBeInTheDocument()
+    expect(listen()).toBeInTheDocument()
+  })
+
+  it('reveals the same things after "je ne sais pas"', () => {
+    const result: GradeResult = { verdict: 'dunno', answer: mere.answers[0] }
+    show(mere, answered(mere, result))
+    expect(sentence()).toBe("C'est une mère formidable.")
+    expect(screen.getByText(TRANSLATION)).toBeInTheDocument()
+  })
+
+  it('shows no audio button when the sentence has no file', () => {
+    show(
+      silent,
+      answered(silent, { verdict: 'ok', answer: { text: 'Le père' } }),
+    )
+    expect(listen()).toBeNull()
+  })
+
+  it('shows the form the sentence needed when another form was accepted', () => {
+    const result: GradeResult = {
+      verdict: 'ok',
+      answer: { text: 'la mère' },
+      form: { text: 'une mère' },
+    }
+    show(mere, answered(mere, result))
+    expect(screen.getByText('Dans la phrase :')).toBeInTheDocument()
+    expect(screen.getByTestId('needed-form')).toHaveTextContent('une mère')
+  })
+
+  it('does not mention the form when the sentence form was typed', () => {
+    show(mere, answered(mere, { verdict: 'ok', answer: { text: 'une mère' } }))
+    expect(screen.queryByText('Dans la phrase :')).toBeNull()
+  })
+})
+
+describe('a card without a sentence', () => {
+  it('renders as before', () => {
+    show(salon)
+    expect(screen.getByText('the living room')).toBeInTheDocument()
+    expect(screen.queryByText('Complète la phrase')).toBeNull()
+    expect(screen.queryByTestId('cloze-sentence')).toBeNull()
+  })
+})
+
+describe('a cloze item on the old picker', () => {
+  it('is asked from its English prompt, without its sentence', () => {
+    show(mere, undefined, false)
+    expect(screen.getByText('the mother')).toBeInTheDocument()
+    expect(screen.queryByTestId('cloze-sentence')).toBeNull()
+  })
+})

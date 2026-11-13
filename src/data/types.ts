@@ -61,6 +61,39 @@ export interface Copy {
   languageLabel: string // accessible name of the language switcher
 }
 
+/** The text of the path and of its sittings, in the language being learnt. */
+export interface PathCopy {
+  sentencePrompt: string // above a cloze sentence
+  formNeeded: string // before the form the sentence needed
+  listen: string // accessible name of the audio button
+  review: (count: number) => string
+  cards: (count: number) => string // the size of a sub-theme
+  left: (count: number) => string // cards still to answer right in a sitting
+  leave: string // leaves a sitting without recording it
+  subThemeDone: string
+  locked: string
+  quiz: string
+  quizHelp: string
+  note: string
+  noteContinue: string
+  legacy: string // the button to the themes that are not on the path
+  backToPath: string
+  end: {
+    title: string
+    allFirstTry: string
+    retried: (count: number) => string
+    quizPassed: (right: number, total: number) => string
+    quizFailed: (right: number, total: number) => string
+  }
+}
+
+/** A language's path: which themes it runs through and where progress is kept. */
+export interface PathConfig {
+  themes: string[] // theme ids, in path order
+  storageKey: string
+  copy: PathCopy
+}
+
 /** A language the site teaches: its vocabulary and its interface. */
 export interface Language {
   code: string // BCP 47 tag, set on <html lang>
@@ -68,4 +101,6 @@ export interface Language {
   storage: StorageKeys // separate per language, so progress never mixes
   themes: Theme[]
   copy: Copy
+  /** Set once the language is on the path; without it, the theme picker is shown. */
+  path?: PathConfig
 }
