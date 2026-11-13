@@ -10,11 +10,18 @@ beforeEach(() => {
   localStorage.clear()
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  window.history.pushState({}, '', '/')
+})
 
-const setup = () => {
+// These themes are not on the path yet, so they sit in the old picker,
+// reached with ?legacy=1 and the "Autres thèmes" button under the path.
+const setup = async () => {
+  window.history.pushState({}, '', '/?legacy=1')
   const user = userEvent.setup()
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
   return user
 }
 
@@ -40,7 +47,7 @@ const stored = (): unknown => JSON.parse(localStorage.getItem(V2_KEY) ?? '{}')
 
 describe('cards mode', () => {
   it('checks with Enter, moves on with a second Enter, and records misses', async () => {
-    const user = setup()
+    const user = await setup()
     await startTheme(user, /Chez soi/)
 
     expect(screen.getByText(`1 / ${total}`)).toBeInTheDocument()
@@ -89,7 +96,7 @@ describe('cards mode', () => {
 
   it('activates the override with Enter instead of skipping', async () => {
     reviewOnly('the sofa')
-    const user = setup()
+    const user = await setup()
     await user.click(screen.getByRole('button', { name: 'Réviser ces mots' }))
     await user.type(screen.getByRole('textbox'), 'canapé{Enter}')
     screen.getByRole('button', { name: /ma réponse était juste/ }).focus()
@@ -103,7 +110,7 @@ describe('cards mode', () => {
 
   it('asks for the gender when the article hides it', async () => {
     reviewOnly('the stairs')
-    const user = setup()
+    const user = await setup()
     await user.click(screen.getByRole('button', { name: 'Réviser ces mots' }))
 
     const input = screen.getByRole('textbox')
@@ -122,7 +129,7 @@ describe('cards mode', () => {
 
   it('reports a missing gender as presque', async () => {
     reviewOnly('the stairs')
-    const user = setup()
+    const user = await setup()
     await user.click(screen.getByRole('button', { name: 'Réviser ces mots' }))
     await user.type(screen.getByRole('textbox'), "l'escalier{Enter}")
     expect(
@@ -133,7 +140,7 @@ describe('cards mode', () => {
 
 describe('list mode', () => {
   it('checks rows with Enter, then shows and records results', async () => {
-    const user = setup()
+    const user = await setup()
     await user.click(screen.getByRole('button', { name: 'Liste' }))
     await startTheme(user, /Chez soi/)
 
@@ -189,7 +196,7 @@ describe('results', () => {
   }
 
   it('copies missed words for Anki', async () => {
-    const user = setup()
+    const user = await setup()
     await missOne(user)
     await user.click(screen.getByRole('button', { name: 'Copier pour Anki' }))
     expect(screen.getByText(/Copié/)).toBeInTheDocument()
@@ -199,7 +206,7 @@ describe('results', () => {
   })
 
   it('falls back to a selected text box when the clipboard fails', async () => {
-    const user = setup()
+    const user = await setup()
     vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(
       new Error('no'),
     )
@@ -211,7 +218,7 @@ describe('results', () => {
   })
 
   it('retries only the missed words', async () => {
-    const user = setup()
+    const user = await setup()
     await missOne(user)
     await user.click(
       screen.getByRole('button', { name: 'Refaire les mots ratés' }),
@@ -225,7 +232,7 @@ describe('item filter', () => {
   const sentences = chezSoi.items.filter((it) => it.type === 'sentence')
 
   it('asks only sentences and remembers the choice', async () => {
-    const user = setup()
+    const user = await setup()
     await user.click(screen.getByRole('button', { name: 'Phrases' }))
     await startTheme(user, /Chez soi/)
     expect(screen.getByText(`1 / ${sentences.length}`)).toBeInTheDocument()
@@ -235,7 +242,7 @@ describe('item filter', () => {
 })
 
 describe('storage', () => {
-  it('opens with migrated v1 progress', () => {
+  it('opens with migrated v1 progress', async () => {
     localStorage.setItem(
       V1_KEY,
       JSON.stringify({
@@ -244,7 +251,7 @@ describe('storage', () => {
         mode: 'list',
       }),
     )
-    render(<App />)
+    await setup()
     expect(screen.getByText(/mots à revoir/)).toHaveTextContent('Tu as 2 mots')
     expect(screen.getByText(/dernier score 9\/13/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Liste' })).toHaveAttribute(
@@ -259,7 +266,7 @@ describe('storage', () => {
     }
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(blocked)
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(blocked)
-    const user = setup()
+    const user = await setup()
     await startTheme(user, /Chez soi/)
     await user.type(screen.getByRole('textbox'), 'le salon{Enter}')
     await user.keyboard('{Enter}')

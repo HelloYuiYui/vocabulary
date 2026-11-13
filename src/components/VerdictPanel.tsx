@@ -26,7 +26,10 @@ export function VerdictPanel({
   formLabel,
 }: VerdictPanelProps) {
   const copy = useCopy()
-  const others = item.answers.filter((a) => a.text !== answer.text)
+  // The form the sentence needed is shown on its own line, not listed twice.
+  const others = item.answers.filter(
+    (a) => a.text !== answer.text && a.text !== form?.text,
+  )
   return (
     <div className="flex flex-col gap-1">
       <span

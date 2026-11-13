@@ -2,12 +2,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
+import { LEGACY_FLAG_KEY } from './storage/pathStorage.ts'
 import { LANGUAGE_KEY, V2_KEY } from './storage/storage.ts'
 
 const BG_KEY = 'cahier-vocab-bg-v2'
 
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem(LEGACY_FLAG_KEY, 'true')
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
 afterEach(() => vi.restoreAllMocks())
@@ -63,6 +65,8 @@ describe('language switcher', () => {
 
     await user.click(screen.getByRole('button', { name: 'Обратно към темите' }))
     await user.click(screen.getByRole('button', { name: 'Français' }))
+    // French opens on the path; its old review list is in the old picker.
+    await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
     expect(screen.getByText(/mots à revoir/)).toHaveTextContent('Tu as 1 mots')
     expect(stored(LANGUAGE_KEY)).toBe('fr')
   })

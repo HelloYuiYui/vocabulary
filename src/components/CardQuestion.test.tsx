@@ -95,6 +95,28 @@ describe('a cloze card', () => {
     expect(screen.getByTestId('needed-form')).toHaveTextContent('une mère')
   })
 
+  it('does not list the sentence form again among the other accepted answers', () => {
+    const nom = cloze(
+      'nom',
+      'the surname',
+      [a('le nom'), a('le nom de famille'), a('le patronyme')],
+      'Martin est {le nom de famille} de Paul.',
+      "Martin is Paul's surname.",
+    )
+    const result: GradeResult = {
+      verdict: 'ok',
+      answer: { text: 'le nom' },
+      form: { text: 'le nom de famille' },
+    }
+    show(nom, answered(nom, result))
+    expect(screen.getByTestId('needed-form')).toHaveTextContent(
+      'le nom de famille',
+    )
+    const also = screen.getByText(/Aussi accepté/)
+    expect(also).toHaveTextContent('le patronyme')
+    expect(also).not.toHaveTextContent('le nom de famille')
+  })
+
   it('does not mention the form when the sentence form was typed', () => {
     show(mere, answered(mere, { verdict: 'ok', answer: { text: 'une mère' } }))
     expect(screen.queryByText('Dans la phrase :')).toBeNull()
