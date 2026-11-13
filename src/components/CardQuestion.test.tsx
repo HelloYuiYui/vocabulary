@@ -169,6 +169,39 @@ describe('an answer whose article hides the gender', () => {
     expect(onAnswer).not.toHaveBeenCalled()
   })
 
+  it('marks the gender picker in red and moves to it when a pick is missing', async () => {
+    const user = userEvent.setup()
+    show(oncle)
+    await user.type(screen.getByRole('textbox'), "l'oncle")
+    const picker = screen.getByRole('radiogroup', { name: 'Genre' })
+    // Nothing is flagged while the learner is still typing.
+    expect(picker).not.toHaveAttribute('aria-invalid')
+    expect(picker).not.toHaveClass('border-pen')
+
+    await user.keyboard('{Enter}')
+    expect(picker).toHaveAttribute('aria-invalid', 'true')
+    expect(picker).toHaveClass('border-pen')
+    expect(picker).not.toHaveClass('border-line')
+    expect(screen.getByRole('radio', { name: 'M' })).toHaveFocus()
+  })
+
+  it('clears the red mark once a gender is picked, and checks on Enter', async () => {
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    show(oncle, undefined, true, onAnswer)
+    await user.type(screen.getByRole('textbox'), "l'oncle{Enter}")
+    // Focus is on the picker: space picks, Enter checks.
+    await user.keyboard(' ')
+    const picker = screen.getByRole('radiogroup', { name: 'Genre' })
+    expect(picker).not.toHaveAttribute('aria-invalid')
+    expect(picker).not.toHaveClass('border-pen')
+    await user.keyboard('{Enter}')
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith({
+      input: "l'oncle",
+      gender: 'm',
+    })
+  })
+
   it('is submitted with the gender once one is picked', async () => {
     const onAnswer = vi.fn()
     const user = userEvent.setup()

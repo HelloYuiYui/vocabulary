@@ -13,6 +13,10 @@ interface AnswerFieldProps {
   placeholder: string
   autoFocus?: boolean
   ref?: Ref<HTMLInputElement>
+  /** A gender pick is required and missing: outlines the picker in red. */
+  genderInvalid?: boolean
+  /** The picker's first choice, to send focus there. */
+  genderRef?: Ref<HTMLInputElement>
 }
 
 /** The handwritten answer line, with the gender picker when l' or les hides it. */
@@ -25,6 +29,8 @@ export function AnswerField({
   placeholder,
   autoFocus,
   ref,
+  genderInvalid,
+  genderRef,
 }: AnswerFieldProps) {
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -51,6 +57,8 @@ export function AnswerField({
           value={draft.gender}
           onChange={(gender) => onChange({ ...draft, gender })}
           disabled={disabled}
+          invalid={genderInvalid}
+          ref={genderRef}
         />
       )}
     </div>

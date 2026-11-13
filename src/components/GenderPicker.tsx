@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import type { Gender } from '../domain/types.ts'
 import { cx } from './cx.ts'
 import { useCopy } from './languageContext.ts'
@@ -9,6 +10,10 @@ interface GenderPickerProps {
   value: Gender | null
   onChange: (gender: Gender) => void
   disabled?: boolean
+  /** A pick is required and missing: the picker is outlined in red. */
+  invalid?: boolean
+  /** The first choice, so that focus can be sent to the picker. */
+  ref?: Ref<HTMLInputElement>
 }
 
 export function GenderPicker({
@@ -16,15 +21,21 @@ export function GenderPicker({
   value,
   onChange,
   disabled,
+  invalid,
+  ref,
 }: GenderPickerProps) {
   const copy = useCopy()
   return (
     <span
       role="radiogroup"
       aria-label={copy.gender.label}
-      className="inline-flex flex-none overflow-hidden rounded-full border-[1.5px] border-line bg-sheet"
+      aria-invalid={invalid || undefined}
+      className={cx(
+        'inline-flex flex-none overflow-hidden rounded-full border-[1.5px] bg-sheet',
+        invalid ? 'border-pen ring-2 ring-pen' : 'border-line',
+      )}
     >
-      {GENDERS.map((gender) => (
+      {GENDERS.map((gender, i) => (
         <label
           key={gender}
           className={cx(
@@ -33,6 +44,7 @@ export function GenderPicker({
           )}
         >
           <input
+            ref={i === 0 ? ref : undefined}
             type="radio"
             name={name}
             value={gender}
