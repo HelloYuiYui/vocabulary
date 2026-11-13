@@ -13,9 +13,6 @@ export function parseSentence(text: string): SentenceParts | undefined {
   return { before: m[1] ?? '', blank: m[2] ?? '', after: m[3] ?? '' }
 }
 
-/** The sentence as it is read, without the braces. */
-export const fullSentence = (text: string): string => text.replace(/[{}]/g, '')
-
 /** The form that fills the blank, as an answer. */
 export const sentenceAnswer = (sentence: Sentence): Answer => {
   const text = parseSentence(sentence.text)?.blank ?? ''

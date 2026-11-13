@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fullSentence, parseSentence, sentenceAnswer } from './sentence.ts'
+import { parseSentence, sentenceAnswer } from './sentence.ts'
 
 describe('parseSentence', () => {
   it('splits a sentence around its blank', () => {
@@ -24,14 +24,6 @@ describe('parseSentence', () => {
       expect(parseSentence(text)).toBeUndefined()
     },
   )
-})
-
-describe('fullSentence', () => {
-  it('gives the sentence without braces', () => {
-    expect(fullSentence("C'est {la mère} de Paul.")).toBe(
-      "C'est la mère de Paul.",
-    )
-  })
 })
 
 describe('sentenceAnswer', () => {
