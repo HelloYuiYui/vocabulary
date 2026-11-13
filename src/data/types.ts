@@ -66,7 +66,11 @@ export interface PathCopy {
   intro: string // under the title, in place of the old picker's introduction
   sentencePrompt: string // above a cloze sentence
   formNeeded: string // before the form the sentence needed
-  pickGender: string // when l' or les is typed and no gender is picked yet
+  /**
+   * Shown when l' or les is typed and no gender is picked yet. Only a
+   * language with that rule sets it; without it, checking is never held back.
+   */
+  pickGender?: string
   listen: string // accessible name of the audio button
   review: (count: number) => string
   cards: (count: number) => string // the size of a sub-theme

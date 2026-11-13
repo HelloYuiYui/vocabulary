@@ -224,6 +224,30 @@ describe('an answer whose article hides the gender', () => {
     expect(onDunno).toHaveBeenCalledOnce()
   })
 
+  it('is submitted without a pick in a language that has no such rule', async () => {
+    // Bulgarian and Polish path text has no pickGender line.
+    const { pickGender: _unused, ...withoutRule } = pathCopy
+    void _unused
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <LanguageContext value={fr}>
+        <CardQuestion
+          entry={{ themeId: 't', item: oncle }}
+          response={undefined}
+          onAnswer={onAnswer}
+          onDunno={() => {}}
+          onNext={() => {}}
+          onOverride={() => {}}
+          pathCopy={withoutRule}
+        />
+      </LanguageContext>,
+    )
+    await user.type(screen.getByRole('textbox'), "l'oncle{Enter}")
+    expect(onAnswer).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
   it('is submitted as before on the old picker, and graded "presque"', async () => {
     const onAnswer = vi.fn()
     const user = userEvent.setup()

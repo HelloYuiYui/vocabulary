@@ -15,11 +15,19 @@ const repeated = (values: string[]): string[] => [
   ...new Set(values.filter((v, i) => values.indexOf(v) !== i)),
 ]
 
+// Latin a, e, o, c, p, x look like Cyrillic letters but never match them.
+const LATIN = /[a-z]/i
+// Catches letters from other alphabets, and accents Polish doesn't use.
+const POLISH = /^[a-ząćęłńóśźż0-9 ,.!?:;()„”"'’–-]+$/i
+
 /**
  * What is wrong with a theme's sub-themes and cloze sentences, one line per
  * problem; empty for a theme without sub-themes. Used by the data tests.
+ * `code` is the language's: the article rules are French, and Bulgarian and
+ * Polish sentences are checked against their alphabets.
  */
-export function pathProblems(theme: Theme, french: boolean): string[] {
+export function pathProblems(theme: Theme, code: string): string[] {
+  const french = code === 'fr'
   const { subThemes } = theme
   if (!subThemes) return []
   const problems: string[] = []
@@ -51,6 +59,11 @@ export function pathProblems(theme: Theme, french: boolean): string[] {
         continue
       }
       if (!item.sentence.en.trim()) say(`"${name}" has no translation`)
+      const read = item.sentence.text.replace(/[{}]/g, '')
+      if (code === 'bg' && LATIN.test(read))
+        say(`"${name}" has Latin letters in its sentence`)
+      if (code === 'pl' && !POLISH.test(read))
+        say(`"${name}" has letters outside the Polish alphabet in its sentence`)
       const hidden = HIDES_GENDER.test(parts.blank)
       if (french && hidden && !item.sentence.gender)
         say(`"${name}" needs a gender for its blank`)
