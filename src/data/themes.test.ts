@@ -78,7 +78,40 @@ describe.each(LANGUAGES)('$code themes', ({ themes }) => {
 
 describe.each(LANGUAGES)('$code themes on the path', ({ code, themes }) => {
   it('have sound sub-themes and sentences', () => {
-    expect(themes.flatMap((t) => pathProblems(t, code === 'fr'))).toEqual([])
+    expect(themes.flatMap((t) => pathProblems(t, code))).toEqual([])
+  })
+})
+
+describe('paths', () => {
+  const onPath = LANGUAGES.flatMap((l) =>
+    l.path ? [{ ...l, path: l.path }] : [],
+  )
+
+  it('puts every language on the path', () => {
+    expect(onPath.map((l) => l.code)).toEqual(['fr', 'bg', 'pl'])
+  })
+
+  it.each(onPath)(
+    '$code names only themes that exist and have sub-themes',
+    (l) => {
+      for (const id of l.path.themes) {
+        const found = l.themes.find((t) => t.id === id)
+        expect(found?.subThemes?.length, id).toBeGreaterThan(0)
+      }
+      expect(new Set(l.path.themes).size).toBe(l.path.themes.length)
+    },
+  )
+
+  it('keeps each language’s path progress under its own key', () => {
+    const keys = onPath.map((l) => l.path.storageKey)
+    expect(new Set(keys).size).toBe(keys.length)
+    const old = LANGUAGES.flatMap((l) => [l.storage.v2, l.storage.v1 ?? ''])
+    expect(keys.filter((k) => old.includes(k))).toEqual([])
+  })
+
+  it('leaves no Bulgarian or Polish theme off the path', () => {
+    for (const l of onPath.filter((l) => l.code !== 'fr'))
+      expect(l.themes.map((t) => t.id)).toEqual(l.path.themes)
   })
 })
 
@@ -93,7 +126,7 @@ describe('pathProblems', () => {
   const themeOf = (...subThemes: ReturnType<typeof sub>[]) =>
     pathTheme({ id: 't', name: 'T', level: 'A1', desc: 'd', subThemes })
   const problemsOf = (...items: Parameters<typeof sub>[2]) =>
-    pathProblems(themeOf(sub('s', 'S', items)), true)
+    pathProblems(themeOf(sub('s', 'S', items)), 'fr')
 
   it('finds nothing wrong with a sound theme', () => {
     expect(problemsOf(mere, plain('zero', 'zero', [a('zéro')]))).toEqual([])
@@ -101,12 +134,12 @@ describe('pathProblems', () => {
 
   it('ignores a theme without sub-themes', () => {
     const theme = { id: 't', name: 'T', level: 'A1' as const, desc: 'd' }
-    expect(pathProblems({ ...theme, items: [mere] }, true)).toEqual([])
+    expect(pathProblems({ ...theme, items: [mere] }, 'fr')).toEqual([])
   })
 
   it('reports repeated sub-theme and item ids', () => {
     const theme = themeOf(sub('s', 'S', [mere]), sub('s', 'S', [mere]))
-    expect(pathProblems(theme, true)).toEqual([
+    expect(pathProblems(theme, 'fr')).toEqual([
       't: sub-theme id "s" is used twice',
       't: item id "mere" is used twice',
     ])
@@ -114,7 +147,7 @@ describe('pathProblems', () => {
 
   it('reports items that are not the sub-themes flattened', () => {
     const theme = { ...themeOf(sub('s', 'S', [mere])), items: [] }
-    expect(pathProblems(theme, true)).toEqual([
+    expect(pathProblems(theme, 'fr')).toEqual([
       't: items are not the sub-themes flattened',
     ])
   })
@@ -123,7 +156,7 @@ describe('pathProblems', () => {
     const many = Array.from({ length: 13 }, (_, i) =>
       plain(`n${i}`, `n${i}`, [a('x')]),
     )
-    expect(pathProblems(themeOf(sub('s', 'S', [])), true)).toEqual([
+    expect(pathProblems(themeOf(sub('s', 'S', [])), 'fr')).toEqual([
       't: sub-theme "s" has 0 items, not 1 to 12',
     ])
     expect(problemsOf(...many)).toEqual([
@@ -236,8 +269,38 @@ describe('pathProblems', () => {
     expect(problemsOf(twins, amie)).toEqual([])
   })
 
+  it('reports Latin letters in a Bulgarian sentence', () => {
+    // The o of "Това" is a Latin look-alike here.
+    const bad = cloze('x', 'x', [a('майка')], 'Тoва е {майка}.', 'x')
+    const hint = cloze('y', 'y', [a('майка')], 'Това е {mother}.', 'y')
+    const good = cloze('z', 'z', [a('майка')], 'Това е {майка}.', 'z')
+    expect(
+      pathProblems(themeOf(sub('s', 'S', [bad, hint, good])), 'bg'),
+    ).toEqual([
+      't: "x" has Latin letters in its sentence',
+      't: "y" has Latin letters in its sentence',
+    ])
+  })
+
+  it('reports letters outside the Polish alphabet in a Polish sentence', () => {
+    const bad = cloze('x', 'x', [a('matka')], 'To jest {матка}.', 'x')
+    const accent = cloze('y', 'y', [a('matka')], 'Voilà {matka}.', 'y')
+    const good = cloze('z', 'z', [a('matka')], 'To jest {matka} Żanety.', 'z')
+    expect(
+      pathProblems(themeOf(sub('s', 'S', [bad, accent, good])), 'pl'),
+    ).toEqual([
+      't: "x" has letters outside the Polish alphabet in its sentence',
+      't: "y" has letters outside the Polish alphabet in its sentence',
+    ])
+  })
+
+  it('does not apply alphabet rules to French', () => {
+    const item = cloze('x', 'x', [a('x')], 'Voilà {x} à Łódź.', 'x')
+    expect(pathProblems(themeOf(sub('s', 'S', [item])), 'fr')).toEqual([])
+  })
+
   it('applies the French article rules to French only', () => {
     const item = cloze('x', 'x', [a('x')], '{les x}.', 'x')
-    expect(pathProblems(themeOf(sub('s', 'S', [item])), false)).toEqual([])
+    expect(pathProblems(themeOf(sub('s', 'S', [item])), 'pl')).toEqual([])
   })
 })

@@ -58,7 +58,9 @@ export function CardQuestion({
   // On the path, an answer whose article hides the gender (l', les) cannot
   // be checked until masculine or feminine is picked.
   const genderMissing =
-    pathCopy !== undefined && hidesGender(draft.input) && !draft.gender
+    pathCopy?.pickGender !== undefined &&
+    hidesGender(draft.input) &&
+    !draft.gender
   const [askedForGender, setAskedForGender] = useState(false)
 
   const submit = (e: FormEvent) => {

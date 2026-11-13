@@ -152,12 +152,16 @@ describe('the other French themes', () => {
 
 describe('the other languages', () => {
   it.each([
-    ['Български', 'Започни'],
-    ['Polski', 'Zacznij'],
-  ])('%s stays on the theme picker', async (name, start) => {
-    const user = setup()
-    await user.click(screen.getByRole('button', { name }))
-    expect(screen.getAllByRole('checkbox')).toHaveLength(4)
-    expect(screen.getByRole('button', { name: start })).toBeInTheDocument()
-  })
+    ['Български', 'Представяне'],
+    ['Polski', 'Przedstawianie się'],
+  ])(
+    '%s is on the path too, with its first theme open',
+    async (name, first) => {
+      const user = setup()
+      await user.click(screen.getByRole('button', { name }))
+      expect(screen.getAllByRole('region')).toHaveLength(4)
+      expect(theme(first).getAllByRole('button').length).toBeGreaterThan(3)
+      expect(screen.queryByRole('checkbox')).toBeNull()
+    },
+  )
 })
