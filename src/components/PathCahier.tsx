@@ -112,6 +112,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   return (
     <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
       <Header
+        intro={copy.intro}
         onLanguageChange={view.name === 'path' ? onLanguageChange : undefined}
       />
       {view.name === 'path' && (

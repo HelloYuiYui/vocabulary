@@ -63,6 +63,7 @@ export interface Copy {
 
 /** The text of the path and of its sittings, in the language being learnt. */
 export interface PathCopy {
+  intro: string // under the title, in place of the old picker's introduction
   sentencePrompt: string // above a cloze sentence
   formNeeded: string // before the form the sentence needed
   listen: string // accessible name of the audio button

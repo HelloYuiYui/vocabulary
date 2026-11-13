@@ -1,6 +1,8 @@
 import type { PathCopy } from '../types.ts'
 
 export const pathCopy: PathCopy = {
+  intro:
+    "Suis le parcours, thème par thème. Dans chaque phrase, écris en français le mot qui manque. Les accents et les articles comptent. Quand l'article cache le genre, comme dans « l'escalier » ou « les charges », choisis masculin ou féminin à côté de ta réponse. Les cartes apprises reviennent plus tard, pour les revoir.",
   sentencePrompt: 'Complète la phrase',
   formNeeded: 'Dans la phrase :',
   listen: 'Écouter la phrase',
