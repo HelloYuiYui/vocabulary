@@ -34,7 +34,6 @@ export function CardQuestion({
   const copy = useCopy()
   const [draft, setDraft] = useState<Draft>({ input: '', gender: null })
   const inputRef = useRef<HTMLInputElement>(null)
-  const genderRef = useRef<HTMLInputElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
   const overrideRef = useRef<HTMLButtonElement>(null)
   const id = useId()
@@ -66,11 +65,8 @@ export function CardQuestion({
     e.preventDefault()
     if (revealed) return
     if (!norm(draft.input)) inputRef.current?.focus()
-    else if (genderMissing) {
-      // Say why nothing happened: flag the picker and put the cursor on it.
-      setAskedForGender(true)
-      genderRef.current?.focus()
-    } else onAnswer(draft)
+    else if (genderMissing) setAskedForGender(true)
+    else onAnswer(draft)
   }
 
   return (
@@ -107,8 +103,6 @@ export function CardQuestion({
             placeholder={copy.card.placeholder}
             large
             autoFocus
-            genderInvalid={askedForGender && genderMissing && !revealed}
-            genderRef={genderRef}
           />
           {pathCopy && askedForGender && genderMissing && !revealed && (
             <p role="alert" className="text-[0.9rem] font-bold text-warn">
