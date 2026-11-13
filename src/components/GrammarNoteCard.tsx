@@ -51,7 +51,6 @@ export function GrammarNoteCard({
                         <th
                           key={c}
                           scope="row"
-                          lang="en"
                           className="border-[1.5px] border-line px-3 py-1 text-left font-normal text-muted"
                         >
                           {cell}
