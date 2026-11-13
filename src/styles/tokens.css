@@ -54,3 +54,97 @@
   --fem: #f39bd0;
   color-scheme: dark;
 }
+
+/*
+ * Per-language palettes. The page's lang attribute picks one; French keeps
+ * the base palette above. Each keeps the same meanings: ink is the learner's
+ * writing and the main colour, pen is the correction and the margin line, ok
+ * is "right" and "done". A language overrides only what it needs, and must
+ * redefine for dark mode everything it sets for light mode (a test checks).
+ */
+
+/* Bulgarian: white, green, red. Green ink, the red margin of the flag's third
+   band; "right" moves to teal so that it is not lost in the green ink. */
+:root[lang='bg'] {
+  --paper: #f3f8f4;
+  --sheet: #fbfdfb;
+  --ink: #0a5234;
+  --text: #1f2a24;
+  --muted: #52655a;
+  --rule: #dcebe1;
+  --rule-strong: #b2d1be;
+  --line: #d2e2d7;
+  --pen: #c22436;
+  --ok: #197b94;
+  --warn: #9a5c0b;
+}
+@media (prefers-color-scheme: dark) {
+  :root[lang='bg']:not([data-theme='light']) {
+    --paper: #0c1611;
+    --sheet: #121f18;
+    --ink: #a5e3c2;
+    --text: #e1ece5;
+    --muted: #8fa899;
+    --rule: #1a2c22;
+    --rule-strong: #294338;
+    --line: #253a30;
+    --pen: #ff7d8f;
+    --ok: #7fd0e6;
+    --warn: #f0b45a;
+  }
+}
+:root[lang='bg'][data-theme='dark'] {
+  --paper: #0c1611;
+  --sheet: #121f18;
+  --ink: #a5e3c2;
+  --text: #e1ece5;
+  --muted: #8fa899;
+  --rule: #1a2c22;
+  --rule-strong: #294338;
+  --line: #253a30;
+  --pen: #ff7d8f;
+  --ok: #7fd0e6;
+  --warn: #f0b45a;
+}
+
+/* Polish: white and red. Red is already the correction pen, so it cannot be
+   the ink as well: the ink is graphite, and the red margin and rules on white
+   paper carry the flag. */
+:root[lang='pl'] {
+  --paper: #f7f5f5;
+  --sheet: #fdfcfc;
+  --ink: #2a2327;
+  --text: #262224;
+  --muted: #675c60;
+  --rule: #eee3e5;
+  --rule-strong: #dcc3c8;
+  --line: #e5d9dc;
+  --pen: #c8102e;
+  --warn: #9a5c0b;
+}
+@media (prefers-color-scheme: dark) {
+  :root[lang='pl']:not([data-theme='light']) {
+    --paper: #161314;
+    --sheet: #1e1a1b;
+    --ink: #f1e7e9;
+    --text: #ece6e7;
+    --muted: #a89c9f;
+    --rule: #292224;
+    --rule-strong: #3e3336;
+    --line: #342b2e;
+    --pen: #ff6f85;
+    --warn: #f0b45a;
+  }
+}
+:root[lang='pl'][data-theme='dark'] {
+  --paper: #161314;
+  --sheet: #1e1a1b;
+  --ink: #f1e7e9;
+  --text: #ece6e7;
+  --muted: #a89c9f;
+  --rule: #292224;
+  --rule-strong: #3e3336;
+  --line: #342b2e;
+  --pen: #ff6f85;
+  --warn: #f0b45a;
+}

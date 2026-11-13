@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { LanguageContext } from './components/languageContext.ts'
 import { LegacyCahier } from './components/LegacyCahier.tsx'
 import { PathCahier } from './components/PathCahier.tsx'
@@ -11,7 +11,9 @@ export default function App() {
     languageFor(loadLanguageCode()),
   )
 
-  useEffect(() => {
+  // A layout effect: the language's colours follow its lang attribute, and
+  // must change in the same frame as its text.
+  useLayoutEffect(() => {
     document.documentElement.lang = language.code
     document.title = language.copy.header.title
   }, [language])
