@@ -66,6 +66,7 @@ export interface PathCopy {
   intro: string // under the title, in place of the old picker's introduction
   sentencePrompt: string // above a cloze sentence
   formNeeded: string // before the form the sentence needed
+  pickGender: string // when l' or les is typed and no gender is picked yet
   listen: string // accessible name of the audio button
   review: (count: number) => string
   cards: (count: number) => string // the size of a sub-theme

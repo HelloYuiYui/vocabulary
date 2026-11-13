@@ -1,10 +1,11 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 import { fr } from '../data/fr/index.ts'
 import { pathCopy } from '../data/fr/pathCopy.ts'
 import { a, cloze, word } from '../data/helpers.ts'
 import type { GradeResult } from '../domain/grade.ts'
-import type { Response } from '../domain/session.ts'
+import type { Draft, Response } from '../domain/session.ts'
 import type { Item } from '../domain/types.ts'
 import { CardQuestion } from './CardQuestion.tsx'
 import { LanguageContext } from './languageContext.ts'
@@ -29,13 +30,18 @@ const answered = (item: Item, result: GradeResult): Response => ({
   overridden: false,
 })
 
-const show = (item: Item, response?: Response, withPath = true) =>
+const show = (
+  item: Item,
+  response?: Response,
+  withPath = true,
+  onAnswer: (draft: Draft) => void = () => {},
+) =>
   render(
     <LanguageContext value={fr}>
       <CardQuestion
         entry={{ themeId: 't', item }}
         response={response}
-        onAnswer={() => {}}
+        onAnswer={onAnswer}
         onDunno={() => {}}
         onNext={() => {}}
         onOverride={() => {}}
@@ -137,5 +143,95 @@ describe('a cloze item on the old picker', () => {
     show(mere, undefined, false)
     expect(screen.getByText('the mother')).toBeInTheDocument()
     expect(screen.queryByTestId('cloze-sentence')).toBeNull()
+  })
+})
+
+describe('an answer whose article hides the gender', () => {
+  const oncle = cloze(
+    'oncle',
+    'the uncle',
+    [a("l'oncle", 'm')],
+    "{L'oncle} de Marie habite en Italie.",
+    "Marie's uncle lives in Italy.",
+    { gender: 'm' },
+  )
+  const PICK = 'Choisis masculin ou féminin avant de vérifier.'
+
+  it('is not submitted until a gender is picked', async () => {
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    show(oncle, undefined, true, onAnswer)
+    await user.type(screen.getByRole('textbox'), "l'oncle{Enter}")
+    expect(onAnswer).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert')).toHaveTextContent(PICK)
+
+    await user.click(screen.getByRole('button', { name: 'Vérifier' }))
+    expect(onAnswer).not.toHaveBeenCalled()
+  })
+
+  it('is submitted with the gender once one is picked', async () => {
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    show(oncle, undefined, true, onAnswer)
+    await user.type(screen.getByRole('textbox'), "l'oncle{Enter}")
+    await user.click(screen.getByRole('radio', { name: 'M' }))
+    expect(screen.queryByRole('alert')).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Vérifier' }))
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith({
+      input: "l'oncle",
+      gender: 'm',
+    })
+  })
+
+  it('does not ask for a gender the answer does not hide', async () => {
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    show(mere, undefined, true, onAnswer)
+    await user.type(screen.getByRole('textbox'), 'une mère{Enter}')
+    expect(onAnswer).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('drops the reminder when the article is typed away', async () => {
+    const user = userEvent.setup()
+    show(oncle)
+    const box = screen.getByRole('textbox')
+    await user.type(box, "l'oncle{Enter}")
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    await user.clear(box)
+    await user.type(box, 'un oncle')
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('still lets the learner say they do not know', async () => {
+    const onDunno = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <LanguageContext value={fr}>
+        <CardQuestion
+          entry={{ themeId: 't', item: oncle }}
+          response={undefined}
+          onAnswer={() => {}}
+          onDunno={onDunno}
+          onNext={() => {}}
+          onOverride={() => {}}
+          pathCopy={pathCopy}
+        />
+      </LanguageContext>,
+    )
+    await user.type(screen.getByRole('textbox'), "l'")
+    await user.click(screen.getByRole('button', { name: 'Je ne sais pas' }))
+    expect(onDunno).toHaveBeenCalledOnce()
+  })
+
+  it('is submitted as before on the old picker, and graded "presque"', async () => {
+    const onAnswer = vi.fn()
+    const user = userEvent.setup()
+    show(oncle, undefined, false, onAnswer)
+    await user.type(screen.getByRole('textbox'), "l'oncle{Enter}")
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith({
+      input: "l'oncle",
+      gender: null,
+    })
   })
 })

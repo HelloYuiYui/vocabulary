@@ -109,21 +109,36 @@ export function PathView({
                   ) : (
                     <>
                       <ul className="flex flex-wrap gap-2">
-                        {(theme.subThemes ?? []).map((sub) => (
-                          <li key={sub.id}>
-                            <Button
-                              className="flex flex-col items-start text-left"
-                              onClick={() => onSubTheme(theme, sub)}
-                            >
-                              <span>{sub.name}</span>
-                              <span className="text-[0.8rem] font-normal text-muted">
-                                {copy.cards(sub.items.length)}
-                                {isSubDone(progress, theme.id, sub.id) &&
-                                  ` · ${copy.subThemeDone}`}
-                              </span>
-                            </Button>
-                          </li>
-                        ))}
+                        {(theme.subThemes ?? []).map((sub) => {
+                          const done = isSubDone(progress, theme.id, sub.id)
+                          return (
+                            <li key={sub.id}>
+                              {/* A finished sub-theme turns green; it can still be redone. */}
+                              <button
+                                type="button"
+                                data-done={done || undefined}
+                                onClick={() => onSubTheme(theme, sub)}
+                                className={cx(
+                                  'flex cursor-pointer flex-col items-start rounded-lg border-[1.5px] px-4 py-2.5 text-left font-bold hover:brightness-108',
+                                  done
+                                    ? 'border-ok text-ok'
+                                    : 'border-ink text-ink',
+                                )}
+                              >
+                                <span>{sub.name}</span>
+                                <span
+                                  className={cx(
+                                    'text-[0.8rem] font-normal',
+                                    !done && 'text-muted',
+                                  )}
+                                >
+                                  {copy.cards(sub.items.length)}
+                                  {done && ` · ${copy.subThemeDone}`}
+                                </span>
+                              </button>
+                            </li>
+                          )
+                        })}
                       </ul>
                       {(theme.note || status === 'open') && (
                         <Actions className="text-[0.85rem]">
