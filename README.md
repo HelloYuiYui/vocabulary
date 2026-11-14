@@ -16,6 +16,7 @@ The Bulgarian and Polish sentences and grammar notes were drafted by an AI model
 - **Skip quiz.** "Je connais déjà ce thème" on an open theme: up to 20 cards, no second tries, 80% finishes the theme and opens the next.
 - **Grammar notes.** At most one short reference card per theme, shown before its first sitting and reachable afterwards.
 - **Audio.** A play button appears after answering when a sentence has a recording. None are included yet.
+- **CSV export.** At the end of a sitting, "Exporter ces cartes (CSV)" saves that sitting's cards; under the path, "Exporter les cartes apprises (CSV)" saves every card learnt so far. Each row is the sentence with its blank written as `[[word:hint]]`, then the English translation, for example `"Je [[me lève:to get up]] à sept heures.","I get up at seven."`. There is no header row; the file is UTF-8 without a byte-order mark. The word is the form in the sentence, and the data tests reject a hint or blank containing `:`, `[[` or `]]`.
 
 In Bulgarian and Polish, all four themes are on the path. In French, four themes are on the path so far: _Se présenter_, _Famille et entourage_, _Chiffres, dates, heure_ and _Description simple_. The twelve other French themes are hidden by default. Add `?legacy=1` to the address once to show an "Autres thèmes" button under the path, which opens them in the theme picker; `?legacy=0` hides it again. The choice is remembered per browser.
 

@@ -59,6 +59,9 @@ export function pathProblems(theme: Theme, code: string): string[] {
         continue
       }
       if (!item.sentence.en.trim()) say(`"${name}" has no translation`)
+      // The export writes [[blank:hint]]; a colon or brackets would break it.
+      if (/:|\[\[|\]\]/.test(`${parts.blank} ${item.en}`))
+        say(`"${name}" has a colon or double brackets in its hint or blank`)
       const read = item.sentence.text.replace(/[{}]/g, '')
       if (code === 'bg' && LATIN.test(read))
         say(`"${name}" has Latin letters in its sentence`)

@@ -20,6 +20,8 @@ export const pathCopy: PathCopy = {
   noteContinue: 'Продължи',
   legacy: 'Други теми',
   backToPath: 'Обратно към пътя',
+  exportSitting: 'Изтегли тези карти (CSV)',
+  exportLearnt: 'Изтегли научените карти (CSV)',
   end: {
     title: 'Сесията приключи',
     allFirstTry: 'Всички карти от първия опит.',

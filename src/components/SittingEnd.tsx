@@ -15,13 +15,20 @@ interface SittingEndProps {
   sitting: SittingState
   copy: PathCopy
   onHome: () => void
+  /** Downloads the sitting's cards; left out when none can be exported. */
+  onExport?: () => void
 }
 
 /**
  * What a finished sitting amounted to, stated as fact: which cards needed
  * more than one try, or the count a quiz ended on.
  */
-export function SittingEnd({ sitting, copy, onHome }: SittingEndProps) {
+export function SittingEnd({
+  sitting,
+  copy,
+  onHome,
+  onExport,
+}: SittingEndProps) {
   const total = sitting.cards.length
   const right = rightFirstTime(sitting)
   const rows = sitting.cards.map((entry, i) => ({
@@ -69,6 +76,11 @@ export function SittingEnd({ sitting, copy, onHome }: SittingEndProps) {
           <Button variant="primary" autoFocus onClick={onHome}>
             {copy.backToPath}
           </Button>
+          {onExport && (
+            <Button variant="ghost" onClick={onExport}>
+              {copy.exportSitting}
+            </Button>
+          )}
         </Actions>
       </Notebook>
     </section>

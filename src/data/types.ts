@@ -84,6 +84,8 @@ export interface PathCopy {
   noteContinue: string
   legacy: string // the button to the themes that are not on the path
   backToPath: string
+  exportSitting: string // downloads the cards of the sitting just finished
+  exportLearnt: string // downloads every card learnt so far
   end: {
     title: string
     allFirstTry: string

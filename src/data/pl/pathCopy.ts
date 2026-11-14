@@ -30,6 +30,8 @@ export const pathCopy: PathCopy = {
   noteContinue: 'Dalej',
   legacy: 'Inne tematy',
   backToPath: 'Wróć do ścieżki',
+  exportSitting: 'Eksportuj te karty (CSV)',
+  exportLearnt: 'Eksportuj poznane karty (CSV)',
   end: {
     title: 'Sesja zakończona',
     allFirstTry: 'Wszystkie karty za pierwszym razem.',

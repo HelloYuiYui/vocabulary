@@ -299,6 +299,16 @@ describe('pathProblems', () => {
     expect(pathProblems(themeOf(sub('s', 'S', [item])), 'fr')).toEqual([])
   })
 
+  it('reports a hint or a blank that would break the [[word:hint]] export', () => {
+    const colon = cloze('x', 'time: hour', [a('heure')], '{heure}.', 'x')
+    const bracket = cloze('y', 'y', [a('y')], 'Voici {y]]}.', 'y')
+    const fine = cloze('z', 'this is / here is', [a('voici')], '{Voici}.', 'z')
+    expect(problemsOf(colon, bracket, fine)).toEqual([
+      't: "x" has a colon or double brackets in its hint or blank',
+      't: "y" has a colon or double brackets in its hint or blank',
+    ])
+  })
+
   it('applies the French article rules to French only', () => {
     const item = cloze('x', 'x', [a('x')], '{les x}.', 'x')
     expect(pathProblems(themeOf(sub('s', 'S', [item])), 'pl')).toEqual([])

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Language, PathConfig } from '../data/types.ts'
 import {
+  cardKey,
   dueCount,
   dueEntries,
   isSubDone,
@@ -15,7 +16,10 @@ import {
   type SittingKind,
 } from '../domain/sitting.ts'
 import type { SubTheme, Theme } from '../domain/types.ts'
+import { clozeCsv } from '../domain/clozeExport.ts'
+import { localDay } from '../domain/schedule.ts'
 import { loadLegacyFlag } from '../storage/pathStorage.ts'
+import { downloadCsv } from './download.ts'
 import { usePathProgress } from '../storage/usePathProgress.ts'
 import { GrammarNoteCard } from './GrammarNoteCard.tsx'
 import { Header } from './Header.tsx'
@@ -109,6 +113,19 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const now = new Date()
   const due = dueEntries(pathThemes, progress, now)
 
+  // Cards learnt so far, in path order, and the sitting's own cards.
+  const learnt = pathThemes.flatMap((theme) =>
+    theme.items.flatMap((item) =>
+      item.id && progress.cards[cardKey(theme.id, item.id)]
+        ? [{ themeId: theme.id, item }]
+        : [],
+    ),
+  )
+  const learntCsv = clozeCsv(learnt)
+  const sittingCsv = clozeCsv(sitting.cards)
+  const fileName = (...parts: string[]) =>
+    ['cahier', language.code, ...parts, localDay(now)].join('-') + '.csv'
+
   return (
     <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
       <Header
@@ -134,6 +151,9 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           }
           onNote={(theme) => setView({ name: 'note', theme })}
           onLegacy={() => setView({ name: 'legacy' })}
+          onExport={
+            learntCsv ? () => downloadCsv(fileName(), learntCsv) : undefined
+          }
         />
       )}
       {view.name === 'note' && view.theme.note && (
@@ -159,6 +179,17 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             sitting={sitting}
             copy={copy}
             onHome={goToPath}
+            onExport={
+              sittingCsv
+                ? () =>
+                    downloadCsv(
+                      fileName(
+                        ...(sitting.themeId ? [sitting.themeId] : ['revision']),
+                      ),
+                      sittingCsv,
+                    )
+                : undefined
+            }
           />
         ) : (
           <SittingView
