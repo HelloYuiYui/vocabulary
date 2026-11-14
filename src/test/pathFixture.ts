@@ -1,11 +1,10 @@
 import { fr } from '../data/fr/index.ts'
 import { pathCopy } from '../data/fr/pathCopy.ts'
 import { a, cloze, pathTheme, plain, sub, word } from '../data/helpers.ts'
-import type { Language, PathConfig } from '../data/types.ts'
+import type { Language } from '../data/types.ts'
 import type { Theme } from '../domain/types.ts'
 
 export const PATH_KEY = 'test-path'
-export const V2_TEST_KEY = 'test-v2'
 
 const t1 = pathTheme({
   id: 't1',
@@ -72,10 +71,9 @@ const old: Theme = {
 export const PATH_THEMES = [t1, t2, t3]
 
 /** French interface text over a tiny path of three themes and one old theme. */
-export const fixtureLanguage: Language & { path: PathConfig } = {
+export const fixtureLanguage: Language = {
   code: 'fr',
   name: 'Français',
-  storage: { v2: V2_TEST_KEY },
   themes: [t1, t2, t3, old],
   copy: fr.copy,
   path: { themes: ['t1', 't2', 't3'], storageKey: PATH_KEY, copy: pathCopy },

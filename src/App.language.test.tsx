@@ -2,14 +2,14 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
-import { LEGACY_FLAG_KEY } from './storage/pathStorage.ts'
-import { LANGUAGE_KEY, V2_KEY } from './storage/storage.ts'
+import { LANGUAGE_KEY } from './storage/storage.ts'
+
+const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
 const BG_KEY = 'cahier-vocab-bg-v2'
 
 beforeEach(() => {
   localStorage.clear()
-  localStorage.setItem(LEGACY_FLAG_KEY, 'true')
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
 afterEach(() => vi.restoreAllMocks())

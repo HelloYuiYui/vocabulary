@@ -2,8 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PathProgress } from '../domain/path.ts'
-import { LEGACY_FLAG_KEY } from '../storage/pathStorage.ts'
-import { fixtureLanguage, PATH_KEY, V2_TEST_KEY } from '../test/pathFixture.ts'
+import { fixtureLanguage, PATH_KEY } from '../test/pathFixture.ts'
 import { LanguageContext } from './languageContext.ts'
 import { PathCahier } from './PathCahier.tsx'
 
@@ -257,44 +256,21 @@ describe('saved progress', () => {
 
   it('leaves the old picker’s saved data alone', async () => {
     const v2 = JSON.stringify({ version: 2, mode: 'list', review: [] })
-    localStorage.setItem(V2_TEST_KEY, v2)
+    localStorage.setItem('cahier-vocab-v2', v2)
     seed({ notesSeen: ['t1'] })
     const { user } = setup()
     await open(user, 'Thème un', /Second/)
     await answer(user, 'le frère')
     await answer(user, 'la sœur')
-    expect(localStorage.getItem(V2_TEST_KEY)).toBe(v2)
+    expect(localStorage.getItem('cahier-vocab-v2')).toBe(v2)
   })
 })
 
 describe('themes that are not on the path', () => {
-  it('are hidden without the flag', () => {
+  it('are not shown', () => {
     setup()
-    expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
     expect(screen.queryByText('Ancien thème')).toBeNull()
-  })
-
-  it('open in the old picker with the flag, and lead back to the path', async () => {
-    localStorage.setItem(LEGACY_FLAG_KEY, 'true')
-    const { user } = setup()
-    await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
-
-    expect(
-      screen.getByRole('checkbox', { name: /Ancien thème/ }),
-    ).toBeInTheDocument()
-    expect(screen.queryByRole('checkbox', { name: /Thème un/ })).toBeNull()
-
-    await user.click(screen.getByRole('checkbox', { name: /Ancien thème/ }))
-    await user.click(screen.getByRole('button', { name: 'Commencer' }))
-    expect(screen.getByText('the stairs')).toBeInTheDocument()
-  })
-
-  it('lead back to the path from the old picker', async () => {
-    localStorage.setItem(LEGACY_FLAG_KEY, 'true')
-    const { user } = setup()
-    await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
-    await back(user)
-    expect(screen.getByRole('region', { name: 'Thème un' })).toBeInTheDocument()
+    expect(screen.getAllByRole('region')).toHaveLength(3)
   })
 })
 

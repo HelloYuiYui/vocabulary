@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import type { Language, PathConfig } from '../data/types.ts'
+import type { Language } from '../data/types.ts'
 import {
   cardKey,
   dueCount,
@@ -18,18 +18,16 @@ import {
 import type { SubTheme, Theme } from '../domain/types.ts'
 import { clozeCsv } from '../domain/clozeExport.ts'
 import { localDay } from '../domain/schedule.ts'
-import { loadLegacyFlag } from '../storage/pathStorage.ts'
 import { downloadCsv } from './download.ts'
 import { usePathProgress } from '../storage/usePathProgress.ts'
 import { GrammarNoteCard } from './GrammarNoteCard.tsx'
 import { Header } from './Header.tsx'
-import { LegacyCahier } from './LegacyCahier.tsx'
 import { PathView } from './PathView.tsx'
 import { SittingEnd } from './SittingEnd.tsx'
 import { SittingView } from './SittingView.tsx'
 
 interface PathCahierProps {
-  language: Language & { path: PathConfig }
+  language: Language
   onLanguageChange: (language: Language) => void
 }
 
@@ -38,7 +36,6 @@ type View =
   // A theme's note; `then` is the sub-theme to start once it has been read.
   | { name: 'note'; theme: Theme; then?: SubTheme }
   | { name: 'sitting' }
-  | { name: 'legacy' }
 
 /** A language on the path: its themes in order, sittings, review and quizzes. */
 export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
@@ -48,14 +45,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
     () => path.themes.flatMap((id) => themes.find((t) => t.id === id) ?? []),
     [path, themes],
   )
-  const legacyThemes = useMemo(
-    () => themes.filter((t) => !path.themes.includes(t.id)),
-    [path, themes],
-  )
   const [progress, setProgress] = usePathProgress(path.storageKey, pathThemes)
-  const [showLegacy] = useState(
-    () => legacyThemes.length > 0 && loadLegacyFlag(),
-  )
   const [view, setView] = useState<View>({ name: 'path' })
   const [sitting, setSitting] = useState(initialSitting)
   const [run, setRun] = useState(0) // remounts the sitting on each start
@@ -100,16 +90,6 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
 
   const goToPath = () => setView({ name: 'path' })
 
-  if (view.name === 'legacy')
-    return (
-      <LegacyCahier
-        language={language}
-        themes={legacyThemes}
-        onBack={goToPath}
-        backLabel={copy.backToPath}
-      />
-    )
-
   const now = new Date()
   const due = dueEntries(pathThemes, progress, now)
 
@@ -138,7 +118,6 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           progress={progress}
           dueCount={dueCount(pathThemes, progress, now)}
           copy={copy}
-          showLegacy={showLegacy}
           onReview={() => start('review', shuffled(due))}
           onSubTheme={(theme, sub) => {
             // A theme's note is shown once, before its first sitting.
@@ -150,7 +129,6 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             start('quiz', quizCards(theme), { themeId: theme.id })
           }
           onNote={(theme) => setView({ name: 'note', theme })}
-          onLegacy={() => setView({ name: 'legacy' })}
           onExport={
             learntCsv ? () => downloadCsv(fileName(), learntCsv) : undefined
           }

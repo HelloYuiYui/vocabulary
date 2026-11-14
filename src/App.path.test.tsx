@@ -3,8 +3,8 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
 import { fr } from './data/fr/index.ts'
-import { LEGACY_FLAG_KEY } from './storage/pathStorage.ts'
-import { V2_KEY } from './storage/storage.ts'
+
+const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
 // A random of 0.999 makes shuffled() keep the order of the cards.
 beforeEach(() => {
@@ -132,27 +132,21 @@ describe('French on the path', () => {
   })
 })
 
-describe('the other French themes', () => {
-  it('are hidden without the flag', () => {
+describe('the French themes not on the path yet', () => {
+  it('are not shown, even with the old ?legacy=1 switch', () => {
+    window.history.pushState({}, '', '/?legacy=1')
+    localStorage.setItem('cahier-vocab-legacy', 'true')
     setup()
-    expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
+    window.history.pushState({}, '', '/')
     expect(screen.queryByText('La ville et les itinéraires')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
+    expect(screen.queryByRole('checkbox')).toBeNull()
   })
 
-  it('open in the old picker with the flag, without the converted themes', async () => {
-    localStorage.setItem(LEGACY_FLAG_KEY, 'true')
-    const user = setup()
-    await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
-    expect(
-      screen.getByRole('checkbox', { name: /La ville et les itinéraires/ }),
-    ).toBeInTheDocument()
-    for (const name of [/Se présenter/, /Chez soi/, /Routine/])
-      expect(screen.queryByRole('checkbox', { name })).toBeNull()
-    // Sixteen French themes, six of them on the path.
-    expect(screen.getAllByRole('checkbox')).toHaveLength(10)
-    expect(
-      screen.getByText(/On te donne le mot en anglais/),
-    ).toBeInTheDocument()
+  it('are still in the language pack, ready to be converted', () => {
+    const offPath = fr.themes.filter((t) => !fr.path.themes.includes(t.id))
+    expect(offPath.map((t) => t.id)).toContain('ville')
+    expect(offPath).toHaveLength(10)
   })
 })
 

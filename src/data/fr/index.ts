@@ -1,17 +1,15 @@
-import { V1_KEY, V2_KEY } from '../../storage/storage.ts'
 import type { Language } from '../types.ts'
-import { copy } from './copy.tsx'
+import { copy } from './copy.ts'
 import { pathCopy } from './pathCopy.ts'
 import { THEMES } from './themes.ts'
 
 export const fr: Language = {
   code: 'fr',
   name: 'Français',
-  storage: { v1: V1_KEY, v2: V2_KEY },
   themes: THEMES,
   copy,
-  // The themes that have sub-themes and sentences; the others stay on the
-  // old picker, behind the legacy flag, until they are converted.
+  // The themes that have sub-themes and sentences, in order. The other
+  // themes stay in the pack, unseen, until they are converted.
   path: {
     themes: [
       'presentation',
