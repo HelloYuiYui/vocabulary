@@ -25,12 +25,14 @@ const answer = async (user: UserEvent, text: string) => {
 }
 
 describe('French on the path', () => {
-  it('runs through the four converted themes, in order', () => {
+  it('runs through the converted themes, in order', () => {
     expect(fr.path?.themes).toEqual([
       'presentation',
       'famille',
       'chiffres-dates',
       'description',
+      'chez-soi',
+      'routine',
     ])
     setup()
     expect(
@@ -40,6 +42,8 @@ describe('French on the path', () => {
       'Famille et entourage',
       'Chiffres, dates, heure',
       'Description simple',
+      'Chez soi',
+      'Routine quotidienne',
     ])
   })
 
@@ -132,7 +136,7 @@ describe('the other French themes', () => {
   it('are hidden without the flag', () => {
     setup()
     expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
-    expect(screen.queryByText('Chez soi')).toBeNull()
+    expect(screen.queryByText('La ville et les itinéraires')).toBeNull()
   })
 
   it('open in the old picker with the flag, without the converted themes', async () => {
@@ -140,10 +144,12 @@ describe('the other French themes', () => {
     const user = setup()
     await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
     expect(
-      screen.getByRole('checkbox', { name: /Chez soi/ }),
+      screen.getByRole('checkbox', { name: /La ville et les itinéraires/ }),
     ).toBeInTheDocument()
-    expect(screen.queryByRole('checkbox', { name: /Se présenter/ })).toBeNull()
-    expect(screen.getAllByRole('checkbox')).toHaveLength(12)
+    for (const name of [/Se présenter/, /Chez soi/, /Routine/])
+      expect(screen.queryByRole('checkbox', { name })).toBeNull()
+    // Sixteen French themes, six of them on the path.
+    expect(screen.getAllByRole('checkbox')).toHaveLength(10)
     expect(
       screen.getByText(/On te donne le mot en anglais/),
     ).toBeInTheDocument()
