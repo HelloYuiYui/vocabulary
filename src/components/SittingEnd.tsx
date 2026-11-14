@@ -15,8 +15,10 @@ interface SittingEndProps {
   sitting: SittingState
   copy: PathCopy
   onHome: () => void
-  /** Downloads the sitting's cards; left out when none can be exported. */
-  onExport?: () => void
+  /** Downloads all the sitting's cards; left out when none can be exported. */
+  onExportAll?: () => void
+  /** Downloads the cards missed at the first try; left out when there are none. */
+  onExportMissed?: () => void
 }
 
 /**
@@ -27,7 +29,8 @@ export function SittingEnd({
   sitting,
   copy,
   onHome,
-  onExport,
+  onExportAll,
+  onExportMissed,
 }: SittingEndProps) {
   const total = sitting.cards.length
   const right = rightFirstTime(sitting)
@@ -76,9 +79,14 @@ export function SittingEnd({
           <Button variant="primary" autoFocus onClick={onHome}>
             {copy.backToPath}
           </Button>
-          {onExport && (
-            <Button variant="ghost" onClick={onExport}>
-              {copy.exportSitting}
+          {onExportAll && (
+            <Button variant="ghost" onClick={onExportAll}>
+              {copy.exportAll}
+            </Button>
+          )}
+          {onExportMissed && (
+            <Button variant="ghost" onClick={onExportMissed}>
+              {copy.exportMissed}
             </Button>
           )}
         </Actions>

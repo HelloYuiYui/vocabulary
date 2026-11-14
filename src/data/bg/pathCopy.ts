@@ -19,8 +19,8 @@ export const pathCopy: PathCopy = {
   note: 'Бележка по граматика',
   noteContinue: 'Продължи',
   backToPath: 'Обратно към пътя',
-  exportSitting: 'Изтегли тези карти (CSV)',
-  exportLearnt: 'Изтегли научените карти (CSV)',
+  exportAll: 'Изтегли всички карти (CSV)',
+  exportMissed: 'Изтегли сгрешените карти (CSV)',
   end: {
     title: 'Сесията приключи',
     allFirstTry: 'Всички карти от първия опит.',

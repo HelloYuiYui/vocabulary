@@ -19,8 +19,6 @@ interface PathViewProps {
   onSubTheme: (theme: Theme, sub: SubTheme) => void
   onQuiz: (theme: Theme) => void
   onNote: (theme: Theme) => void
-  /** Downloads every card learnt so far; left out while there are none. */
-  onExport?: () => void
 }
 
 interface Step {
@@ -50,7 +48,6 @@ export function PathView({
   onSubTheme,
   onQuiz,
   onNote,
-  onExport,
 }: PathViewProps) {
   const statuses = themeStatuses(themes, progress)
   const steps = themes.map((theme, i) => ({
@@ -174,13 +171,6 @@ export function PathView({
           </ol>
         </div>
       ))}
-      {onExport && (
-        <Actions>
-          <Button variant="ghost" onClick={onExport}>
-            {copy.exportLearnt}
-          </Button>
-        </Actions>
-      )}
     </div>
   )
 }

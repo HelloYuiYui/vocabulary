@@ -20,8 +20,8 @@ export const pathCopy: PathCopy = {
   note: 'Note de grammaire',
   noteContinue: 'Continuer',
   backToPath: 'Retour au parcours',
-  exportSitting: 'Exporter ces cartes (CSV)',
-  exportLearnt: 'Exporter les cartes apprises (CSV)',
+  exportAll: 'Exporter toutes les cartes (CSV)',
+  exportMissed: 'Exporter les cartes ratées (CSV)',
   end: {
     title: 'Séance terminée',
     allFirstTry: 'Toutes les cartes du premier coup.',

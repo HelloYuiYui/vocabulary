@@ -29,8 +29,8 @@ export const pathCopy: PathCopy = {
   note: 'Notatka gramatyczna',
   noteContinue: 'Dalej',
   backToPath: 'Wróć do ścieżki',
-  exportSitting: 'Eksportuj te karty (CSV)',
-  exportLearnt: 'Eksportuj poznane karty (CSV)',
+  exportAll: 'Eksportuj wszystkie karty (CSV)',
+  exportMissed: 'Eksportuj karty z błędami (CSV)',
   end: {
     title: 'Sesja zakończona',
     allFirstTry: 'Wszystkie karty za pierwszym razem.',
