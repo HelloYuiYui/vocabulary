@@ -11,6 +11,11 @@ export const pathCopy: PathCopy = {
   cards: (count) => (count === 1 ? '1 карта' : `${count} карти`),
   left: (count) => (count === 1 ? 'остава 1 карта' : `остават ${count} карти`),
   leave: 'Спри',
+  leaveConfirm: {
+    title: 'Да спреш ли сесията?',
+    body: 'Отговорите от тази сесия няма да бъдат запазени.',
+    stay: 'Продължи сесията',
+  },
   subThemeDone: 'готово',
   locked: 'Предстои',
   quiz: 'Тази тема вече я знам',

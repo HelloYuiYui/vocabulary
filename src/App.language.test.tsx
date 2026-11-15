@@ -79,6 +79,12 @@ describe('language switcher', () => {
     expect(screen.getAllByText('Вярно!')[0]).toBeInTheDocument()
     await user.keyboard('{Enter}')
     await user.click(screen.getByRole('button', { name: 'Спри' }))
+    expect(
+      screen.getByRole('dialog', { name: 'Да спреш ли сесията?' }),
+    ).toBeInTheDocument()
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Спри' }),
+    )
 
     // Leaving early records nothing but the note having been shown.
     expect(stored(BG_PATH_KEY)).toEqual({

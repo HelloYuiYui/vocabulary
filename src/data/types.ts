@@ -35,6 +35,12 @@ export interface PathCopy {
   cards: (count: number) => string // the size of a sub-theme
   left: (count: number) => string // cards still to answer right in a sitting
   leave: string // leaves a sitting without recording it
+  /** Asked before leaving a sitting that has answers; `leave` confirms. */
+  leaveConfirm: {
+    title: string
+    body: string // says the sitting's answers will not be recorded
+    stay: string // goes on with the sitting
+  }
   subThemeDone: string
   locked: string
   quiz: string

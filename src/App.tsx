@@ -1,14 +1,25 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { LanguageContext } from './components/languageContext.ts'
 import { PathCahier } from './components/PathCahier.tsx'
-import { languageFor } from './data/language.ts'
 import type { Language } from './data/types.ts'
-import { loadLanguageCode, saveLanguageCode } from './storage/storage.ts'
+import { formatRoute, parseRoute } from './domain/route.ts'
+import { go, useHash } from './routing/hashHistory.ts'
+import { languageAt } from './routing/languageAt.ts'
+import { saveLanguageCode } from './storage/storage.ts'
+
+const pathOf = (language: Language) =>
+  formatRoute({ lang: language.code, page: { name: 'path' } })
 
 export default function App() {
-  const [language, setLanguage] = useState(() =>
-    languageFor(loadLanguageCode()),
-  )
+  const hash = useHash()
+  const language = languageAt(hash)
+  const known = parseRoute(hash)?.lang === language.code
+
+  // An address that names no page of a known language takes the address of
+  // that language's path.
+  useEffect(() => {
+    if (!known) go(pathOf(language), { replace: true })
+  }, [known, language])
 
   // A layout effect: the language's colours follow its lang attribute, and
   // must change in the same frame as its text.
@@ -17,10 +28,9 @@ export default function App() {
     document.title = language.copy.header.title
   }, [language])
 
-  const onLanguageChange = (next: Language) => {
-    saveLanguageCode(next.code)
-    setLanguage(next)
-  }
+  useEffect(() => {
+    saveLanguageCode(language.code)
+  }, [language.code])
 
   // The key starts each language afresh, with its own saved progress.
   return (
@@ -28,7 +38,7 @@ export default function App() {
       <PathCahier
         key={language.code}
         language={language}
-        onLanguageChange={onLanguageChange}
+        onLanguageChange={(next) => go(pathOf(next))}
       />
     </LanguageContext>
   )

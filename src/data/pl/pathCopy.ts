@@ -21,6 +21,11 @@ export const pathCopy: PathCopy = {
   left: (count) =>
     `${plural(count, 'została', 'zostały', 'zostało')} ${cardsWord(count)}`,
   leave: 'Przerwij',
+  leaveConfirm: {
+    title: 'Przerwać sesję?',
+    body: 'Odpowiedzi z tej sesji nie zostaną zapisane.',
+    stay: 'Kontynuuj sesję',
+  },
   subThemeDone: 'zrobione',
   locked: 'Wkrótce',
   quiz: 'Znam już ten temat',
