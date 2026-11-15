@@ -12,12 +12,11 @@ const handlers = () => ({
   onSubTheme: vi.fn(),
   onQuiz: vi.fn(),
   onNote: vi.fn(),
-  onLegacy: vi.fn(),
 })
 
 const show = (
   progress: PathProgress = EMPTY_PROGRESS,
-  extra: { dueCount?: number; showLegacy?: boolean } = {},
+  extra: { dueCount?: number } = {},
 ) => {
   const on = handlers()
   render(
@@ -26,7 +25,6 @@ const show = (
         themes={PATH_THEMES}
         progress={progress}
         dueCount={extra.dueCount ?? 0}
-        showLegacy={extra.showLegacy ?? false}
         copy={pathCopy}
         {...on}
       />
@@ -151,14 +149,6 @@ describe('PathView', () => {
     const on = show(EMPTY_PROGRESS, { dueCount })
     await userEvent.click(screen.getByRole('button', { name }))
     expect(on.onReview).toHaveBeenCalledOnce()
-  })
-
-  it('shows the legacy button only when asked', async () => {
-    show()
-    expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
-    const on = show(EMPTY_PROGRESS, { showLegacy: true })
-    await userEvent.click(screen.getByRole('button', { name: 'Autres thèmes' }))
-    expect(on.onLegacy).toHaveBeenCalledOnce()
   })
 
   it('never shows a streak, a percentage or a mastery label', () => {

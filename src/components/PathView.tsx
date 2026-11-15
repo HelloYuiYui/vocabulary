@@ -15,12 +15,10 @@ interface PathViewProps {
   progress: PathProgress
   dueCount: number
   copy: PathCopy
-  showLegacy: boolean
   onReview: () => void
   onSubTheme: (theme: Theme, sub: SubTheme) => void
   onQuiz: (theme: Theme) => void
   onNote: (theme: Theme) => void
-  onLegacy: () => void
   /** Downloads every card learnt so far; left out while there are none. */
   onExport?: () => void
 }
@@ -48,12 +46,10 @@ export function PathView({
   progress,
   dueCount,
   copy,
-  showLegacy,
   onReview,
   onSubTheme,
   onQuiz,
   onNote,
-  onLegacy,
   onExport,
 }: PathViewProps) {
   const statuses = themeStatuses(themes, progress)
@@ -178,18 +174,11 @@ export function PathView({
           </ol>
         </div>
       ))}
-      {(showLegacy || onExport) && (
+      {onExport && (
         <Actions>
-          {showLegacy && (
-            <Button variant="ghost" onClick={onLegacy}>
-              {copy.legacy}
-            </Button>
-          )}
-          {onExport && (
-            <Button variant="ghost" onClick={onExport}>
-              {copy.exportLearnt}
-            </Button>
-          )}
+          <Button variant="ghost" onClick={onExport}>
+            {copy.exportLearnt}
+          </Button>
         </Actions>
       )}
     </div>

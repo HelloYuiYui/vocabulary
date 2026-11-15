@@ -12,9 +12,6 @@ export interface Answer {
  */
 export type ItemType = 'word' | 'sentence'
 
-/** Which item types a session asks. */
-export type ItemFilter = ItemType | 'all'
-
 /** A sentence in the language learnt, with the word to find marked as a blank. */
 export interface Sentence {
   text: string // the blank is in braces: "C'est {la mère} de Paul."
@@ -55,18 +52,4 @@ export interface Theme {
   items: Item[] // every item; for a theme on the path, its sub-themes flattened
   subThemes?: SubTheme[]
   note?: GrammarNote
-}
-
-export type Mode = 'cards' | 'list'
-
-/** Identifies an item across sessions: a theme id and an English prompt. */
-export interface ItemKey {
-  themeId: string
-  en: string
-}
-
-export interface Score {
-  right: number
-  total: number
-  at: string // ISO date
 }

@@ -105,7 +105,13 @@ describe('paths', () => {
   it('keeps each language’s path progress under its own key', () => {
     const keys = onPath.map((l) => l.path.storageKey)
     expect(new Set(keys).size).toBe(keys.length)
-    const old = LANGUAGES.flatMap((l) => [l.storage.v2, l.storage.v1 ?? ''])
+    // Keys the old theme picker used; they are left in browsers untouched.
+    const old = [
+      'cahier-vocab-v1',
+      'cahier-vocab-v2',
+      'cahier-vocab-bg-v2',
+      'cahier-vocab-pl-v2',
+    ]
     expect(keys.filter((k) => old.includes(k))).toEqual([])
   })
 

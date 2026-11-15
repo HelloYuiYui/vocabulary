@@ -19,7 +19,6 @@ export const pathCopy: PathCopy = {
     'Un test de 20 cartes au plus, sans second essai. 80 % ouvre le thème suivant.',
   note: 'Note de grammaire',
   noteContinue: 'Continuer',
-  legacy: 'Autres thèmes',
   backToPath: 'Retour au parcours',
   exportSitting: 'Exporter ces cartes (CSV)',
   exportLearnt: 'Exporter les cartes apprises (CSV)',

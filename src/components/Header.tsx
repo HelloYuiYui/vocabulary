@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { Language } from '../data/types.ts'
 import { Eyebrow } from './Eyebrow.tsx'
 import { useCopy } from './languageContext.ts'
@@ -7,8 +6,7 @@ import { LanguageToggle } from './LanguageToggle.tsx'
 interface HeaderProps {
   /** Shows the language switcher; left out during a session. */
   onLanguageChange?: (language: Language) => void
-  /** Replaces the language's usual introduction; the path has its own. */
-  intro?: ReactNode
+  intro: string
 }
 
 export function Header({ onLanguageChange, intro }: HeaderProps) {
@@ -20,9 +18,7 @@ export function Header({ onLanguageChange, intro }: HeaderProps) {
         {onLanguageChange && <LanguageToggle onChange={onLanguageChange} />}
       </div>
       <h1>{copy.header.title}</h1>
-      <p className="mt-2.5 max-w-[62ch] text-muted">
-        {intro ?? copy.header.intro}
-      </p>
+      <p className="mt-2.5 max-w-[62ch] text-muted">{intro}</p>
     </header>
   )
 }

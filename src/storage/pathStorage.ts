@@ -99,21 +99,3 @@ export function loadPath(
 
 export const savePath = (key: string, progress: PathProgress): void =>
   write(key, { version: 1, ...progress })
-
-/** Whether this browser shows the themes that are not on the path yet. */
-export const LEGACY_FLAG_KEY = 'cahier-vocab-legacy'
-
-/**
- * Reads the flag. `?legacy=1` in the address switches it on for this browser
- * and `?legacy=0` switches it off; otherwise the saved choice stands.
- */
-export function loadLegacyFlag(
-  search: string = typeof location === 'undefined' ? '' : location.search,
-): boolean {
-  const param = new URLSearchParams(search).get('legacy')
-  if (param === '1' || param === '0') {
-    write(LEGACY_FLAG_KEY, param === '1')
-    return param === '1'
-  }
-  return read(LEGACY_FLAG_KEY) === true
-}

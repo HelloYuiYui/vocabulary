@@ -1,6 +1,5 @@
 import { useLayoutEffect, useState } from 'react'
 import { LanguageContext } from './components/languageContext.ts'
-import { LegacyCahier } from './components/LegacyCahier.tsx'
 import { PathCahier } from './components/PathCahier.tsx'
 import { languageFor } from './data/language.ts'
 import type { Language } from './data/types.ts'
@@ -22,25 +21,15 @@ export default function App() {
     saveLanguageCode(next.code)
     setLanguage(next)
   }
-  const { path } = language
 
-  // The key starts each language afresh, with its own saved progress. A
-  // language on the path opens on it; the others keep the theme picker.
+  // The key starts each language afresh, with its own saved progress.
   return (
     <LanguageContext value={language}>
-      {path ? (
-        <PathCahier
-          key={language.code}
-          language={{ ...language, path }}
-          onLanguageChange={onLanguageChange}
-        />
-      ) : (
-        <LegacyCahier
-          key={language.code}
-          language={language}
-          onLanguageChange={onLanguageChange}
-        />
-      )}
+      <PathCahier
+        key={language.code}
+        language={language}
+        onLanguageChange={onLanguageChange}
+      />
     </LanguageContext>
   )
 }

@@ -18,7 +18,6 @@ export const pathCopy: PathCopy = {
     'Тест с най-много 20 карти, без втори опит. При 80 % се отваря следващата тема.',
   note: 'Бележка по граматика',
   noteContinue: 'Продължи',
-  legacy: 'Други теми',
   backToPath: 'Обратно към пътя',
   exportSitting: 'Изтегли тези карти (CSV)',
   exportLearnt: 'Изтегли научените карти (CSV)',

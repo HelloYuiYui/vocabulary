@@ -18,17 +18,7 @@ The Bulgarian and Polish sentences and grammar notes were drafted by an AI model
 - **Audio.** A play button appears after answering when a sentence has a recording. None are included yet.
 - **CSV export.** At the end of a sitting, "Exporter ces cartes (CSV)" saves that sitting's cards; under the path, "Exporter les cartes apprises (CSV)" saves every card learnt so far. Each row is the sentence with its blank written as `[[word:hint]]`, then the English translation, for example `"Je [[me lève:to get up]] à sept heures.","I get up at seven."`. There is no header row; the file is UTF-8 without a byte-order mark. The word is the form in the sentence, and the data tests reject a hint or blank containing `:`, `[[` or `]]`.
 
-In Bulgarian and Polish, all four themes are on the path. In French, four themes are on the path so far: _Se présenter_, _Famille et entourage_, _Chiffres, dates, heure_ and _Description simple_. The twelve other French themes are hidden by default. Add `?legacy=1` to the address once to show an "Autres thèmes" button under the path, which opens them in the theme picker; `?legacy=0` hides it again. The choice is remembered per browser.
-
-## The theme picker (French behind `?legacy=1`)
-
-The older way of practising, kept for the French themes that are not on the path yet: you get a word or phrase in English and type it in French.
-
-- Two modes: one card at a time, or a full worksheet list on one page.
-- Ask only words, only sentences, or both. With a session limit, each choice keeps its own place in every theme.
-- Gender checks: when an answer starts with `l'` or `les`, a masculine/feminine picker appears. Typing `un escalier` instead of `l'escalier` also counts, since the indefinite article shows the gender.
-- "Presque" verdicts for a wrong article or gender, and an override for sentences that can be phrased several ways.
-- A results list showing every answer, a review list that persists between sessions, and a tab-separated export for Anki.
+In Bulgarian and Polish, all four themes are on the path. In French, six themes are on the path so far: _Se présenter_, _Famille et entourage_, _Chiffres, dates, heure_, _Description simple_, _Chez soi_ and _Routine quotidienne_. The ten other French themes are kept in the pack, unseen, until each is converted (see [Converting an older theme](#converting-an-older-theme)).
 
 ## Running it
 
@@ -59,17 +49,16 @@ Pushing to `main` deploys to GitHub Pages through `.github/workflows/pages.yml`.
 ```
 index.html                  page shell and Google Fonts
 src/main.tsx                entry point
-src/App.tsx                 picks the path or the theme picker for the language
+src/App.tsx                 the chosen language and its path
 src/data/language.ts        the list of language packs
 src/data/types.ts           what a language pack holds
 src/data/fr/, bg/, pl/      a language pack each: themes, interface text
 src/data/<code>/a1/ …       vocabulary, one file per theme
 src/data/<code>/themes.ts   the THEMES list, in checklist order
 src/domain/                 grading, sittings, review schedule, path progress (no React)
-src/storage/                localStorage load, save and migration
+src/storage/                localStorage: path progress, the chosen language
 src/components/             one file per component, styled with Tailwind
   PathCahier.tsx            the path: sittings, review, quizzes, notes
-  LegacyCahier.tsx          the theme picker and its sessions
 src/styles/tokens.css       light and dark colour tokens
 src/styles/index.css        Tailwind entry and token mapping
 docs/delf-checklist.md      A1 to B2 theme checklist, a roadmap for new themes
@@ -98,29 +87,22 @@ sub('parents-et-enfants', 'Parents et enfants', [
 
 The data tests check all of this, so a bad card fails before it ships.
 
-## Adding vocabulary to the theme picker
+## Converting an older theme
 
-Each theme lives in its own file under `src/data/<code>/<level>/` and has an `id`, `name`, `level`, `desc` and `items`. Items are built with `word()` or `sentence()`: an English prompt, the accepted answers with the preferred one first, and an optional note in the language being learnt:
+Ten French themes predate the path. They are written with `word()` and `sentence()`: an English prompt and its accepted answers, with no sentence to fill in. They stay in `THEMES` and keep passing the data tests, but the app shows only the themes named in `path.themes`.
 
-```ts
-word('the stairs', [a("l'escalier", 'm'), a('les escaliers', 'm')], 'Optional note.'),
-sentence('Where is the station?', [a('Où est la gare ?')]),
-```
-
-Use `sentence()` for prompts ending in `.`, `?` or `!`, and `word()` for everything else, including verb phrases like "to have a shower". When the article hides the gender (`l'`, `les`), pass it as the second argument to `a()`. Add a new theme to `THEMES` in `src/data/<code>/themes.ts`. The tests check that genders and item types are set correctly and that ids and prompts are unique, since saved progress is keyed on them.
-
-In Bulgarian, prompt nouns without "the" (`word('family', [a('семейство')])`), since the answer is the bare form, and give verbs in the "аз" form (`говоря`), since Bulgarian has no infinitive. The tests reject Latin letters in Bulgarian answers, which look the same as Cyrillic а, е, о, с, р but never match.
-
-In Polish, prompt nouns without "the" too, but give verbs in the infinitive (`mówić`). A missing Polish letter, `ł` included, counts as an accent slip, like a missing French accent.
+To bring one onto the path, rewrite it with `pathTheme()`, `sub()` and `cloze()` as above, keeping every word's English prompt, answers, genders and notes. Each old `sentence()` item either becomes a card on its key word, lends its sentence to an existing card, or is dropped. Then add the theme's id to `path.themes`.
 
 ## Languages
 
 A language pack is a folder under `src/data/<code>/` with:
 
 - `themes.ts` and the theme files, as above;
-- `copy.tsx`, every piece of interface text, typed by `Copy` in `src/data/types.ts`, so a missing string fails the type check;
+- `copy.ts`, the interface text shared by every screen, typed by `Copy` in `src/data/types.ts`, so a missing string fails the type check;
 - `pathCopy.ts`, the path's interface text, typed by `PathCopy`;
-- `index.ts`, exporting the `Language`: its code, its name for the switcher, its themes, its copy, its `path` (theme ids in order, a storage key and the path text) and its localStorage key. Each language needs its own key so that progress never mixes; the chosen language itself is kept under `cahier-vocab-language`.
+- `index.ts`, exporting the `Language`: its code, its name for the switcher, its themes, its copy and its `path` (theme ids in order, a storage key and the path text). Each language needs its own storage key so that progress never mixes; the chosen language itself is kept under `cahier-vocab-language`.
+
+Earlier versions kept progress from an older theme picker under `cahier-vocab-v1`, `cahier-vocab-v2`, `cahier-vocab-bg-v2` and `cahier-vocab-pl-v2`. The app no longer reads those entries and never deletes them.
 
 To add one, copy `src/data/bg/`, translate it, and add it to `LANGUAGES` in `src/data/language.ts`; it then appears in the switcher. Components read the current pack with `useLanguage()` or `useCopy()` from `src/components/languageContext.ts`. If the alphabet isn't covered by the fonts in `index.html`, add a font that covers it as a fallback in `src/styles/tokens.css`, as Bulgarian does with Cyrillic.
 

@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { a, pathTheme, plain, sub } from '../data/helpers.ts'
 import { EMPTY_PROGRESS, type PathProgress } from '../domain/path.ts'
-import {
-  LEGACY_FLAG_KEY,
-  loadLegacyFlag,
-  loadPath,
-  savePath,
-} from './pathStorage.ts'
-import { V2_KEY } from './storage.ts'
+import { loadPath, savePath } from './pathStorage.ts'
 
 const KEY = 'test-path'
 const THEMES = [
@@ -129,48 +123,9 @@ describe('savePath', () => {
 
   it('never touches the v2 entry', () => {
     const v2 = JSON.stringify({ version: 2, mode: 'list', review: [] })
-    localStorage.setItem(V2_KEY, v2)
+    localStorage.setItem('cahier-vocab-v2', v2)
     savePath(KEY, SAVED)
     loadPath(KEY, THEMES)
-    expect(localStorage.getItem(V2_KEY)).toBe(v2)
-  })
-})
-
-describe('loadLegacyFlag', () => {
-  it('is off by default', () => {
-    expect(loadLegacyFlag('')).toBe(false)
-    expect(localStorage.getItem(LEGACY_FLAG_KEY)).toBeNull()
-  })
-
-  it('is switched on by ?legacy=1 and stays on afterwards', () => {
-    expect(loadLegacyFlag('?legacy=1')).toBe(true)
-    expect(loadLegacyFlag('')).toBe(true)
-    expect(loadLegacyFlag('?other=1')).toBe(true)
-  })
-
-  it('is switched off by ?legacy=0 and stays off afterwards', () => {
-    loadLegacyFlag('?legacy=1')
-    expect(loadLegacyFlag('?x=1&legacy=0')).toBe(false)
-    expect(loadLegacyFlag('')).toBe(false)
-  })
-
-  it('ignores other values of the parameter', () => {
-    expect(loadLegacyFlag('?legacy=yes')).toBe(false)
-  })
-
-  it('ignores a stored value that is not a boolean', () => {
-    localStorage.setItem(LEGACY_FLAG_KEY, '"true"')
-    expect(loadLegacyFlag('')).toBe(false)
-  })
-
-  it('still answers from the query string when storage throws', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new Error('blocked')
-    })
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new Error('blocked')
-    })
-    expect(loadLegacyFlag('?legacy=1')).toBe(true)
-    expect(loadLegacyFlag('')).toBe(false)
+    expect(localStorage.getItem('cahier-vocab-v2')).toBe(v2)
   })
 })
