@@ -121,6 +121,11 @@ describe('learning a sub-theme', () => {
     await open(user, 'Thème un', /Second/)
     await answer(user, 'le frère')
     await user.click(screen.getByRole('button', { name: 'Arrêter' }))
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Arrêter',
+      }),
+    )
     expect(
       theme('Thème un').getByRole('button', { name: /Second/ }),
     ).not.toHaveTextContent('fait')

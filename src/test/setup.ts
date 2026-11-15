@@ -2,7 +2,13 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 
-afterEach(cleanup)
+afterEach(async () => {
+  cleanup()
+  // Let a step back the test started land, then start the next test at a
+  // bare address.
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  history.replaceState(null, '', location.pathname)
+})
 
 // jsdom implements neither of these.
 window.matchMedia = (media: string): MediaQueryList => ({
@@ -16,3 +22,13 @@ window.matchMedia = (media: string): MediaQueryList => ({
   dispatchEvent: () => false,
 })
 Element.prototype.scrollIntoView = () => undefined
+
+// jsdom has <dialog> but neither of its methods.
+HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+  this.open = true
+}
+HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+  if (!this.open) return
+  this.open = false
+  this.dispatchEvent(new Event('close'))
+}

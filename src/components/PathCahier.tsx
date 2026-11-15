@@ -1,11 +1,15 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Language } from '../data/types.ts'
 import {
   dueCount,
   dueEntries,
   isSubDone,
   recordSitting,
+  themeStatuses,
+  type PathProgress,
 } from '../domain/path.ts'
+import { formatRoute, parseRoute, type Page } from '../domain/route.ts'
+import { go, useHash, useLeaveGuard } from '../routing/hashHistory.ts'
 import { shuffled, type Entry } from '../domain/session.ts'
 import {
   initialSitting,
@@ -13,12 +17,14 @@ import {
   sittingReducer,
   type SittingAction,
   type SittingKind,
+  type SittingState,
 } from '../domain/sitting.ts'
 import type { SubTheme, Theme } from '../domain/types.ts'
 import { clozeCsv } from '../domain/clozeExport.ts'
 import { localDay } from '../domain/schedule.ts'
 import { downloadCsv } from './download.ts'
 import { usePathProgress } from '../storage/usePathProgress.ts'
+import { ConfirmLeave } from './ConfirmLeave.tsx'
 import { GrammarNoteCard } from './GrammarNoteCard.tsx'
 import { Header } from './Header.tsx'
 import { PathView } from './PathView.tsx'
@@ -30,11 +36,43 @@ interface PathCahierProps {
   onLanguageChange: (language: Language) => void
 }
 
+/** A page as it is shown: a note's theme and sub-theme looked up. */
 type View =
   | { name: 'path' }
-  // A theme's note; `then` is the sub-theme to start once it has been read.
   | { name: 'note'; theme: Theme; then?: SubTheme }
   | { name: 'sitting' }
+  | { name: 'end' }
+
+const PATH: View = { name: 'path' }
+
+/**
+ * What a page shows, or undefined when it can't be shown: a note of a theme
+ * that is locked, gone or noteless, or a sitting that is not running.
+ */
+function viewOf(
+  page: Page,
+  themes: Theme[],
+  progress: PathProgress,
+  sitting: SittingState,
+): View | undefined {
+  switch (page.name) {
+    case 'path':
+      return PATH
+    case 'note': {
+      const i = themes.findIndex((t) => t.id === page.themeId)
+      const theme = themes[i]
+      if (!theme?.note || themeStatuses(themes, progress)[i] === 'locked')
+        return undefined
+      if (page.then === undefined) return { name: 'note', theme }
+      const then = theme.subThemes?.find((s) => s.id === page.then)
+      return then && { name: 'note', theme, then }
+    }
+    case 'sitting':
+      return sitting.cards.length > 0 && !sitting.finished ? page : undefined
+    case 'end':
+      return sitting.finished ? page : undefined
+  }
+}
 
 /** A language on the path: its themes in order, sittings, review and quizzes. */
 export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
@@ -45,21 +83,54 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
     [path, themes],
   )
   const [progress, setProgress] = usePathProgress(path.storageKey, pathThemes)
-  const [view, setView] = useState<View>({ name: 'path' })
   const [sitting, setSitting] = useState(initialSitting)
   const [run, setRun] = useState(0) // remounts the sitting on each start
+  const [asking, setAsking] = useState(false) // whether to stop the sitting
   const sittingRef = useRef(sitting)
 
+  // The page comes from the address; another language's address is App's.
+  const route = parseRoute(useHash())
+  const page: Page =
+    route?.lang === language.code ? route.page : { name: 'path' }
+  const view = viewOf(page, pathThemes, progress, sitting)
+  const goTo = (to: Page, options?: { replace?: boolean }) =>
+    go(formatRoute({ lang: language.code, page: to }), options)
+
+  // A page that can't be shown, such as a sitting's after a reload, gives way
+  // to the path.
+  useEffect(() => {
+    if (!view)
+      go(formatRoute({ lang: language.code, page: { name: 'path' } }), {
+        replace: true,
+      })
+  }, [view, language.code])
+
+  // A sitting with answers asks before Back or Arrêter throws them away.
+  const answered =
+    view?.name === 'sitting' && Object.keys(sitting.tries).length > 0
+  const ask = useCallback(() => setAsking(true), [])
+  useLeaveGuard(answered, ask)
+
   // Like useReducer's dispatch, but records the sitting, once, as soon as an
-  // action finishes it.
+  // action finishes it, and moves on to its end.
   const dispatch = (action: SittingAction) => {
     const prev = sittingRef.current
     const next = sittingReducer(prev, action)
     if (next === prev) return
     sittingRef.current = next
     setSitting(next)
-    if (next.finished && !prev.finished)
+    if (next.finished && !prev.finished) {
       setProgress((p) => recordSitting(p, next, pathThemes, new Date()))
+      goTo({ name: 'end' }, { replace: true })
+    }
+  }
+
+  // Leaves a sitting, recording nothing. Forward will find no sitting.
+  const leave = () => {
+    setAsking(false)
+    sittingRef.current = initialSitting
+    setSitting(initialSitting)
+    goTo({ name: 'path' })
   }
 
   const start = (
@@ -77,7 +148,9 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
     sittingRef.current = started
     setSitting(started)
     setRun((r) => r + 1)
-    setView({ name: 'sitting' })
+    // A sitting started from a note takes the note's place, so Back from the
+    // sitting goes to the path.
+    goTo({ name: 'sitting' }, { replace: view?.name === 'note' })
   }
 
   const startSubTheme = (theme: Theme, sub: SubTheme) =>
@@ -87,7 +160,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
       { themeId: theme.id, subThemeId: sub.id },
     )
 
-  const goToPath = () => setView({ name: 'path' })
+  const goToPath = () => goTo({ name: 'path' })
 
   const now = new Date()
   const due = dueEntries(pathThemes, progress, now)
@@ -102,13 +175,15 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const fileName = (...parts: string[]) =>
     ['cahier', language.code, ...parts, localDay(now)].join('-') + '.csv'
 
+  const shown = view ?? PATH // until the address catches up
+
   return (
     <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
       <Header
         intro={copy.intro}
-        onLanguageChange={view.name === 'path' ? onLanguageChange : undefined}
+        onLanguageChange={shown.name === 'path' ? onLanguageChange : undefined}
       />
-      {view.name === 'path' && (
+      {shown.name === 'path' && (
         <PathView
           themes={pathThemes}
           progress={progress}
@@ -118,21 +193,21 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           onSubTheme={(theme, sub) => {
             // A theme's note is shown once, before its first sitting.
             if (theme.note && !progress.notesSeen.includes(theme.id))
-              setView({ name: 'note', theme, then: sub })
+              goTo({ name: 'note', themeId: theme.id, then: sub.id })
             else startSubTheme(theme, sub)
           }}
           onQuiz={(theme) =>
             start('quiz', quizCards(theme), { themeId: theme.id })
           }
-          onNote={(theme) => setView({ name: 'note', theme })}
+          onNote={(theme) => goTo({ name: 'note', themeId: theme.id })}
         />
       )}
-      {view.name === 'note' && view.theme.note && (
+      {shown.name === 'note' && shown.theme.note && (
         <GrammarNoteCard
-          note={view.theme.note}
+          note={shown.theme.note}
           copy={copy}
           onContinue={() => {
-            const { theme, then } = view
+            const { theme, then } = shown
             setProgress((p) =>
               p.notesSeen.includes(theme.id)
                 ? p
@@ -143,33 +218,40 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           }}
         />
       )}
-      {view.name === 'sitting' &&
-        (sitting.finished ? (
-          <SittingEnd
-            key={run}
-            sitting={sitting}
-            copy={copy}
-            onHome={goToPath}
-            onExportAll={
-              allCsv
-                ? () => downloadCsv(fileName(sittingName), allCsv)
-                : undefined
-            }
-            onExportMissed={
-              missedCsv
-                ? () => downloadCsv(fileName(sittingName, 'ratees'), missedCsv)
-                : undefined
-            }
-          />
-        ) : (
-          <SittingView
-            key={run}
-            sitting={sitting}
-            dispatch={dispatch}
-            copy={copy}
-            onLeave={goToPath}
-          />
-        ))}
+      {shown.name === 'end' && (
+        <SittingEnd
+          key={run}
+          sitting={sitting}
+          copy={copy}
+          onHome={goToPath}
+          onExportAll={
+            allCsv
+              ? () => downloadCsv(fileName(sittingName), allCsv)
+              : undefined
+          }
+          onExportMissed={
+            missedCsv
+              ? () => downloadCsv(fileName(sittingName, 'ratees'), missedCsv)
+              : undefined
+          }
+        />
+      )}
+      {shown.name === 'sitting' && (
+        <SittingView
+          key={run}
+          sitting={sitting}
+          dispatch={dispatch}
+          copy={copy}
+          onLeave={answered ? ask : leave}
+        />
+      )}
+      {shown.name === 'sitting' && asking && (
+        <ConfirmLeave
+          copy={copy}
+          onStay={() => setAsking(false)}
+          onLeave={leave}
+        />
+      )}
     </div>
   )
 }

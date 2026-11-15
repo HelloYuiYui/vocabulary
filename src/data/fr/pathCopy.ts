@@ -12,6 +12,11 @@ export const pathCopy: PathCopy = {
   cards: (count) => (count === 1 ? '1 carte' : `${count} cartes`),
   left: (count) => (count === 1 ? 'reste 1 carte' : `restent ${count} cartes`),
   leave: 'Arrêter',
+  leaveConfirm: {
+    title: 'Arrêter la séance ?',
+    body: 'Les réponses de cette séance ne seront pas enregistrées.',
+    stay: 'Continuer la séance',
+  },
   subThemeDone: 'fait',
   locked: 'À venir',
   quiz: 'Je connais déjà ce thème',
