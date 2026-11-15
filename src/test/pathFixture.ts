@@ -29,7 +29,13 @@ const t1 = pathTheme({
         "C'est {la mère} de Paul.",
         "This is Paul's mother.",
       ),
-      plain('pere', 'the father', [a('le père')]),
+      cloze(
+        'pere',
+        'the father',
+        [a('le père')],
+        '{Le père} de Julie travaille.',
+        "Julie's father works.",
+      ),
     ]),
     sub('s2', 'Second', [
       plain('frere', 'the brother', [a('le frère')]),

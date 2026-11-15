@@ -302,12 +302,23 @@ describe('exporting cards as CSV', () => {
     return files
   }
 
-  it('offers no export on the path before anything is learnt', () => {
+  const MARKED_MERE =
+    '"C\'est [[la mère:the mother]] de Paul.","This is Paul\'s mother."\r\n'
+  const MARKED_PERE =
+    '"[[Le père:the father]] de Julie travaille.","Julie\'s father works."\r\n'
+  const ALL = 'Exporter toutes les cartes (CSV)'
+  const MISSED = 'Exporter les cartes ratées (CSV)'
+
+  it('offers no export on the path, only at the end of a sitting', () => {
+    seed({
+      done: ['t1/s1'],
+      cards: { 't1/mere': { box: 2, due: '2026-11-20', seen: 1, right: 1 } },
+    })
     setup()
     expect(screen.queryByRole('button', { name: /Exporter/ })).toBeNull()
   })
 
-  it('exports the cards of a finished sitting, marked as [[word:hint]]', async () => {
+  it('exports every card of a finished sitting, marked as [[word:hint]]', async () => {
     today(2026, 11, 14)
     const files = catchDownloads()
     seed({ notesSeen: ['t1'] })
@@ -315,44 +326,71 @@ describe('exporting cards as CSV', () => {
     await open(user, 'Thème un', /Premier/)
     await answer(user, 'la mère')
     await answer(user, 'le père')
-    await user.click(
-      screen.getByRole('button', { name: 'Exporter ces cartes (CSV)' }),
-    )
+    await user.click(screen.getByRole('button', { name: ALL }))
     expect(files).toHaveLength(1)
     expect(files[0]?.name).toBe('cahier-fr-t1-2026-11-14.csv')
-    // The father has no sentence in the fixture, so only the mother is written.
-    expect(await files[0]?.blob.text()).toBe(
-      '"C\'est [[la mère:the mother]] de Paul.","This is Paul\'s mother."\r\n',
-    )
+    expect(files[0]?.blob.type).toBe('text/csv;charset=utf-8')
+    expect(await files[0]?.blob.text()).toBe(MARKED_MERE + MARKED_PERE)
+  })
+
+  it('exports only the cards missed at the first try', async () => {
+    today(2026, 11, 14)
+    const files = catchDownloads()
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await answer(user, 'la mère')
+    await answer(user, 'faux')
+    await answer(user, 'le père')
+    await user.click(screen.getByRole('button', { name: MISSED }))
+    expect(files[0]?.name).toBe('cahier-fr-t1-ratees-2026-11-14.csv')
+    expect(await files[0]?.blob.text()).toBe(MARKED_PERE)
+  })
+
+  it('counts "je ne sais pas" as missed', async () => {
+    const files = catchDownloads()
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await user.click(screen.getByRole('button', { name: 'Je ne sais pas' }))
+    await user.keyboard('{Enter}')
+    await answer(user, 'le père')
+    await answer(user, 'la mère')
+    await user.click(screen.getByRole('button', { name: MISSED }))
+    expect(await files[0]?.blob.text()).toBe(MARKED_MERE)
+  })
+
+  it('offers no "missed" export when every card was right at the first try', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await answer(user, 'la mère')
+    await answer(user, 'le père')
+    expect(screen.getByRole('button', { name: ALL })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: MISSED })).toBeNull()
   })
 
   it('offers no export at the end of a sitting with no sentence to write', async () => {
     seed({ notesSeen: ['t1'] })
     const { user } = setup()
     await open(user, 'Thème un', /Second/)
-    await answer(user, 'le frère')
+    await answer(user, 'faux')
     await answer(user, 'la sœur')
+    await answer(user, 'le frère')
     expect(screen.queryByRole('button', { name: /Exporter/ })).toBeNull()
   })
 
-  it('exports every card learnt so far from the path', async () => {
+  it('exports after a review sitting too, named for the review', async () => {
     today(2026, 11, 14)
     const files = catchDownloads()
     seed({
       done: ['t1/s1'],
-      cards: {
-        't1/mere': { box: 2, due: '2026-11-20', seen: 1, right: 1 },
-        't1/pere': { box: 1, due: '2026-11-15', seen: 0, right: 0 },
-      },
+      cards: { 't1/mere': { box: 1, due: '2026-11-13', seen: 0, right: 0 } },
     })
     const { user } = setup()
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Exporter les cartes apprises (CSV)',
-      }),
-    )
-    expect(files[0]?.name).toBe('cahier-fr-2026-11-14.csv')
-    expect(await files[0]?.blob.text()).toContain('[[la mère:the mother]]')
-    expect(files[0]?.blob.type).toBe('text/csv;charset=utf-8')
+    await user.click(screen.getByRole('button', { name: '1 carte à revoir' }))
+    await answer(user, 'la mère')
+    await user.click(screen.getByRole('button', { name: ALL }))
+    expect(files[0]?.name).toBe('cahier-fr-revision-2026-11-14.csv')
   })
 })

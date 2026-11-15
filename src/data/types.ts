@@ -42,8 +42,8 @@ export interface PathCopy {
   note: string
   noteContinue: string
   backToPath: string
-  exportSitting: string // downloads the cards of the sitting just finished
-  exportLearnt: string // downloads every card learnt so far
+  exportAll: string // at the end of a sitting: downloads all its cards
+  exportMissed: string // at the end of a sitting: only those missed at the first try
   end: {
     title: string
     allFirstTry: string

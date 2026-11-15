@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Language } from '../data/types.ts'
 import {
-  cardKey,
   dueCount,
   dueEntries,
   isSubDone,
@@ -93,16 +92,13 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const now = new Date()
   const due = dueEntries(pathThemes, progress, now)
 
-  // Cards learnt so far, in path order, and the sitting's own cards.
-  const learnt = pathThemes.flatMap((theme) =>
-    theme.items.flatMap((item) =>
-      item.id && progress.cards[cardKey(theme.id, item.id)]
-        ? [{ themeId: theme.id, item }]
-        : [],
-    ),
+  // At the end of a sitting: all its cards, or those missed at the first try
+  // (a wrong answer, "presque" or "je ne sais pas").
+  const allCsv = clozeCsv(sitting.cards)
+  const missedCsv = clozeCsv(
+    sitting.cards.filter((_, i) => sitting.firstRight[i] !== true),
   )
-  const learntCsv = clozeCsv(learnt)
-  const sittingCsv = clozeCsv(sitting.cards)
+  const sittingName = sitting.themeId ?? 'revision'
   const fileName = (...parts: string[]) =>
     ['cahier', language.code, ...parts, localDay(now)].join('-') + '.csv'
 
@@ -129,9 +125,6 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             start('quiz', quizCards(theme), { themeId: theme.id })
           }
           onNote={(theme) => setView({ name: 'note', theme })}
-          onExport={
-            learntCsv ? () => downloadCsv(fileName(), learntCsv) : undefined
-          }
         />
       )}
       {view.name === 'note' && view.theme.note && (
@@ -157,15 +150,14 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             sitting={sitting}
             copy={copy}
             onHome={goToPath}
-            onExport={
-              sittingCsv
-                ? () =>
-                    downloadCsv(
-                      fileName(
-                        ...(sitting.themeId ? [sitting.themeId] : ['revision']),
-                      ),
-                      sittingCsv,
-                    )
+            onExportAll={
+              allCsv
+                ? () => downloadCsv(fileName(sittingName), allCsv)
+                : undefined
+            }
+            onExportMissed={
+              missedCsv
+                ? () => downloadCsv(fileName(sittingName, 'ratees'), missedCsv)
                 : undefined
             }
           />
