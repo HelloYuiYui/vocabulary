@@ -21,6 +21,8 @@ export const pathCopy: PathCopy = {
   noteContinue: 'Continuer',
   legacy: 'Autres thèmes',
   backToPath: 'Retour au parcours',
+  exportSitting: 'Exporter ces cartes (CSV)',
+  exportLearnt: 'Exporter les cartes apprises (CSV)',
   end: {
     title: 'Séance terminée',
     allFirstTry: 'Toutes les cartes du premier coup.',

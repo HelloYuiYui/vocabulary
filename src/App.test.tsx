@@ -1,28 +1,38 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import App from './App.tsx'
-import { chezSoi } from './data/fr/a1/chezSoi.ts'
+import { LanguageContext } from './components/languageContext.ts'
+import { LegacyCahier } from './components/LegacyCahier.tsx'
+import { fr } from './data/fr/index.ts'
+import type { Language } from './data/types.ts'
 import { V1_KEY, V2_KEY } from './storage/storage.ts'
+import { legacyChezSoi as chezSoi, legacyVille } from './test/legacyThemes.ts'
 
 // A random of 0.999 makes shuffled() keep the theme order.
 beforeEach(() => {
   localStorage.clear()
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
-afterEach(() => {
-  vi.restoreAllMocks()
-  window.history.pushState({}, '', '/')
-})
+afterEach(() => vi.restoreAllMocks())
 
-// These themes are not on the path yet, so they sit in the old picker,
-// reached with ?legacy=1 and the "Autres thèmes" button under the path.
-const setup = async () => {
-  window.history.pushState({}, '', '/?legacy=1')
+// The old theme picker, tested on its own with French text and storage keys
+// and a frozen copy of a theme as the picker knew it. Which real themes are
+// still on the picker changes as they move to the path; these tests do not.
+const { path: _path, ...frenchPicker } = fr
+void _path
+const language: Language = {
+  ...frenchPicker,
+  themes: [chezSoi, legacyVille],
+}
+
+const setup = () => {
   const user = userEvent.setup()
-  render(<App />)
-  await user.click(screen.getByRole('button', { name: 'Autres thèmes' }))
-  return user
+  render(
+    <LanguageContext value={language}>
+      <LegacyCahier language={language} onLanguageChange={() => {}} />
+    </LanguageContext>,
+  )
+  return Promise.resolve(user)
 }
 
 const startTheme = async (user: UserEvent, name: RegExp) => {

@@ -13,7 +13,14 @@ export const fr: Language = {
   // The themes that have sub-themes and sentences; the others stay on the
   // old picker, behind the legacy flag, until they are converted.
   path: {
-    themes: ['presentation', 'famille', 'chiffres-dates', 'description'],
+    themes: [
+      'presentation',
+      'famille',
+      'chiffres-dates',
+      'description',
+      'chez-soi',
+      'routine',
+    ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,
   },

@@ -132,3 +132,19 @@ describe('gradeItem', () => {
     expect(gradeItem('la mère', null, items.mere).form?.text).toBe('une mère')
   })
 })
+
+describe('a phrase whose dictionary form is longer than the blank', () => {
+  const nextTo = cloze(
+    'a-cote',
+    'next to',
+    [a('à côté'), a('à côté de')],
+    'La cuisine est {à côté} du salon.',
+    'The kitchen is next to the living room.',
+  )
+
+  it('accepts the fuller form a learner is likely to type, and shows the blank', () => {
+    const result = gradeCloze('à côté de', null, nextTo)
+    expect(result.verdict).toBe('ok')
+    expect(result.form?.text).toBe('à côté')
+  })
+})

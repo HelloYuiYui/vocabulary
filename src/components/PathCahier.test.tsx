@@ -307,3 +307,76 @@ describe('the language switcher', () => {
     expect(screen.queryByRole('group', { name: /langue/i })).toBeNull()
   })
 })
+
+describe('exporting cards as CSV', () => {
+  /** Catches the file a download would save, instead of saving it. */
+  const catchDownloads = () => {
+    const files: { name: string; blob: Blob }[] = []
+    let last: Blob | undefined
+    URL.createObjectURL = vi.fn((blob: Blob) => {
+      last = blob
+      return 'blob:test'
+    })
+    URL.revokeObjectURL = vi.fn()
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      if (last) files.push({ name: this.download, blob: last })
+    })
+    return files
+  }
+
+  it('offers no export on the path before anything is learnt', () => {
+    setup()
+    expect(screen.queryByRole('button', { name: /Exporter/ })).toBeNull()
+  })
+
+  it('exports the cards of a finished sitting, marked as [[word:hint]]', async () => {
+    today(2026, 11, 14)
+    const files = catchDownloads()
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await answer(user, 'la mère')
+    await answer(user, 'le père')
+    await user.click(
+      screen.getByRole('button', { name: 'Exporter ces cartes (CSV)' }),
+    )
+    expect(files).toHaveLength(1)
+    expect(files[0]?.name).toBe('cahier-fr-t1-2026-11-14.csv')
+    // The father has no sentence in the fixture, so only the mother is written.
+    expect(await files[0]?.blob.text()).toBe(
+      '"C\'est [[la mère:the mother]] de Paul.","This is Paul\'s mother."\r\n',
+    )
+  })
+
+  it('offers no export at the end of a sitting with no sentence to write', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Second/)
+    await answer(user, 'le frère')
+    await answer(user, 'la sœur')
+    expect(screen.queryByRole('button', { name: /Exporter/ })).toBeNull()
+  })
+
+  it('exports every card learnt so far from the path', async () => {
+    today(2026, 11, 14)
+    const files = catchDownloads()
+    seed({
+      done: ['t1/s1'],
+      cards: {
+        't1/mere': { box: 2, due: '2026-11-20', seen: 1, right: 1 },
+        't1/pere': { box: 1, due: '2026-11-15', seen: 0, right: 0 },
+      },
+    })
+    const { user } = setup()
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Exporter les cartes apprises (CSV)',
+      }),
+    )
+    expect(files[0]?.name).toBe('cahier-fr-2026-11-14.csv')
+    expect(await files[0]?.blob.text()).toContain('[[la mère:the mother]]')
+    expect(files[0]?.blob.type).toBe('text/csv;charset=utf-8')
+  })
+})
