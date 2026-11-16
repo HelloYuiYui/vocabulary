@@ -382,13 +382,6 @@ export const ville: Theme = pathTheme({
         'I leave my car in the car park.',
       ),
       cloze(
-        'a-pied',
-        'on foot',
-        [a('à pied')],
-        "C'est à cinq minutes {à pied}.",
-        "It's five minutes on foot.",
-      ),
-      cloze(
         'la-plus-proche',
         'nearest',
         [a('la plus proche')],
