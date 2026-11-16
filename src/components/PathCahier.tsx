@@ -8,7 +8,7 @@ import {
   themeStatuses,
   type PathProgress,
 } from '../domain/path.ts'
-import { formatRoute, parseRoute, type Page } from '../domain/route.ts'
+import { formatRoute, HOME, parseRoute, type Page } from '../domain/route.ts'
 import { go, useHash, useLeaveGuard } from '../routing/hashHistory.ts'
 import { shuffled, type Entry } from '../domain/session.ts'
 import {
@@ -27,6 +27,7 @@ import { usePathProgress } from '../storage/usePathProgress.ts'
 import { ConfirmLeave } from './ConfirmLeave.tsx'
 import { GrammarNoteCard } from './GrammarNoteCard.tsx'
 import { Header } from './Header.tsx'
+import { Page as PageFrame } from './Page.tsx'
 import { PathView } from './PathView.tsx'
 import { SittingEnd } from './SittingEnd.tsx'
 import { SittingView } from './SittingView.tsx'
@@ -178,10 +179,11 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const shown = view ?? PATH // until the address catches up
 
   return (
-    <div className="mx-auto flex max-w-[920px] flex-col gap-8 pt-10 pr-[max(16px,env(safe-area-inset-right,0px))] pb-16 pl-[max(16px,env(safe-area-inset-left,0px))]">
+    <PageFrame>
       <Header
         intro={copy.intro}
         onLanguageChange={shown.name === 'path' ? onLanguageChange : undefined}
+        onHome={shown.name === 'sitting' ? undefined : () => go(HOME)}
       />
       {shown.name === 'path' && (
         <PathView
@@ -252,6 +254,6 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           onLeave={leave}
         />
       )}
-    </div>
+    </PageFrame>
   )
 }

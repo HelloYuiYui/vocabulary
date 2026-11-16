@@ -9,6 +9,9 @@ export type Page =
   | { name: 'sitting' }
   | { name: 'end' } // the end of a sitting, once it is recorded
 
+/** The homepage's address: before, or apart from, any language. */
+export const HOME = '#/'
+
 export interface Route {
   lang: string
   page: Page

@@ -6,6 +6,7 @@ import { THEMES } from './themes.ts'
 export const bg: Language = {
   code: 'bg',
   name: 'Български',
+  awaitingReview: true,
   themes: THEMES,
   copy,
   // Every theme is on the path.

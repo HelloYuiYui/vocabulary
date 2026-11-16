@@ -8,8 +8,10 @@ const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
 const BG_KEY = 'cahier-vocab-bg-v2'
 
+// A returning learner, who has chosen French: the bare address opens the path.
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem(LANGUAGE_KEY, JSON.stringify('fr'))
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
 afterEach(() => vi.restoreAllMocks())
@@ -108,14 +110,6 @@ describe('language switcher', () => {
     render(<App />)
     expect(
       screen.getByRole('heading', { name: 'Тетрадка с думи' }),
-    ).toBeInTheDocument()
-  })
-
-  it('falls back to French for an unknown saved language', () => {
-    localStorage.setItem(LANGUAGE_KEY, JSON.stringify('xx'))
-    render(<App />)
-    expect(
-      screen.getByRole('heading', { name: 'Cahier de vocabulaire' }),
     ).toBeInTheDocument()
   })
 
