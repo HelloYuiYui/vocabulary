@@ -21,6 +21,7 @@ export const fr: Language = {
       'courses',
       'ville',
       'transports',
+      'meteo',
     ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,
