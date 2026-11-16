@@ -18,6 +18,8 @@ export const fr: Language = {
       'description',
       'chez-soi',
       'routine',
+      'courses',
+      'ville',
     ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,
