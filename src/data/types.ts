@@ -59,6 +59,20 @@ export interface PathCopy {
   }
 }
 
+/** The homepage's text, in English: no language has been chosen yet. */
+export interface HomeCopy {
+  title: string
+  tagline: string
+  intro: string
+  how: { title: string; points: { lead: string; rest: string }[] }
+  isnt: { title: string; body: string }
+  expect: { title: string; body: string }
+  choose: { title: string }
+  /** What a language holds, from its path: "10 themes, A1 (DELF)". */
+  summary: (themes: number, levels: string[], exam?: string) => string
+  awaitingReview: string
+}
+
 /** A language's path: which themes it runs through and where progress is kept. */
 export interface PathConfig {
   themes: string[] // theme ids, in path order
@@ -70,6 +84,9 @@ export interface PathConfig {
 export interface Language {
   code: string // BCP 47 tag, set on <html lang>
   name: string // in the language itself, for the switcher
+  exam?: string // the exam its themes follow, named on the homepage
+  /** Drafted with AI help and not yet read by a native speaker. */
+  awaitingReview?: boolean
   /** Every theme of the language; only those named by the path are shown. */
   themes: Theme[]
   copy: Copy

@@ -6,6 +6,7 @@ import { THEMES } from './themes.ts'
 export const fr: Language = {
   code: 'fr',
   name: 'Français',
+  exam: 'DELF',
   themes: THEMES,
   copy,
   // The themes that have sub-themes and sentences, in order. The other

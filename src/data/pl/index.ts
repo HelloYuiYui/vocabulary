@@ -6,6 +6,7 @@ import { THEMES } from './themes.ts'
 export const pl: Language = {
   code: 'pl',
   name: 'Polski',
+  awaitingReview: true,
   themes: THEMES,
   copy,
   // Every theme is on the path.

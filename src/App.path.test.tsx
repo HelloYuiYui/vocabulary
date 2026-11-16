@@ -2,13 +2,16 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
+import { LANGUAGE_KEY } from './storage/storage.ts'
 import { fr } from './data/fr/index.ts'
 
 const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
 // A random of 0.999 makes shuffled() keep the order of the cards.
+// A returning learner, who has chosen French: the bare address opens the path.
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem(LANGUAGE_KEY, JSON.stringify('fr'))
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
 afterEach(() => vi.restoreAllMocks())

@@ -16,8 +16,10 @@ const NOTE = 'Être et avoir au présent' // the note of Se présenter
 const SUB = /L'identité/
 
 // A random of 0.999 makes shuffled() keep the order of the cards.
+// A returning learner, who has chosen French: the bare address opens the path.
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem(LANGUAGE_KEY, JSON.stringify('fr'))
   vi.spyOn(Math, 'random').mockReturnValue(0.999)
 })
 afterEach(() => vi.restoreAllMocks())
