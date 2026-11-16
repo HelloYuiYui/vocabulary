@@ -20,6 +20,7 @@ export const fr: Language = {
       'routine',
       'courses',
       'ville',
+      'transports',
     ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,

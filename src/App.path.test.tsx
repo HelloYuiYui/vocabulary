@@ -35,6 +35,7 @@ describe('French on the path', () => {
       'routine',
       'courses',
       'ville',
+      'transports',
     ])
     setup()
     expect(
@@ -48,6 +49,7 @@ describe('French on the path', () => {
       'Routine quotidienne',
       'Nourriture et courses',
       'La ville et les itinéraires',
+      'Transports',
     ])
   })
 
@@ -142,15 +144,15 @@ describe('the French themes not on the path yet', () => {
     localStorage.setItem('cahier-vocab-legacy', 'true')
     setup()
     window.history.pushState({}, '', '/')
-    expect(screen.queryByText('Transports')).toBeNull()
+    expect(screen.queryByText('Météo et saisons')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
     expect(screen.queryByRole('checkbox')).toBeNull()
   })
 
   it('are still in the language pack, ready to be converted', () => {
     const offPath = fr.themes.filter((t) => !fr.path.themes.includes(t.id))
-    expect(offPath.map((t) => t.id)).toContain('transports')
-    expect(offPath).toHaveLength(8)
+    expect(offPath.map((t) => t.id)).toContain('meteo')
+    expect(offPath).toHaveLength(7)
   })
 })
 
