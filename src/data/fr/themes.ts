@@ -8,6 +8,7 @@ import { ecritsCourts } from './a1/ecritsCourts.ts'
 import { famille } from './a1/famille.ts'
 import { loisirs } from './a1/loisirs.ts'
 import { meteo } from './a1/meteo.ts'
+import { nature } from './a1/nature.ts'
 import { presentation } from './a1/presentation.ts'
 import { routine } from './a1/routine.ts'
 import { transports } from './a1/transports.ts'
@@ -30,6 +31,7 @@ export const THEMES: Theme[] = [
   ville,
   transports,
   meteo,
+  nature,
   loisirs,
   vetements,
   chezSoi,
