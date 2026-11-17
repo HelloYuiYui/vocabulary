@@ -12,6 +12,7 @@ import { nature } from './a1/nature.ts'
 import { presentation } from './a1/presentation.ts'
 import { routine } from './a1/routine.ts'
 import { transports } from './a1/transports.ts'
+import { vacances } from './a1/vacances.ts'
 import { vetements } from './a1/vetements.ts'
 import { ville } from './a1/ville.ts'
 import { corps } from './a2/corps.ts'
@@ -35,6 +36,7 @@ export const THEMES: Theme[] = [
   loisirs,
   vetements,
   chezSoi,
+  vacances,
   ecritsCourts,
   corps,
   portrait,
