@@ -21,6 +21,7 @@ export const bg: Language = {
       'pazaruvane',
       'grad',
       'transport',
+      'vreme',
     ],
     storageKey: 'cahier-vocab-bg-path-v1',
     copy: pathCopy,
