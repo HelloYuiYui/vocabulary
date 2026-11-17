@@ -20,6 +20,24 @@
     'Atkinson Hyperlegible', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
   --font-hand: 'Kalam', 'Caveat', 'Comic Neue', 'Segoe Print', cursive;
 }
+
+/*
+ * Handwritings a learner can pick in the settings, for a language whose
+ * pathCopy offers them. On <html> the attribute sets the learner's writing;
+ * on an element, it sets that element's sample. After :root, so they win.
+ */
+/* Joined-up hand: Kalam has no Cyrillic, so Caveat writes it. */
+[data-hand='cursive'] {
+  --font-hand: 'Kalam', 'Caveat', 'Comic Neue', 'Segoe Print', cursive;
+}
+/* Print letters written by hand, rounder and larger than Caveat. */
+[data-hand='print'] {
+  --font-hand: 'Pangolin', 'Comic Neue', 'Segoe Print', cursive;
+}
+/* Plain printed letters, the standard Cyrillic shapes. */
+[data-hand='plain'] {
+  --font-hand: 'Golos Text', 'Segoe UI', system-ui, sans-serif;
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --paper: #10142a;

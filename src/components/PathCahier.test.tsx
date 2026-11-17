@@ -581,3 +581,70 @@ describe('the open path, in the settings', () => {
     expect(screen.queryByRole('link', { name: 'Réglages' })).toBeNull()
   })
 })
+
+const HAND = {
+  label: 'Écriture',
+  sample: 'Bonjour',
+  options: [
+    { id: 'cursive', name: 'Attachée' },
+    { id: 'print', name: 'Script' },
+  ],
+}
+const withHands: typeof fixtureLanguage = {
+  ...fixtureLanguage,
+  path: {
+    ...fixtureLanguage.path,
+    copy: {
+      ...fixtureLanguage.path.copy,
+      settings: { ...fixtureLanguage.path.copy.settings, hand: HAND },
+    },
+  },
+}
+const hand = () => document.documentElement.dataset.hand
+
+describe('the handwriting, in the settings', () => {
+  const setupWithHands = () => {
+    const user = userEvent.setup()
+    const view = render(
+      <LanguageContext value={withHands}>
+        <PathCahier language={withHands} onLanguageChange={() => {}} />
+      </LanguageContext>,
+    )
+    return { user, ...view }
+  }
+
+  it('is not offered by a language that names no handwriting', async () => {
+    const { user } = setup()
+    await settings(user)
+    expect(screen.queryByRole('group', { name: 'Écriture' })).toBeNull()
+    expect(hand()).toBeUndefined()
+  })
+
+  it('starts with the first one, and keeps the one picked', async () => {
+    const { user, unmount } = setupWithHands()
+    expect(hand()).toBe('cursive')
+    await settings(user)
+    const group = within(screen.getByRole('group', { name: 'Écriture' }))
+    expect(group.getByRole('radio', { name: 'Attachée' })).toBeChecked()
+
+    await user.click(group.getByRole('radio', { name: 'Script' }))
+    expect(hand()).toBe('print')
+    expect(saved().hand).toBe('print')
+
+    unmount()
+    expect(hand()).toBeUndefined()
+  })
+
+  it('shows each one on a sample, in that handwriting', async () => {
+    const { user } = setupWithHands()
+    await settings(user)
+    const samples = screen.getAllByText('Bonjour')
+    expect(samples.map((s) => s.dataset.hand)).toEqual(['cursive', 'print'])
+  })
+
+  it('falls back to the first one when the saved one is gone', () => {
+    seed({ hand: 'gone' })
+    setupWithHands()
+    expect(hand()).toBe('cursive')
+  })
+})

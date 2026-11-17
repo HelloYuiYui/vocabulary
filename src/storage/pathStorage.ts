@@ -106,6 +106,8 @@ export function loadPath(
     notesSeen: known(raw.notesSeen, themeIds),
     skipped,
     openPath: raw.openPath === true,
+    // Checked against the language's choices where it is used.
+    ...(typeof raw.hand === 'string' && { hand: raw.hand }),
   }
 }
 
