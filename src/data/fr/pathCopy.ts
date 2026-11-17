@@ -12,6 +12,7 @@ export const pathCopy: PathCopy = {
   cards: (count) => (count === 1 ? '1 carte' : `${count} cartes`),
   left: (count) => (count === 1 ? 'reste 1 carte' : `restent ${count} cartes`),
   leave: 'Arrêter',
+  skipWord: 'Je connais ce mot',
   leaveConfirm: {
     title: 'Arrêter la séance ?',
     body: 'Les réponses de cette séance ne seront pas enregistrées.',
@@ -36,5 +37,20 @@ export const pathCopy: PathCopy = {
         : `${count} cartes ont demandé plus d’un essai.`,
     quizPassed: (right, total) => `${right}/${total} : thème passé.`,
     quizFailed: (right, total) => `${right}/${total} : le thème reste à faire.`,
+    setAside: (n) =>
+      n === 1
+        ? 'Un mot mis de côté. Tu peux le remettre dans les réglages.'
+        : `${n} mots mis de côté. Tu peux les remettre dans les réglages.`,
+  },
+  settings: {
+    title: 'Réglages',
+    openPath: {
+      label: 'Ouvrir tous les thèmes',
+      help: 'L’ordre conseillé reste affiché, mais aucun thème n’attend plus le précédent.',
+    },
+    setAsideTitle: 'Mots mis de côté',
+    setAsideEmpty:
+      'Aucun mot mis de côté. Pendant une séance, « Je connais ce mot » en met un ici.',
+    restore: 'Remettre',
   },
 }

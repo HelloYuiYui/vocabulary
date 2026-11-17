@@ -58,7 +58,7 @@ const known = (v: unknown, valid: ReadonlySet<string>): string[] =>
  * is dropped. Missing, corrupt or unreadable data gives empty progress.
  *
  * A card added to a sub-theme the learner has already finished would never
- * be asked, so it enters review here, due tomorrow.
+ * be asked, so it enters review here, due tomorrow, unless it was set aside.
  */
 export function loadPath(
   key: string,
@@ -86,15 +86,27 @@ export function loadPath(
     }
 
   const done = known(raw.done, subKeys)
+  const skipped = known(raw.skipped, cardKeys)
   const finished = new Set(done)
+  const aside = new Set(skipped)
   for (const theme of themes)
     for (const sub of theme.subThemes ?? []) {
       if (!finished.has(subKey(theme.id, sub.id))) continue
-      for (const item of sub.items)
-        if (item.id) cards[cardKey(theme.id, item.id)] ??= enrol(now)
+      for (const item of sub.items) {
+        if (!item.id) continue
+        const key = cardKey(theme.id, item.id)
+        if (aside.has(key)) delete cards[key]
+        else cards[key] ??= enrol(now)
+      }
     }
 
-  return { done, cards, notesSeen: known(raw.notesSeen, themeIds) }
+  return {
+    done,
+    cards,
+    notesSeen: known(raw.notesSeen, themeIds),
+    skipped,
+    openPath: raw.openPath === true,
+  }
 }
 
 export const savePath = (key: string, progress: PathProgress): void =>

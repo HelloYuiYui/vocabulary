@@ -13,6 +13,7 @@ const routes: [string, Route][] = [
   ],
   ['#/pl/sitting', { lang: 'pl', page: { name: 'sitting' } }],
   ['#/fr/sitting/end', { lang: 'fr', page: { name: 'end' } }],
+  ['#/bg/settings', { lang: 'bg', page: { name: 'settings' } }],
 ]
 
 describe('routes', () => {

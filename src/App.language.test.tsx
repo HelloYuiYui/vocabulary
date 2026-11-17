@@ -94,6 +94,8 @@ describe('language switcher', () => {
       done: [],
       cards: {},
       notesSeen: ['predstavyane'],
+      skipped: [],
+      openPath: false,
     })
     // The old picker's saved data, Bulgarian and French, is left alone.
     expect(localStorage.getItem(BG_KEY)).toBe(bgV2)

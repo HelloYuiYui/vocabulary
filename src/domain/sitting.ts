@@ -19,6 +19,7 @@ export interface SittingState {
   response: Response | undefined // the answer to queue[0], once given
   firstRight: Record<number, boolean> // card index -> was its first answer right
   tries: Record<number, number> // card index -> answers given so far
+  skipped: number[] // card indices set aside with "je connais ce mot"
   finished: boolean
 }
 
@@ -34,6 +35,7 @@ export type SittingAction =
   | { type: 'dunno' }
   | { type: 'override' }
   | { type: 'next' }
+  | { type: 'skip' } // sets the card on screen aside; not in a quiz
 
 export const initialSitting: SittingState = {
   kind: 'learn',
@@ -42,6 +44,7 @@ export const initialSitting: SittingState = {
   response: undefined,
   firstRight: {},
   tries: {},
+  skipped: [],
   finished: false,
 }
 
@@ -118,6 +121,20 @@ export function sittingReducer(
           state.tries[index] === 1
             ? { ...state.firstRight, [index]: true }
             : state.firstRight,
+      }
+    }
+    case 'skip': {
+      const [index, ...queue] = state.queue
+      if (index === undefined || state.kind === 'quiz') return state
+      const firstRight = { ...state.firstRight }
+      delete firstRight[index]
+      return {
+        ...state,
+        queue,
+        response: undefined,
+        firstRight,
+        skipped: [...state.skipped, index],
+        finished: queue.length === 0,
       }
     }
     case 'next': {

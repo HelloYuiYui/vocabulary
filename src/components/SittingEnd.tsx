@@ -32,12 +32,13 @@ export function SittingEnd({
   onExportAll,
   onExportMissed,
 }: SittingEndProps) {
-  const total = sitting.cards.length
+  // Cards set aside are not part of what the sitting amounted to.
+  const aside = new Set(sitting.skipped)
+  const rows = sitting.cards.flatMap((entry, i) =>
+    aside.has(i) ? [] : [{ entry, retried: sitting.firstRight[i] !== true }],
+  )
+  const total = rows.length
   const right = rightFirstTime(sitting)
-  const rows = sitting.cards.map((entry, i) => ({
-    entry,
-    retried: sitting.firstRight[i] !== true,
-  }))
   // Stable sort: the cards that needed another try come first.
   const ordered = [...rows].sort(
     (x, y) => Number(y.retried) - Number(x.retried),
@@ -54,7 +55,14 @@ export function SittingEnd({
     <section>
       <Notebook>
         <Eyebrow>{copy.end.title}</Eyebrow>
-        <p className="max-w-[62ch] text-[1.05rem] text-text">{summary}</p>
+        {total > 0 && (
+          <p className="max-w-[62ch] text-[1.05rem] text-text">{summary}</p>
+        )}
+        {aside.size > 0 && (
+          <p className="max-w-[62ch] text-muted">
+            {copy.end.setAside(aside.size)}
+          </p>
+        )}
         {ordered.length > 0 && (
           <ul>
             {ordered.map(({ entry, retried }) => (

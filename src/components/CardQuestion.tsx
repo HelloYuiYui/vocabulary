@@ -17,6 +17,8 @@ interface CardQuestionProps {
   onDunno: () => void
   onNext: () => void
   onOverride: () => void
+  /** Sets the card aside for good ("je connais ce mot"); not in a quiz. */
+  onSkip?: () => void
   /** On the path: an item with a sentence is then shown as a cloze card. */
   pathCopy?: PathCopy
 }
@@ -29,6 +31,7 @@ export function CardQuestion({
   onDunno,
   onNext,
   onOverride,
+  onSkip,
   pathCopy,
 }: CardQuestionProps) {
   const copy = useCopy()
@@ -118,6 +121,11 @@ export function CardQuestion({
               {copy.card.check}
             </Button>
             <Button onClick={onDunno}>{copy.card.dunno}</Button>
+            {onSkip && pathCopy && (
+              <Button variant="ghost" onClick={onSkip}>
+                {pathCopy.skipWord}
+              </Button>
+            )}
           </Actions>
         )}
       </form>
@@ -135,6 +143,11 @@ export function CardQuestion({
             {canOverride(response.result.verdict) && (
               <Button ref={overrideRef} variant="ghost" onClick={onOverride}>
                 {copy.override}
+              </Button>
+            )}
+            {onSkip && pathCopy && (
+              <Button variant="ghost" onClick={onSkip}>
+                {pathCopy.skipWord}
               </Button>
             )}
           </Actions>

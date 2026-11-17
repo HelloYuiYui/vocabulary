@@ -21,6 +21,7 @@ export const pathCopy: PathCopy = {
   left: (count) =>
     `${plural(count, 'została', 'zostały', 'zostało')} ${cardsWord(count)}`,
   leave: 'Przerwij',
+  skipWord: 'Znam to słowo',
   leaveConfirm: {
     title: 'Przerwać sesję?',
     body: 'Odpowiedzi z tej sesji nie zostaną zapisane.',
@@ -44,5 +45,20 @@ export const pathCopy: PathCopy = {
     quizPassed: (right, total) => `${right}/${total}: temat zaliczony.`,
     quizFailed: (right, total) =>
       `${right}/${total}: temat nadal do zrobienia.`,
+    setAside: (n) =>
+      n === 1
+        ? 'Jedno słowo odłożone. Możesz je przywrócić w ustawieniach.'
+        : `Odłożone słowa: ${n}. Możesz je przywrócić w ustawieniach.`,
+  },
+  settings: {
+    title: 'Ustawienia',
+    openPath: {
+      label: 'Otwórz wszystkie tematy',
+      help: 'Zalecana kolejność zostaje widoczna, ale żaden temat nie czeka już na poprzedni.',
+    },
+    setAsideTitle: 'Odłożone słowa',
+    setAsideEmpty:
+      'Brak odłożonych słów. Podczas sesji przycisk „Znam to słowo” odkłada słowo tutaj.',
+    restore: 'Przywróć',
   },
 }

@@ -239,3 +239,35 @@ describe('quizCards', () => {
     expect(quizCards({ ...theme, items: [] })).toEqual([])
   })
 })
+
+describe('skipping the card on screen', () => {
+  const skip: SittingAction = { type: 'skip' }
+
+  it('takes it out of the sitting before it is answered', () => {
+    const state = run(begin([A, B]), skip)
+    expect(state.queue).toEqual([1])
+    expect(state.skipped).toEqual([0])
+    expect(state.response).toBeUndefined()
+  })
+
+  it('takes it out after a wrong answer too, so it does not come back', () => {
+    const state = run(begin([A, B]), say('wrong'), skip, say('bravo'), next)
+    expect(state.finished).toBe(true)
+    expect(state.firstRight).toEqual({ 1: true })
+    expect(state.skipped).toEqual([0])
+  })
+
+  it('finishes the sitting when it was the last card', () => {
+    expect(run(begin([A]), skip).finished).toBe(true)
+  })
+
+  it('is not possible in a quiz', () => {
+    const quiz = begin([A, B], 'quiz')
+    expect(run(quiz, skip)).toBe(quiz)
+  })
+
+  it('leaves the sitting alone once it is over', () => {
+    const over = run(begin([A]), skip)
+    expect(run(over, skip)).toBe(over)
+  })
+})

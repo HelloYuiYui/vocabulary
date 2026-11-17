@@ -7,8 +7,11 @@ import {
   EMPTY_PROGRESS,
   isSubDone,
   recordSitting,
+  restoreCard,
+  skipCard,
   subKey,
   themeStatuses,
+  withoutSkipped,
   type PathProgress,
 } from './path.ts'
 import type { Entry } from './session.ts'
@@ -308,5 +311,106 @@ describe('dueEntries', () => {
       },
     }
     expect(dueEntries(T, progress, NOW)).toEqual([])
+  })
+})
+
+describe('skipping a card ("je connais ce mot")', () => {
+  const key = cardKey('t1', 's1-a')
+
+  it('sets the card aside and drops its review state', () => {
+    const learnt = recordSitting(EMPTY_PROGRESS, learn('t1', 's1'), T, NOW)
+    const after = skipCard(learnt, 't1', 's1-a')
+    expect(after.skipped).toEqual([key])
+    expect(after.cards[key]).toBeUndefined()
+    expect(after.cards[cardKey('t1', 's1-b')]).toBeDefined()
+  })
+
+  it('is never due again', () => {
+    const learnt = recordSitting(EMPTY_PROGRESS, learn('t1', 's1'), T, NOW)
+    const later = new Date(2026, 11, 30)
+    const after = skipCard(learnt, 't1', 's1-a')
+    expect(dueEntries(T, after, later).map((e) => e.item.id)).toEqual(['s1-b'])
+    expect(dueCount(T, after, later)).toBe(1)
+  })
+
+  it('is not enrolled when its sub-theme is finished, and still counts as done', () => {
+    const skipped = skipCard(EMPTY_PROGRESS, 't1', 's1-a')
+    const after = recordSitting(skipped, learn('t1', 's1'), T, NOW)
+    expect(after.done).toContain(subKey('t1', 's1'))
+    expect(after.cards[key]).toBeUndefined()
+    expect(after.skipped).toEqual([key])
+  })
+
+  it('is not enrolled by a passed quiz either', () => {
+    const skipped = skipCard(EMPTY_PROGRESS, 't1', 's1-a')
+    const after = recordSitting(
+      skipped,
+      sitting('quiz', cardsOf('t1'), { themeId: 't1' }),
+      T,
+      NOW,
+    )
+    expect(after.cards[key]).toBeUndefined()
+  })
+
+  it('is set aside only once', () => {
+    const twice = skipCard(skipCard(EMPTY_PROGRESS, 't1', 's1-a'), 't1', 's1-a')
+    expect(twice.skipped).toEqual([key])
+  })
+
+  it('leaves the cards of a sitting that are not set aside', () => {
+    const skipped = skipCard(EMPTY_PROGRESS, 't1', 's1-a')
+    expect(
+      withoutSkipped(cardsOf('t1', 's1'), skipped).map((e) => e.item.id),
+    ).toEqual(['s1-b'])
+  })
+})
+
+describe('putting a card back ("remettre")', () => {
+  const key = cardKey('t1', 's1-a')
+
+  it('returns it to review, due tomorrow, when its sub-theme is done', () => {
+    const learnt = recordSitting(EMPTY_PROGRESS, learn('t1', 's1'), T, NOW)
+    const back = restoreCard(
+      skipCard(learnt, 't1', 's1-a'),
+      't1',
+      's1-a',
+      T,
+      NOW,
+    )
+    expect(back.skipped).toEqual([])
+    expect(back.cards[key]?.due).toBe(TOMORROW)
+  })
+
+  it('leaves it to be learnt when its sub-theme is not done yet', () => {
+    const back = restoreCard(
+      skipCard(EMPTY_PROGRESS, 't1', 's1-a'),
+      't1',
+      's1-a',
+      T,
+      NOW,
+    )
+    expect(back.skipped).toEqual([])
+    expect(back.cards[key]).toBeUndefined()
+  })
+})
+
+describe('the open path', () => {
+  it('opens every theme that is not done', () => {
+    const open: PathProgress = {
+      ...doneWith(subKey('t1', 's1'), subKey('t1', 's2')),
+      openPath: true,
+    }
+    expect(themeStatuses(T, open)).toEqual(['done', 'open', 'open'])
+  })
+
+  it('lets a quiz finish any theme', () => {
+    const open: PathProgress = { ...EMPTY_PROGRESS, openPath: true }
+    const after = recordSitting(
+      open,
+      sitting('quiz', cardsOf('t3'), { themeId: 't3' }),
+      T,
+      NOW,
+    )
+    expect(after.done).toContain(subKey('t3', 's1'))
   })
 })

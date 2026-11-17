@@ -62,6 +62,11 @@ export function SittingView({
             dispatch({ type: 'override' })
             dispatch({ type: 'next' })
           }}
+          onSkip={
+            sitting.kind === 'quiz'
+              ? undefined
+              : () => dispatch({ type: 'skip' })
+          }
         />
       </Notebook>
       <Actions className="mt-3">

@@ -21,6 +21,8 @@ const SAVED: PathProgress = {
   done: ['t1/s1'],
   cards: { 't1/a': CARD },
   notesSeen: ['t1'],
+  skipped: ['t1/b'],
+  openPath: true,
 }
 const put = (value: unknown) => localStorage.setItem(KEY, JSON.stringify(value))
 
@@ -56,7 +58,26 @@ describe('loadPath', () => {
       done: [],
       cards: { 't1/a': CARD },
       notesSeen: [],
+      skipped: [],
+      openPath: false,
     })
+  })
+
+  it('reads progress saved before cards could be set aside', () => {
+    put({ version: 1, done: [], cards: {}, notesSeen: [] })
+    expect(loadPath(KEY, THEMES)).toEqual(EMPTY_PROGRESS)
+  })
+
+  it('keeps set-aside cards that still exist and a true open-path switch only', () => {
+    put({ version: 1, skipped: ['t1/b', 't1/gone', 3], openPath: 'yes' })
+    const loaded = loadPath(KEY, THEMES)
+    expect(loaded.skipped).toEqual(['t1/b'])
+    expect(loaded.openPath).toBe(false)
+  })
+
+  it('never enrols a card set aside in a finished sub-theme', () => {
+    put({ version: 1, done: ['t1/s2'], skipped: ['t1/b'] })
+    expect(loadPath(KEY, THEMES).cards).toEqual({})
   })
 
   it.each([
@@ -89,7 +110,11 @@ describe('loadPath', () => {
       cards: { 't1/a': CARD, 't1/gone': CARD, 'gone/a': CARD },
       notesSeen: ['t1', 'gone', 't1', null],
     })
-    expect(loadPath(KEY, THEMES)).toEqual(SAVED)
+    expect(loadPath(KEY, THEMES)).toEqual({
+      ...SAVED,
+      skipped: [],
+      openPath: false,
+    })
   })
 
   it('enrols a card that was added to a sub-theme already finished', () => {
