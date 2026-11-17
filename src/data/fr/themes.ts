@@ -15,25 +15,27 @@ import { vetements } from './a1/vetements.ts'
 import { ville } from './a1/ville.ts'
 import { corps } from './a2/corps.ts'
 import { logement } from './a2/logement.ts'
+import { portrait } from './a2/portrait.ts'
 import { sante } from './a2/sante.ts'
 
-/** Every theme, in the order of docs/delf-checklist.md. */
+/** Every theme: the path's themes in path order, then the themes not on it yet. */
 export const THEMES: Theme[] = [
   presentation,
   famille,
   cafe,
-  chiffres,
   description,
-  chezSoi,
   routine,
+  chiffres,
   courses,
   ville,
   transports,
   meteo,
   loisirs,
   vetements,
+  chezSoi,
   ecritsCourts,
   corps,
-  sante,
+  portrait,
   logement,
+  sante,
 ]

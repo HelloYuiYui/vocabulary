@@ -163,7 +163,7 @@ describe('the French themes not on the path yet', () => {
   it('are still in the language pack, ready to be converted', () => {
     const offPath = fr.themes.filter((t) => !fr.path.themes.includes(t.id))
     expect(offPath.map((t) => t.id)).toContain('ecrits-courts')
-    expect(offPath).toHaveLength(4)
+    expect(offPath).toHaveLength(5)
   })
 })
 

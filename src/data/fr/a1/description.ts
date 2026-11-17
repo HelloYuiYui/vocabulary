@@ -86,13 +86,6 @@ export const description: Theme = pathTheme({
         'My uncle is very strong.',
       ),
       cloze(
-        'faible',
-        'weak',
-        [a('faible')],
-        'Je suis malade et un peu {faible}.',
-        'I am ill and a bit weak.',
-      ),
-      cloze(
         'taille',
         'the height (of a person)',
         [a('la taille')],
@@ -124,14 +117,6 @@ export const description: Theme = pathTheme({
         'Your daughter is very pretty.',
       ),
       cloze(
-        'laid',
-        'ugly',
-        [a('laid'), a('laide'), a('moche')],
-        'Ce chien est {laid}, mais gentil.',
-        'This dog is ugly, but kind.',
-        { note: '« Moche » est familier.' },
-      ),
-      cloze(
         'cheveux',
         'the hair (on the head)',
         [a('les cheveux', 'm')],
@@ -149,20 +134,6 @@ export const description: Theme = pathTheme({
         'Il a {les yeux} bleus.',
         'He has blue eyes.',
         { gender: 'm', note: 'Un œil, des yeux.' },
-      ),
-      cloze(
-        'barbe',
-        'the beard',
-        [a('la barbe')],
-        'Mon père a {une barbe}.',
-        'My father has a beard.',
-      ),
-      cloze(
-        'moustache',
-        'the moustache',
-        [a('la moustache')],
-        'Mon grand-père a {une moustache} blanche.',
-        'My grandfather has a white moustache.',
       ),
       cloze(
         'lunettes',
@@ -202,20 +173,6 @@ export const description: Theme = pathTheme({
         'My cousin has red hair.',
       ),
       cloze(
-        'chauve',
-        'bald',
-        [a('chauve')],
-        'Mon oncle est {chauve}.',
-        'My uncle is bald.',
-      ),
-      cloze(
-        'frise',
-        'curly (hair)',
-        [a('frisé'), a('frisée'), a('bouclé'), a('bouclée')],
-        'Elle a les cheveux {frisés}.',
-        'She has curly hair.',
-      ),
-      cloze(
         'raide',
         'straight (hair)',
         [a('raide'), a('lisse')],
@@ -245,13 +202,6 @@ export const description: Theme = pathTheme({
       ),
     ]),
     sub('caractere', 'Le caractère', [
-      cloze(
-        'caractere',
-        'the character (personality)',
-        [a('le caractère')],
-        'Elle a {un caractère} difficile.',
-        'She has a difficult character.',
-      ),
       cloze(
         'gentil',
         'kind',
@@ -288,27 +238,6 @@ export const description: Theme = pathTheme({
         'This pupil is clever.',
       ),
       cloze(
-        'bete',
-        'stupid',
-        [a('bête'), a('idiot'), a('idiote')],
-        'Cette idée est {bête}.',
-        'This idea is stupid.',
-      ),
-      cloze(
-        'paresseux',
-        'lazy',
-        [a('paresseux'), a('paresseuse'), a('fainéant'), a('fainéante')],
-        'Mon chat est {paresseux}.',
-        'My cat is lazy.',
-      ),
-      cloze(
-        'travailleur',
-        'hard-working',
-        [a('travailleur'), a('travailleuse')],
-        'Ma sœur est {travailleuse}.',
-        'My sister is hard-working.',
-      ),
-      cloze(
         'calme',
         'calm',
         [a('calme')],
@@ -330,7 +259,7 @@ export const description: Theme = pathTheme({
         'Julie is a serious pupil.',
       ),
     ]),
-    sub('qualites-et-defauts', 'Qualités et défauts', [
+    sub('qualites-et-defauts', 'Qualités et humeur', [
       cloze(
         'genereux',
         'generous',
@@ -346,13 +275,6 @@ export const description: Theme = pathTheme({
         'This dog is not mean.',
       ),
       cloze(
-        'tetu',
-        'stubborn',
-        [a('têtu'), a('têtue')],
-        'Mon fils est {têtu}.',
-        'My son is stubborn.',
-      ),
-      cloze(
         'curieux',
         'curious',
         [a('curieux'), a('curieuse')],
@@ -365,20 +287,6 @@ export const description: Theme = pathTheme({
         [a('sportif'), a('sportive')],
         'Ma mère est très {sportive}.',
         'My mother is very sporty.',
-      ),
-      cloze(
-        'bavard',
-        'chatty',
-        [a('bavard'), a('bavarde')],
-        'Mes amies sont {bavardes}.',
-        'My friends are chatty.',
-      ),
-      cloze(
-        'poli',
-        'polite',
-        [a('poli'), a('polie')],
-        'Cet enfant est très {poli}.',
-        'This child is very polite.',
       ),
       cloze(
         'patient',
