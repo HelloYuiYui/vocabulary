@@ -2,6 +2,8 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App.tsx'
+import { bg } from './data/bg/index.ts'
+import { pl } from './data/pl/index.ts'
 import { LANGUAGE_KEY } from './storage/storage.ts'
 
 beforeEach(() => localStorage.clear())
@@ -49,8 +51,13 @@ describe('the homepage', () => {
     const french = language(/Français/)
     expect(french).toHaveTextContent('19 themes, A1, A2 (DELF)')
     expect(french).not.toHaveTextContent(/review/)
-    for (const name of [/Български/, /Polski/]) {
-      expect(language(name)).toHaveTextContent('4 themes, A1')
+    for (const [name, pack] of [
+      [/Български/, bg],
+      [/Polski/, pl],
+    ] as const) {
+      expect(language(name)).toHaveTextContent(
+        `${pack.path.themes.length} themes, A1`,
+      )
       expect(language(name)).toHaveTextContent(
         'Drafted with AI help, awaiting review by a native speaker.',
       )

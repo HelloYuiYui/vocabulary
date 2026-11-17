@@ -3,7 +3,9 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
 import { LANGUAGE_KEY } from './storage/storage.ts'
+import { bg } from './data/bg/index.ts'
 import { fr } from './data/fr/index.ts'
+import { pl } from './data/pl/index.ts'
 
 const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
@@ -181,14 +183,14 @@ describe('the French themes not on the path yet', () => {
 
 describe('the other languages', () => {
   it.each([
-    ['Български', 'Представяне'],
-    ['Polski', 'Przedstawianie się'],
+    ['Български', 'Представяне', bg.path.themes.length],
+    ['Polski', 'Przedstawianie się', pl.path.themes.length],
   ])(
     '%s is on the path too, with its first theme open',
-    async (name, first) => {
+    async (name, first, count) => {
       const user = setup()
       await user.click(screen.getByRole('button', { name }))
-      expect(screen.getAllByRole('region')).toHaveLength(4)
+      expect(screen.getAllByRole('region')).toHaveLength(count)
       expect(theme(first).getAllByRole('button').length).toBeGreaterThan(3)
       expect(screen.queryByRole('checkbox')).toBeNull()
     },
