@@ -1,5 +1,6 @@
 import type { Theme } from '../../domain/types.ts'
 import { chisla } from './a1/chisla.ts'
+import { ezhednevie } from './a1/ezhednevie.ts'
 import { kafene } from './a1/kafene.ts'
 import { opisanie } from './a1/opisanie.ts'
 import { predstavyane } from './a1/predstavyane.ts'
@@ -11,5 +12,6 @@ export const THEMES: Theme[] = [
   semeystvo,
   kafene,
   opisanie,
+  ezhednevie,
   chisla,
 ]

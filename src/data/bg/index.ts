@@ -11,7 +11,14 @@ export const bg: Language = {
   copy,
   // Every theme is on the path.
   path: {
-    themes: ['predstavyane', 'semeystvo', 'kafene', 'opisanie', 'chisla-dati'],
+    themes: [
+      'predstavyane',
+      'semeystvo',
+      'kafene',
+      'opisanie',
+      'ezhednevie',
+      'chisla-dati',
+    ],
     storageKey: 'cahier-vocab-bg-path-v1',
     copy: pathCopy,
   },
