@@ -32,6 +32,7 @@ describe('French on the path', () => {
     expect(fr.path?.themes).toEqual([
       'presentation',
       'famille',
+      'cafe',
       'chiffres-dates',
       'description',
       'chez-soi',
@@ -49,6 +50,7 @@ describe('French on the path', () => {
     ).toEqual([
       'Se présenter',
       'Famille et entourage',
+      'Au café',
       'Chiffres, dates, heure',
       'Description simple',
       'Chez soi',

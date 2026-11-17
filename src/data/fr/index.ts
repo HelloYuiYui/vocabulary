@@ -15,6 +15,7 @@ export const fr: Language = {
     themes: [
       'presentation',
       'famille',
+      'cafe',
       'chiffres-dates',
       'description',
       'chez-soi',
