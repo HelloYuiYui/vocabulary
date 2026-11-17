@@ -1,5 +1,5 @@
 import type { Theme } from '../../../domain/types.ts'
-import { a, sentence, word } from '../../helpers.ts'
+import { a, cloze, sentence, word } from '../../helpers.ts'
 
 export const logement: Theme = {
   id: 'logement',
@@ -191,5 +191,65 @@ export const logement: Theme = {
       a('Je voudrais donner mon préavis.'),
       a('Je souhaite donner mon préavis.'),
     ]),
+    // Kitchen and bathroom appliances, moved from chez-soi's cuisine-bains
+    // sub-theme as later than A1. Keep them as a sub-theme when converting.
+    cloze(
+      'frigo',
+      'the fridge',
+      [a('le frigo'), a('le réfrigérateur')],
+      'Le lait est dans {le frigo}.',
+      'The milk is in the fridge.',
+    ),
+    cloze(
+      'four',
+      'the oven',
+      [a('le four')],
+      'Le gâteau est dans {le four}.',
+      'The cake is in the oven.',
+    ),
+    cloze(
+      'cuisiniere',
+      'the cooker',
+      [a('la cuisinière'), a('la gazinière')],
+      'Il y a une casserole sur {la cuisinière}.',
+      'There is a pan on the cooker.',
+      { note: "La cuisinière, c'est aussi la femme qui cuisine." },
+    ),
+    cloze(
+      'lave-vaisselle',
+      'the dishwasher',
+      [a('le lave-vaisselle')],
+      'Il y a {un lave-vaisselle} dans la cuisine.',
+      'There is a dishwasher in the kitchen.',
+    ),
+    cloze(
+      'evier',
+      'the kitchen sink',
+      [a("l'évier", 'm')],
+      "Les assiettes sont dans {l'évier}.",
+      'The plates are in the sink.',
+      { gender: 'm' },
+    ),
+    cloze(
+      'lave-linge',
+      'the washing machine',
+      [a('le lave-linge'), a('la machine à laver')],
+      'Il y a {un lave-linge} dans la salle de bains.',
+      'There is a washing machine in the bathroom.',
+    ),
+    cloze(
+      'lavabo',
+      'the washbasin',
+      [a('le lavabo')],
+      'Je me lave les mains dans {le lavabo}.',
+      'I wash my hands in the washbasin.',
+    ),
+    cloze(
+      'baignoire',
+      'the bathtub',
+      [a('la baignoire')],
+      'Elle prend un bain dans {la baignoire}.',
+      'She has a bath in the bathtub.',
+    ),
   ],
 }
