@@ -8,6 +8,7 @@ import { pazaruvane } from './a1/pazaruvane.ts'
 import { predstavyane } from './a1/predstavyane.ts'
 import { priroda } from './a1/priroda.ts'
 import { semeystvo } from './a1/semeystvo.ts'
+import { svobodnoVreme } from './a1/svobodnoVreme.ts'
 import { transport } from './a1/transport.ts'
 import { vreme } from './a1/vreme.ts'
 
@@ -24,4 +25,5 @@ export const THEMES: Theme[] = [
   transport,
   vreme,
   priroda,
+  svobodnoVreme,
 ]

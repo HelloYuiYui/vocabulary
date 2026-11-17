@@ -23,6 +23,7 @@ export const bg: Language = {
       'transport',
       'vreme',
       'priroda',
+      'svobodno-vreme',
     ],
     storageKey: 'cahier-vocab-bg-path-v1',
     copy: pathCopy,
