@@ -23,6 +23,8 @@ export const fr: Language = {
       'ville',
       'transports',
       'meteo',
+      'loisirs',
+      'vetements',
     ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,
