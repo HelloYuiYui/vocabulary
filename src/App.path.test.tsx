@@ -33,16 +33,16 @@ describe('French on the path', () => {
       'presentation',
       'famille',
       'cafe',
-      'chiffres-dates',
       'description',
-      'chez-soi',
       'routine',
+      'chiffres-dates',
       'courses',
       'ville',
       'transports',
       'meteo',
       'loisirs',
       'vetements',
+      'chez-soi',
     ])
     setup()
     expect(
@@ -51,16 +51,16 @@ describe('French on the path', () => {
       'Se présenter',
       'Famille et entourage',
       'Au café',
-      'Chiffres, dates, heure',
       'Description simple',
-      'Chez soi',
       'Routine quotidienne',
+      'Chiffres, dates, heure',
       'Nourriture et courses',
       'La ville et les itinéraires',
       'Transports',
       'Météo et saisons',
       'Goûts et loisirs',
       'Vêtements',
+      'Chez soi',
     ])
   })
 
