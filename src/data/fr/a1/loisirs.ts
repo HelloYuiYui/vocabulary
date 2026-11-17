@@ -310,16 +310,6 @@ export const loisirs: Theme = pathTheme({
         'Cycling is a very popular hobby.',
       ),
       cloze(
-        'aimer',
-        'to like',
-        [a('aimer'), a('aimer bien')],
-        'Nous {aimons} la musique.',
-        'We like music.',
-        {
-          note: "« Aimer bien » est moins fort qu'« aimer » pour une personne.",
-        },
-      ),
-      cloze(
         'adorer',
         'to love (something)',
         [a('adorer')],
@@ -332,13 +322,6 @@ export const loisirs: Theme = pathTheme({
         [a('détester')],
         'Mon frère {déteste} le foot.',
         'My brother hates football.',
-      ),
-      cloze(
-        'preferer',
-        'to prefer',
-        [a('préférer')],
-        'Je {préfère} la montagne à la mer.',
-        'I prefer the mountains to the sea.',
       ),
       cloze(
         'danse',

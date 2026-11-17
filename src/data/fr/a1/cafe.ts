@@ -275,9 +275,12 @@ export const cafe: Theme = pathTheme({
       cloze(
         'aimer',
         'to like',
-        [a('aimer')],
+        [a('aimer'), a('aimer bien')],
         'Elle {aime} le café noir.',
         'She likes black coffee.',
+        {
+          note: "« Aimer bien » est moins fort qu'« aimer » pour une personne.",
+        },
       ),
       cloze(
         'preferer',
