@@ -27,8 +27,11 @@ export function VerdictPanel({
 }: VerdictPanelProps) {
   const copy = useCopy()
   // The form the sentence needed is shown on its own line, not listed twice.
+  // A blank that starts its sentence is capitalised; that is the same answer.
+  const same = (x: string, y?: string) =>
+    y !== undefined && x.toLocaleLowerCase() === y.toLocaleLowerCase()
   const others = item.answers.filter(
-    (a) => a.text !== answer.text && a.text !== form?.text,
+    (a) => !same(a.text, answer.text) && !same(a.text, form?.text),
   )
   return (
     <div className="flex flex-col gap-1">

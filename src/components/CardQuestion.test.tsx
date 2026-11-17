@@ -123,6 +123,15 @@ describe('a cloze card', () => {
     expect(also).not.toHaveTextContent('le nom de famille')
   })
 
+  it('does not list the same answer again when only its capital differs', () => {
+    // The blank starts the sentence, so its form is capitalised.
+    show(
+      silent,
+      answered(silent, { verdict: 'ok', answer: { text: 'Le père' } }),
+    )
+    expect(screen.queryByText(/Aussi accepté/)).toBeNull()
+  })
+
   it('does not mention the form when the sentence form was typed', () => {
     show(mere, answered(mere, { verdict: 'ok', answer: { text: 'une mère' } }))
     expect(screen.queryByText('Dans la phrase :')).toBeNull()
