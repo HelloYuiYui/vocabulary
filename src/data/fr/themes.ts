@@ -18,6 +18,7 @@ import { ville } from './a1/ville.ts'
 import { corps } from './a2/corps.ts'
 import { logement } from './a2/logement.ts'
 import { portrait } from './a2/portrait.ts'
+import { raconter } from './a2/raconter.ts'
 import { sante } from './a2/sante.ts'
 
 /** Every theme: the path's themes in path order, then the themes not on it yet. */
@@ -38,8 +39,9 @@ export const THEMES: Theme[] = [
   chezSoi,
   vacances,
   ecritsCourts,
+  raconter,
   corps,
+  sante,
   portrait,
   logement,
-  sante,
 ]

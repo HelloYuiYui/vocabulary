@@ -47,7 +47,7 @@ describe('the homepage', () => {
   it('states what each language holds, and which await review', () => {
     setup()
     const french = language(/Français/)
-    expect(french).toHaveTextContent('17 themes, A1, A2 (DELF)')
+    expect(french).toHaveTextContent('19 themes, A1, A2 (DELF)')
     expect(french).not.toHaveTextContent(/review/)
     for (const name of [/Български/, /Polski/]) {
       expect(language(name)).toHaveTextContent('4 themes, A1')

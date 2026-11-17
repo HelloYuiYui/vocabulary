@@ -46,7 +46,9 @@ describe('French on the path', () => {
       'chez-soi',
       'vacances',
       'ecrits-courts',
+      'raconter',
       'corps',
+      'sante',
     ])
     setup()
     expect(
@@ -68,7 +70,9 @@ describe('French on the path', () => {
       'Chez soi',
       'Les vacances',
       'Écrits courts',
+      'Raconter au passé',
       'Le corps',
+      'Santé',
     ])
   })
 
@@ -171,7 +175,7 @@ describe('the French themes not on the path yet', () => {
   it('are still in the language pack, ready to be converted', () => {
     const offPath = fr.themes.filter((t) => !fr.path.themes.includes(t.id))
     expect(offPath.map((t) => t.id)).toContain('portrait')
-    expect(offPath).toHaveLength(3)
+    expect(offPath).toHaveLength(2)
   })
 })
 
