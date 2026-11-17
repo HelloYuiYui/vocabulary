@@ -6,6 +6,7 @@ import { grad } from './a1/grad.ts'
 import { kafene } from './a1/kafene.ts'
 import { opisanie } from './a1/opisanie.ts'
 import { pazaruvane } from './a1/pazaruvane.ts'
+import { pochivka } from './a1/pochivka.ts'
 import { predstavyane } from './a1/predstavyane.ts'
 import { priroda } from './a1/priroda.ts'
 import { semeystvo } from './a1/semeystvo.ts'
@@ -30,4 +31,5 @@ export const THEMES: Theme[] = [
   svobodnoVreme,
   drehi,
   vkashti,
+  pochivka,
 ]
