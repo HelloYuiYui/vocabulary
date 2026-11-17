@@ -1,7 +1,7 @@
 import { gradeItem } from './cloze.ts'
 import { canOverride, isCorrect, type GradeResult } from './grade.ts'
 import { shuffled, type Draft, type Entry, type Response } from './session.ts'
-import type { Theme } from './types.ts'
+import type { Item, Theme } from './types.ts'
 
 /**
  * learn: a sub-theme taken for the first time. practice: one taken again.
@@ -167,12 +167,18 @@ export const quizPassed = (state: SittingState): boolean =>
   state.cards.length > 0 &&
   rightFirstTime(state) / state.cards.length >= QUIZ_PASS
 
-/** A fresh draw for a theme's skip quiz: one card from each sub-theme in turn. */
+/**
+ * A fresh draw for a theme's skip quiz: one card from each sub-theme in turn,
+ * among the cards `allowed` keeps (by default, all of them).
+ */
 export function quizCards(
   theme: Theme,
   random: () => number = Math.random,
+  allowed: (item: Item) => boolean = () => true,
 ): Entry[] {
-  const piles = (theme.subThemes ?? []).map((s) => shuffled(s.items, random))
+  const piles = (theme.subThemes ?? []).map((s) =>
+    shuffled(s.items.filter(allowed), random),
+  )
   const cards: Entry[] = []
   for (let round = 0; cards.length < QUIZ_SIZE; round++) {
     const drawn = piles.flatMap((pile) => pile[round] ?? [])

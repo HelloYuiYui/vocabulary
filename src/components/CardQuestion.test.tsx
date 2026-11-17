@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { fr } from '../data/fr/index.ts'
@@ -266,5 +266,49 @@ describe('an answer whose article hides the gender', () => {
       input: "l'oncle",
       gender: null,
     })
+  })
+})
+
+describe('"je connais ce mot"', () => {
+  const showWithSkip = (onSkip: () => void, response?: Response) =>
+    render(
+      <LanguageContext value={fr}>
+        <CardQuestion
+          entry={{ themeId: 't', item: mere }}
+          response={response}
+          onAnswer={() => {}}
+          onDunno={() => {}}
+          onNext={() => {}}
+          onOverride={() => {}}
+          onSkip={onSkip}
+          pathCopy={pathCopy}
+        />
+      </LanguageContext>,
+    )
+  const SKIP = 'Je connais ce mot'
+
+  it('is offered before answering and after', () => {
+    const onSkip = vi.fn()
+    const { unmount } = showWithSkip(onSkip)
+    fireEvent.click(screen.getByRole('button', { name: SKIP }), { detail: 1 })
+    expect(onSkip).toHaveBeenCalledOnce()
+    unmount()
+    showWithSkip(
+      onSkip,
+      answered(mere, { verdict: 'bad', answer: mere.answers[0] }),
+    )
+    expect(screen.getByRole('button', { name: SKIP })).toBeInTheDocument()
+  })
+
+  it('ignores the second click of a double click, which lands on the next card', () => {
+    const onSkip = vi.fn()
+    showWithSkip(onSkip)
+    fireEvent.click(screen.getByRole('button', { name: SKIP }), { detail: 2 })
+    expect(onSkip).not.toHaveBeenCalled()
+  })
+
+  it('is not offered without a way to skip', () => {
+    show(mere)
+    expect(screen.queryByRole('button', { name: SKIP })).toBeNull()
   })
 })

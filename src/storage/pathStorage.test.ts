@@ -75,6 +75,11 @@ describe('loadPath', () => {
     expect(loaded.openPath).toBe(false)
   })
 
+  it('drops a review state left behind for a card set aside', () => {
+    put({ version: 1, cards: { 't1/a': CARD }, skipped: ['t1/a'] })
+    expect(loadPath(KEY, THEMES).cards).toEqual({})
+  })
+
   it('never enrols a card set aside in a finished sub-theme', () => {
     put({ version: 1, done: ['t1/s2'], skipped: ['t1/b'] })
     expect(loadPath(KEY, THEMES).cards).toEqual({})

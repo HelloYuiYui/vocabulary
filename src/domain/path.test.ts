@@ -381,6 +381,20 @@ describe('putting a card back ("remettre")', () => {
     expect(back.cards[key]?.due).toBe(TOMORROW)
   })
 
+  it('schedules it afresh even if an old review state was left behind', () => {
+    const learnt = recordSitting(EMPTY_PROGRESS, learn('t1', 's1'), T, NOW)
+    const stale: PathProgress = {
+      ...skipCard(learnt, 't1', 's1-a'),
+      cards: {
+        ...learnt.cards,
+        [key]: { box: 4, due: '2027-01-01', seen: 5, right: 5 },
+      },
+    }
+    expect(restoreCard(stale, 't1', 's1-a', T, NOW).cards[key]?.due).toBe(
+      TOMORROW,
+    )
+  })
+
   it('leaves it to be learnt when its sub-theme is not done yet', () => {
     const back = restoreCard(
       skipCard(EMPTY_PROGRESS, 't1', 's1-a'),

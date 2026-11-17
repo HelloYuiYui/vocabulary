@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from 'react'
 import { canOverride } from '../domain/grade.ts'
 import type { PathCopy } from '../data/types.ts'
 import { hidesGender, norm } from '../domain/normalise.ts'
@@ -41,6 +48,11 @@ export function CardQuestion({
   const overrideRef = useRef<HTMLButtonElement>(null)
   const id = useId()
   const revealed = response !== undefined
+  // The next card's button takes this one's place, so the second click of a
+  // double click would set it aside too: only a single click counts.
+  const skip = (event: MouseEvent) => {
+    if (event.detail <= 1) onSkip?.()
+  }
   const sentence = pathCopy ? item.sentence : undefined
 
   // Once revealed, Enter anywhere goes to the next card, except on the
@@ -122,7 +134,7 @@ export function CardQuestion({
             </Button>
             <Button onClick={onDunno}>{copy.card.dunno}</Button>
             {onSkip && pathCopy && (
-              <Button variant="ghost" onClick={onSkip}>
+              <Button variant="ghost" onClick={skip}>
                 {pathCopy.skipWord}
               </Button>
             )}
@@ -146,7 +158,7 @@ export function CardQuestion({
               </Button>
             )}
             {onSkip && pathCopy && (
-              <Button variant="ghost" onClick={onSkip}>
+              <Button variant="ghost" onClick={skip}>
                 {pathCopy.skipWord}
               </Button>
             )}

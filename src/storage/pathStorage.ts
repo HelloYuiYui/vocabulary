@@ -89,14 +89,14 @@ export function loadPath(
   const skipped = known(raw.skipped, cardKeys)
   const finished = new Set(done)
   const aside = new Set(skipped)
+  for (const key of aside) delete cards[key]
   for (const theme of themes)
     for (const sub of theme.subThemes ?? []) {
       if (!finished.has(subKey(theme.id, sub.id))) continue
       for (const item of sub.items) {
         if (!item.id) continue
         const key = cardKey(theme.id, item.id)
-        if (aside.has(key)) delete cards[key]
-        else cards[key] ??= enrol(now)
+        if (!aside.has(key)) cards[key] ??= enrol(now)
       }
     }
 

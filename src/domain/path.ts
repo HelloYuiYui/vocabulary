@@ -161,7 +161,7 @@ export function restoreCard(
   if (!sub || !isSubDone(progress, themeId, sub.id)) return back
   return {
     ...back,
-    cards: { ...back.cards, [key]: back.cards[key] ?? enrol(now) },
+    cards: { ...back.cards, [key]: enrol(now) },
   }
 }
 

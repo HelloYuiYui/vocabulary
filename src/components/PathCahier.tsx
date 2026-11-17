@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Language } from '../data/types.ts'
 import {
+  cardKey,
   dueCount,
   dueEntries,
   isSubDone,
@@ -234,9 +235,17 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             else startSubTheme(theme, sub)
           }}
           onQuiz={(theme) =>
-            start('quiz', withoutSkipped(quizCards(theme), progress), {
-              themeId: theme.id,
-            })
+            start(
+              'quiz',
+              quizCards(
+                theme,
+                Math.random,
+                (item) =>
+                  !item.id ||
+                  !progress.skipped.includes(cardKey(theme.id, item.id)),
+              ),
+              { themeId: theme.id },
+            )
           }
           onNote={(theme) => goTo({ name: 'note', themeId: theme.id })}
         />
@@ -301,6 +310,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
       {shown.name === 'sitting' && asking && (
         <ConfirmLeave
           copy={copy}
+          keptAside={sitting.skipped.length > 0}
           onStay={() => setAsking(false)}
           onLeave={leave}
         />

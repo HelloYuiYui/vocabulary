@@ -6,6 +6,8 @@ import { Notebook } from './Notebook.tsx'
 
 interface ConfirmLeaveProps {
   copy: PathCopy
+  /** Some words were set aside: they stay aside, unlike the answers. */
+  keptAside?: boolean
   onStay: () => void
   onLeave: () => void
 }
@@ -14,7 +16,12 @@ interface ConfirmLeaveProps {
  * Asks before a sitting with answers is left. Staying is the default: it has
  * the focus, and Escape stays too.
  */
-export function ConfirmLeave({ copy, onStay, onLeave }: ConfirmLeaveProps) {
+export function ConfirmLeave({
+  copy,
+  keptAside,
+  onStay,
+  onLeave,
+}: ConfirmLeaveProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
 
@@ -37,7 +44,10 @@ export function ConfirmLeave({ copy, onStay, onLeave }: ConfirmLeaveProps) {
     >
       <Notebook>
         <h2 id={titleId}>{copy.leaveConfirm.title}</h2>
-        <p className="max-w-[62ch]">{copy.leaveConfirm.body}</p>
+        <p className="max-w-[62ch]">
+          {copy.leaveConfirm.body}
+          {keptAside && ` ${copy.leaveConfirm.keptAside}`}
+        </p>
         <Actions>
           <Button variant="primary" autoFocus onClick={onStay}>
             {copy.leaveConfirm.stay}

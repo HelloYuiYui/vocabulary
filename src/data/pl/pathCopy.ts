@@ -26,6 +26,7 @@ export const pathCopy: PathCopy = {
     title: 'Przerwać sesję?',
     body: 'Odpowiedzi z tej sesji nie zostaną zapisane.',
     stay: 'Kontynuuj sesję',
+    keptAside: 'Odłożone słowa pozostają odłożone.',
   },
   subThemeDone: 'zrobione',
   locked: 'Wkrótce',
@@ -47,18 +48,18 @@ export const pathCopy: PathCopy = {
       `${right}/${total}: temat nadal do zrobienia.`,
     setAside: (n) =>
       n === 1
-        ? 'Jedno słowo odłożone. Możesz je przywrócić w ustawieniach.'
-        : `Odłożone słowa: ${n}. Możesz je przywrócić w ustawieniach.`,
+        ? 'Odłożono 1 słowo. Możesz je przywrócić w ustawieniach ścieżki.'
+        : `Odłożono ${n} ${plural(n, 'słowo', 'słowa', 'słów')}. Możesz je przywrócić w ustawieniach ścieżki.`,
   },
   settings: {
     title: 'Ustawienia',
     openPath: {
-      label: 'Otwórz wszystkie tematy',
-      help: 'Zalecana kolejność zostaje widoczna, ale żaden temat nie czeka już na poprzedni.',
+      label: 'Wszystkie tematy otwarte',
+      help: 'Zalecana kolejność pozostaje widoczna, ale żaden temat nie czeka już na poprzedni.',
     },
     setAsideTitle: 'Odłożone słowa',
     setAsideEmpty:
-      'Brak odłożonych słów. Podczas sesji przycisk „Znam to słowo” odkłada słowo tutaj.',
+      'Brak odłożonych słów. Podczas sesji przycisk „Znam to słowo” przenosi je tutaj.',
     restore: 'Przywróć',
   },
 }

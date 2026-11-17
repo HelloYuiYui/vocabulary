@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import type { PathCopy } from '../data/types.ts'
 import { cardKey, type PathProgress } from '../domain/path.ts'
 import type { Theme } from '../domain/types.ts'
@@ -30,6 +30,7 @@ export function SettingsView({
   const switchId = useId()
   const helpId = useId()
   const asideId = useId()
+  const asideHeading = useRef<HTMLHeadingElement>(null)
   const aside = new Set(progress.skipped)
   const groups = themes.flatMap((theme) => {
     const items = theme.items.filter(
@@ -63,27 +64,39 @@ export function SettingsView({
         </div>
 
         <section aria-labelledby={asideId} className="flex flex-col gap-3">
-          <h3 id={asideId}>{settings.setAsideTitle}</h3>
+          {/* Focus comes here after "remettre", whose button is then gone. */}
+          <h3 id={asideId} ref={asideHeading} tabIndex={-1}>
+            {settings.setAsideTitle}
+          </h3>
           {groups.length === 0 ? (
             <p className="max-w-[62ch] text-muted">{settings.setAsideEmpty}</p>
           ) : (
             groups.map(({ theme, items }) => (
               <div key={theme.id} className="flex flex-col">
-                <p className="text-[0.9rem] text-muted">{theme.name}</p>
+                <h4 className="text-[0.9rem] font-normal text-muted">
+                  {theme.name}
+                </h4>
                 <ul>
                   {items.map((item) => (
                     <li
                       key={item.id}
                       className="grid grid-cols-[1fr_1fr_auto] items-center gap-3 border-b border-dashed border-rule-strong py-[7px] max-[520px]:grid-cols-[1fr_auto]"
                     >
-                      <span>{item.en}</span>
+                      <span id={`${asideId}-${theme.id}-${item.id}`}>
+                        {item.en}
+                      </span>
                       <span className="font-hand text-[1.15rem] text-ink max-[520px]:order-3 max-[520px]:col-span-2">
                         <AnswerText answer={item.answers[0]} />
                       </span>
                       <Button
                         variant="ghost"
                         size="xs"
-                        onClick={() => item.id && onRestore(theme.id, item.id)}
+                        aria-describedby={`${asideId}-${theme.id}-${item.id}`}
+                        onClick={() => {
+                          if (!item.id) return
+                          onRestore(theme.id, item.id)
+                          asideHeading.current?.focus()
+                        }}
                       >
                         {settings.restore}
                       </Button>

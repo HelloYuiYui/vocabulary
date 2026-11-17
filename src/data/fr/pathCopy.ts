@@ -17,6 +17,7 @@ export const pathCopy: PathCopy = {
     title: 'Arrêter la séance ?',
     body: 'Les réponses de cette séance ne seront pas enregistrées.',
     stay: 'Continuer la séance',
+    keptAside: 'Les mots mis de côté le restent.',
   },
   subThemeDone: 'fait',
   locked: 'À venir',
@@ -39,8 +40,8 @@ export const pathCopy: PathCopy = {
     quizFailed: (right, total) => `${right}/${total} : le thème reste à faire.`,
     setAside: (n) =>
       n === 1
-        ? 'Un mot mis de côté. Tu peux le remettre dans les réglages.'
-        : `${n} mots mis de côté. Tu peux les remettre dans les réglages.`,
+        ? 'Un mot mis de côté. Les réglages, depuis le parcours, permettent de le remettre.'
+        : `${n} mots mis de côté. Les réglages, depuis le parcours, permettent de les remettre.`,
   },
   settings: {
     title: 'Réglages',

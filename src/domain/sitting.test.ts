@@ -207,6 +207,20 @@ describe('quizCards', () => {
   const perSub = (cards: Entry[], s: number) =>
     cards.filter((c) => c.item.id?.startsWith(`s${s}-`)).length
 
+  it('draws only the cards it is allowed, still up to 20', () => {
+    const allowed = (id: string | undefined) =>
+      !id?.endsWith('-0') && !id?.endsWith('-1')
+    const cards = quizCards(themeOf([10, 10, 10]), Math.random, (item) =>
+      allowed(item.id),
+    )
+    expect(cards).toHaveLength(20)
+    expect(cards.every((c) => allowed(c.item.id))).toBe(true)
+  })
+
+  it('draws nothing when no card is allowed', () => {
+    expect(quizCards(themeOf([3]), Math.random, () => false)).toEqual([])
+  })
+
   it('draws at most 20 cards, spread across sub-themes', () => {
     const cards = quizCards(themeOf([10, 10, 10]))
     expect(QUIZ_SIZE).toBe(20)

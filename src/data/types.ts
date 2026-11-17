@@ -42,6 +42,7 @@ export interface PathCopy {
     title: string
     body: string // says the sitting's answers will not be recorded
     stay: string // goes on with the sitting
+    keptAside: string // added when words were set aside: they stay aside
   }
   subThemeDone: string
   locked: string

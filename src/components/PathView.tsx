@@ -1,5 +1,6 @@
 import type { PathCopy } from '../data/types.ts'
 import {
+  cardKey,
   isSubDone,
   themeStatuses,
   type PathProgress,
@@ -49,6 +50,12 @@ export function PathView({
   onQuiz,
   onNote,
 }: PathViewProps) {
+  const aside = new Set(progress.skipped)
+  // A theme can be quizzed while it has a card that is not set aside.
+  const quizzable = (theme: Theme) =>
+    theme.items.some(
+      (item) => item.id && !aside.has(cardKey(theme.id, item.id)),
+    )
   const statuses = themeStatuses(themes, progress)
   const steps = themes.map((theme, i) => ({
     theme,
@@ -107,12 +114,19 @@ export function PathView({
                       <ul className="flex flex-wrap gap-2">
                         {(theme.subThemes ?? []).map((sub) => {
                           const done = isSubDone(progress, theme.id, sub.id)
+                          // Cards set aside are not asked, so not counted.
+                          const left = sub.items.filter(
+                            (item) =>
+                              !item.id ||
+                              !aside.has(cardKey(theme.id, item.id)),
+                          ).length
                           return (
                             <li key={sub.id}>
                               {/* A finished sub-theme turns green; it can still be redone. */}
                               <button
                                 type="button"
                                 data-done={done || undefined}
+                                disabled={left === 0}
                                 onClick={() => onSubTheme(theme, sub)}
                                 className={cx(
                                   'flex cursor-pointer flex-col items-start rounded-lg border-[1.5px] px-4 py-2.5 text-left font-bold hover:brightness-108',
@@ -128,7 +142,7 @@ export function PathView({
                                     !done && 'text-muted',
                                   )}
                                 >
-                                  {copy.cards(sub.items.length)}
+                                  {copy.cards(left)}
                                   {done && ` · ${copy.subThemeDone}`}
                                 </span>
                               </button>
@@ -147,7 +161,7 @@ export function PathView({
                               {copy.note}
                             </Button>
                           )}
-                          {status === 'open' && (
+                          {status === 'open' && quizzable(theme) && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -158,7 +172,7 @@ export function PathView({
                           )}
                         </Actions>
                       )}
-                      {status === 'open' && (
+                      {status === 'open' && quizzable(theme) && (
                         <p className="text-[0.8rem] text-muted">
                           {copy.quizHelp}
                         </p>
