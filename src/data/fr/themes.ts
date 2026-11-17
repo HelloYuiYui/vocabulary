@@ -1,7 +1,6 @@
 import type { Theme } from '../../domain/types.ts'
 import { chezSoi } from './a1/chezSoi.ts'
 import { chiffres } from './a1/chiffres.ts'
-import { corps } from './a1/corps.ts'
 import { courses } from './a1/courses.ts'
 import { description } from './a1/description.ts'
 import { ecritsCourts } from './a1/ecritsCourts.ts'
@@ -13,6 +12,7 @@ import { routine } from './a1/routine.ts'
 import { transports } from './a1/transports.ts'
 import { vetements } from './a1/vetements.ts'
 import { ville } from './a1/ville.ts'
+import { corps } from './a2/corps.ts'
 import { logement } from './a2/logement.ts'
 import { sante } from './a2/sante.ts'
 
@@ -30,8 +30,8 @@ export const THEMES: Theme[] = [
   meteo,
   loisirs,
   vetements,
-  corps,
   ecritsCourts,
+  corps,
   sante,
   logement,
 ]
