@@ -19,6 +19,7 @@ export const bg: Language = {
       'ezhednevie',
       'chisla-dati',
       'pazaruvane',
+      'grad',
     ],
     storageKey: 'cahier-vocab-bg-path-v1',
     copy: pathCopy,
