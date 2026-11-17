@@ -456,25 +456,11 @@ export const chiffres: Theme = pathTheme({
         'Il est huit heures {moins le quart}.',
         "It's quarter to eight.",
       ),
-      cloze(
-        'matin',
-        'in the morning',
-        [a('le matin')],
-        'Je bois un café {le matin}.',
-        'I drink a coffee in the morning.',
-      ),
-      cloze(
-        'soir',
-        'in the evening',
-        [a('le soir')],
-        'Je regarde un film {le soir}.',
-        'I watch a film in the evening.',
-      ),
       cloze('tot', 'early', [a('tôt')], 'Je me lève {tôt}.', 'I get up early.'),
       cloze(
         'tard',
         'late',
-        [a('tard'), a('en retard')],
+        [a('tard')],
         'Il rentre {tard} le soir.',
         'He comes home late in the evening.',
         {

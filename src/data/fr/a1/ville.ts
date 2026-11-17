@@ -368,13 +368,6 @@ export const ville: Theme = pathTheme({
         { note: "Le plan : d'une ville. La carte : d'une région, d'un pays." },
       ),
       cloze(
-        'gare',
-        'the train station',
-        [a('la gare')],
-        'Le train part de {la gare} à huit heures.',
-        'The train leaves from the station at eight.',
-      ),
-      cloze(
         'parking',
         'the car park',
         [a('le parking')],

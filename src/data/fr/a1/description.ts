@@ -142,13 +142,6 @@ export const description: Theme = pathTheme({
         'Elle porte {des lunettes}.',
         'She wears glasses.',
       ),
-      cloze(
-        'porter',
-        'to wear',
-        [a('porter')],
-        'Je dois {porter} des lunettes.',
-        'I have to wear glasses.',
-      ),
     ]),
     sub('cheveux-et-yeux', 'Les cheveux et les yeux', [
       cloze(
@@ -192,13 +185,6 @@ export const description: Theme = pathTheme({
         [a('court'), a('courte')],
         'Mon père a les cheveux {courts}.',
         'My father has short hair.',
-      ),
-      cloze(
-        'bleu',
-        'blue',
-        [a('bleu'), a('bleue')],
-        'Ma mère a les yeux {bleus}.',
-        'My mother has blue eyes.',
       ),
     ]),
     sub('caractere', 'Le caractère', [
