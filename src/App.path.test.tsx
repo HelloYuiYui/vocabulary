@@ -40,9 +40,11 @@ describe('French on the path', () => {
       'ville',
       'transports',
       'meteo',
+      'nature',
       'loisirs',
       'vetements',
       'chez-soi',
+      'vacances',
     ])
     setup()
     expect(
@@ -58,9 +60,11 @@ describe('French on the path', () => {
       'La ville et les itinéraires',
       'Transports',
       'Météo et saisons',
+      'La nature et les animaux',
       'Goûts et loisirs',
       'Vêtements',
       'Chez soi',
+      'Les vacances',
     ])
   })
 
