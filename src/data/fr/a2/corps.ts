@@ -4,7 +4,7 @@ import { a, sentence, word } from '../../helpers.ts'
 export const corps: Theme = {
   id: 'corps',
   name: 'Le corps',
-  level: 'A1',
+  level: 'A2',
   desc: 'Les parties du corps et dire où tu as mal.',
   items: [
     word('the body', [a('le corps')]),
