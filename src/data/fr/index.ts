@@ -28,6 +28,8 @@ export const fr: Language = {
       'vetements',
       'chez-soi',
       'vacances',
+      'ecrits-courts',
+      'corps',
     ],
     storageKey: 'cahier-vocab-path-v1',
     copy: pathCopy,
