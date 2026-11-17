@@ -143,7 +143,7 @@ export const description: Theme = pathTheme({
         'She wears glasses.',
       ),
     ]),
-    sub('cheveux-et-yeux', 'Les cheveux et les yeux', [
+    sub('cheveux-et-yeux', 'Les cheveux', [
       cloze(
         'blond',
         'blond',

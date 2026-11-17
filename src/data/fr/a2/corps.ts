@@ -10,11 +10,11 @@ export const corps: Theme = pathTheme({
     title: "J'ai mal à la tête : avoir mal à",
     rule: "To say where it hurts, use avoir mal à + the body part with its definite article (le, la, l', les). The à contracts with le and les: j'ai mal à la tête, à l'épaule, au dos (à + le), aux pieds (à + les).",
     table: {
-      head: ['article', 'avec à', 'exemple'],
+      head: ['article', 'with à', 'example'],
       rows: [
         ['le', 'au', "J'ai mal au dos."],
         ['la', 'à la', "J'ai mal à la tête."],
-        ["l' (voyelle)", "à l'", "J'ai mal à l'épaule."],
+        ["l' (before a vowel)", "à l'", "J'ai mal à l'épaule."],
         ['les', 'aux', "J'ai mal aux pieds."],
       ],
     },
@@ -26,13 +26,6 @@ export const corps: Theme = pathTheme({
   },
   subThemes: [
     sub('tete', 'La tête', [
-      cloze(
-        'corps',
-        'the body',
-        [a('le corps')],
-        'Le sport est bon pour {le corps}.',
-        'Sport is good for the body.',
-      ),
       cloze(
         'tete',
         'the head',
@@ -73,8 +66,8 @@ export const corps: Theme = pathTheme({
         'oreille',
         'the ear',
         [a("l'oreille", 'f')],
-        "Il met son téléphone contre {l'oreille}.",
-        'He holds his phone to his ear.',
+        "Il a toujours son téléphone à {l'oreille}.",
+        'He always has his phone to his ear.',
         { gender: 'f' },
       ),
       cloze(
@@ -112,8 +105,6 @@ export const corps: Theme = pathTheme({
         'Elle a {une dent} cassée.',
         'She has a broken tooth.',
       ),
-    ]),
-    sub('cou-et-bras', 'Le cou, le bras et la main', [
       cloze(
         'langue',
         'the tongue',
@@ -121,6 +112,8 @@ export const corps: Theme = pathTheme({
         'Le petit garçon tire {la langue}.',
         'The little boy sticks out his tongue.',
       ),
+    ]),
+    sub('cou-et-bras', 'Le menton, le cou et les bras', [
       cloze(
         'menton',
         'the chin',
@@ -164,15 +157,15 @@ export const corps: Theme = pathTheme({
         'coude',
         'the elbow',
         [a('le coude')],
-        'Il met {le coude} sur la table.',
-        'He puts his elbow on the table.',
+        'Il pose {le coude} sur la table.',
+        'He rests his elbow on the table.',
       ),
       cloze(
         'poignet',
         'the wrist',
         [a('le poignet')],
-        'Elle a {un poignet} très fin.',
-        'She has a very slim wrist.',
+        "Elle s'est foulé {le poignet}.",
+        'She sprained her wrist.',
       ),
       cloze(
         'main',
@@ -216,27 +209,24 @@ export const corps: Theme = pathTheme({
         'dos',
         'the back',
         [a('le dos')],
-        '{Le dos} me fait mal.',
-        'My back hurts.',
+        'Il porte son sac sur {le dos}.',
+        'He carries his bag on his back.',
         { note: "À + le = au : j'ai mal au dos." },
       ),
       cloze(
         'ventre',
         'the stomach',
         [a('le ventre'), a("l'estomac", 'm')],
-        "Elle a mal à {l'estomac}.",
-        'She has a stomach ache.',
-        {
-          gender: 'm',
-          note: "Le ventre : le dehors. L'estomac : l'organe.",
-        },
+        'Le bébé dort sur {le ventre}.',
+        'The baby sleeps on its stomach.',
+        { note: "Le ventre : la partie du corps. L'estomac : l'organe." },
       ),
       cloze(
         'coeur',
         'the heart',
         [a('le cœur')],
-        '{Le cœur} bat très vite.',
-        'The heart beats very fast.',
+        'Le médecin écoute {le cœur} du patient.',
+        "The doctor listens to the patient's heart.",
       ),
       cloze(
         'hanche',
@@ -249,7 +239,7 @@ export const corps: Theme = pathTheme({
         'jambe',
         'the leg',
         [a('la jambe')],
-        "Il s'est cassé {la jambe} en ski.",
+        "Il s'est cassé {la jambe} au ski.",
         'He broke his leg skiing.',
       ),
       cloze(
@@ -283,7 +273,14 @@ export const corps: Theme = pathTheme({
         { gender: 'm' },
       ),
     ]),
-    sub('dedans', 'Dedans et être malade', [
+    sub('dedans', "L'intérieur du corps et être malade", [
+      cloze(
+        'corps',
+        'the body',
+        [a('le corps')],
+        'Le sport est bon pour {le corps}.',
+        'Sport is good for the body.',
+      ),
       cloze(
         'peau',
         'the skin',
