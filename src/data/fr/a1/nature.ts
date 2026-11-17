@@ -45,8 +45,8 @@ export const nature: Theme = pathTheme({
         'mer',
         'the sea',
         [a('la mer')],
-        'Nous allons à {la mer} en été.',
-        'We go to the sea in summer.',
+        "L'eau de {la mer} est froide.",
+        'The sea water is cold.',
       ),
       cloze(
         'plage',
@@ -142,8 +142,8 @@ export const nature: Theme = pathTheme({
         'feuille',
         'the leaf',
         [a('la feuille')],
-        'En automne, {les feuilles} tombent.',
-        'In autumn, the leaves fall.',
+        '{Les feuilles} de cet arbre sont très grandes.',
+        'The leaves of this tree are very big.',
         { gender: 'f' },
       ),
       cloze(
@@ -154,18 +154,11 @@ export const nature: Theme = pathTheme({
         'We follow the path in the forest.',
       ),
       cloze(
-        'se-promener',
-        'to go for a walk',
-        [a('se promener')],
-        'Le dimanche, nous {nous promenons} au parc.',
-        'On Sundays, we go for a walk in the park.',
-      ),
-      cloze(
         'promenade',
         'the walk',
         [a('la promenade'), a('la balade')],
-        'Après le repas, on fait {une promenade}.',
-        'After the meal, we go for a walk.',
+        'Nous faisons {une promenade} en forêt.',
+        'We go for a walk in the forest.',
       ),
       cloze(
         'pique-nique',
@@ -202,8 +195,8 @@ export const nature: Theme = pathTheme({
         'chat',
         'the cat',
         [a('le chat')],
-        '{Le chat} dort sur le lit.',
-        'The cat is sleeping on the bed.',
+        '{Le chat} mange du poisson.',
+        'The cat is eating fish.',
       ),
       cloze(
         'oiseau',
@@ -235,13 +228,13 @@ export const nature: Theme = pathTheme({
         'We have a goldfish in a bowl.',
       ),
     ]),
-    sub('ferme', 'À la ferme', [
+    sub('ferme', 'À la ferme et dehors', [
       cloze(
         'ferme',
         'the farm',
         [a('la ferme')],
-        'Mes grands-parents habitent dans {une ferme}.',
-        'My grandparents live on a farm.',
+        'Nous achetons des œufs à {la ferme}.',
+        'We buy eggs at the farm.',
       ),
       cloze(
         'cheval',
