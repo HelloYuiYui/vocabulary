@@ -24,6 +24,7 @@ export const bg: Language = {
       'vreme',
       'priroda',
       'svobodno-vreme',
+      'drehi',
     ],
     storageKey: 'cahier-vocab-bg-path-v1',
     copy: pathCopy,
