@@ -1,4 +1,5 @@
 import type { Theme } from '../../domain/types.ts'
+import { cafe } from './a1/cafe.ts'
 import { chezSoi } from './a1/chezSoi.ts'
 import { chiffres } from './a1/chiffres.ts'
 import { courses } from './a1/courses.ts'
@@ -7,31 +8,40 @@ import { ecritsCourts } from './a1/ecritsCourts.ts'
 import { famille } from './a1/famille.ts'
 import { loisirs } from './a1/loisirs.ts'
 import { meteo } from './a1/meteo.ts'
+import { nature } from './a1/nature.ts'
 import { presentation } from './a1/presentation.ts'
 import { routine } from './a1/routine.ts'
 import { transports } from './a1/transports.ts'
+import { vacances } from './a1/vacances.ts'
 import { vetements } from './a1/vetements.ts'
 import { ville } from './a1/ville.ts'
 import { corps } from './a2/corps.ts'
 import { logement } from './a2/logement.ts'
+import { portrait } from './a2/portrait.ts'
+import { raconter } from './a2/raconter.ts'
 import { sante } from './a2/sante.ts'
 
-/** Every theme, in the order of docs/delf-checklist.md. */
+/** Every theme: the path's themes in path order, then the themes not on it yet. */
 export const THEMES: Theme[] = [
   presentation,
   famille,
-  chiffres,
+  cafe,
   description,
-  chezSoi,
   routine,
+  chiffres,
   courses,
   ville,
   transports,
   meteo,
+  nature,
   loisirs,
   vetements,
+  chezSoi,
+  vacances,
   ecritsCourts,
+  raconter,
   corps,
   sante,
+  portrait,
   logement,
 ]

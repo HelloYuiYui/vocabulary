@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Language } from '../data/types.ts'
 import {
+  cardKey,
   dueCount,
   dueEntries,
   isSubDone,
   recordSitting,
+  restoreCard,
+  skipCard,
   themeStatuses,
+  withoutSkipped,
   type PathProgress,
 } from '../domain/path.ts'
 import { formatRoute, HOME, parseRoute, type Page } from '../domain/route.ts'
@@ -29,6 +33,7 @@ import { GrammarNoteCard } from './GrammarNoteCard.tsx'
 import { Header } from './Header.tsx'
 import { Page as PageFrame } from './Page.tsx'
 import { PathView } from './PathView.tsx'
+import { SettingsView } from './SettingsView.tsx'
 import { SittingEnd } from './SittingEnd.tsx'
 import { SittingView } from './SittingView.tsx'
 
@@ -43,6 +48,7 @@ type View =
   | { name: 'note'; theme: Theme; then?: SubTheme }
   | { name: 'sitting' }
   | { name: 'end' }
+  | { name: 'settings' }
 
 const PATH: View = { name: 'path' }
 
@@ -72,6 +78,8 @@ function viewOf(
       return sitting.cards.length > 0 && !sitting.finished ? page : undefined
     case 'end':
       return sitting.finished ? page : undefined
+    case 'settings':
+      return page
   }
 }
 
@@ -118,6 +126,12 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
     const prev = sittingRef.current
     const next = sittingReducer(prev, action)
     if (next === prev) return
+    // A card set aside leaves review at once, whether or not the sitting ends.
+    const current = prev.cards[prev.queue[0] ?? -1]
+    if (action.type === 'skip' && current?.item.id) {
+      const { themeId, item } = current
+      setProgress((p) => skipCard(p, themeId, item.id ?? ''))
+    }
     sittingRef.current = next
     setSitting(next)
     if (next.finished && !prev.finished) {
@@ -157,7 +171,12 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const startSubTheme = (theme: Theme, sub: SubTheme) =>
     start(
       isSubDone(progress, theme.id, sub.id) ? 'practice' : 'learn',
-      shuffled(sub.items.map((item) => ({ themeId: theme.id, item }))),
+      shuffled(
+        withoutSkipped(
+          sub.items.map((item) => ({ themeId: theme.id, item })),
+          progress,
+        ),
+      ),
       { themeId: theme.id, subThemeId: sub.id },
     )
 
@@ -168,9 +187,14 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
 
   // At the end of a sitting: all its cards, or those missed at the first try
   // (a wrong answer, "presque" or "je ne sais pas").
-  const allCsv = clozeCsv(sitting.cards)
+  // Cards set aside are left out of both.
+  const aside = new Set(sitting.skipped)
+  const kept = sitting.cards.filter((_, i) => !aside.has(i))
+  const allCsv = clozeCsv(kept)
   const missedCsv = clozeCsv(
-    sitting.cards.filter((_, i) => sitting.firstRight[i] !== true),
+    sitting.cards.filter(
+      (_, i) => !aside.has(i) && sitting.firstRight[i] !== true,
+    ),
   )
   const sittingName = sitting.themeId ?? 'revision'
   const fileName = (...parts: string[]) =>
@@ -184,6 +208,18 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
         intro={copy.intro}
         onLanguageChange={shown.name === 'path' ? onLanguageChange : undefined}
         onHome={shown.name === 'sitting' ? undefined : () => go(HOME)}
+        settings={
+          shown.name === 'path'
+            ? {
+                label: copy.settings.title,
+                href: formatRoute({
+                  lang: language.code,
+                  page: { name: 'settings' },
+                }),
+                onOpen: () => goTo({ name: 'settings' }),
+              }
+            : undefined
+        }
       />
       {shown.name === 'path' && (
         <PathView
@@ -199,9 +235,33 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
             else startSubTheme(theme, sub)
           }}
           onQuiz={(theme) =>
-            start('quiz', quizCards(theme), { themeId: theme.id })
+            start(
+              'quiz',
+              quizCards(
+                theme,
+                Math.random,
+                (item) =>
+                  !item.id ||
+                  !progress.skipped.includes(cardKey(theme.id, item.id)),
+              ),
+              { themeId: theme.id },
+            )
           }
           onNote={(theme) => goTo({ name: 'note', themeId: theme.id })}
+        />
+      )}
+      {shown.name === 'settings' && (
+        <SettingsView
+          themes={pathThemes}
+          progress={progress}
+          copy={copy}
+          onOpenPath={(open) => setProgress((p) => ({ ...p, openPath: open }))}
+          onRestore={(themeId, itemId) =>
+            setProgress((p) =>
+              restoreCard(p, themeId, itemId, pathThemes, new Date()),
+            )
+          }
+          onBack={goToPath}
         />
       )}
       {shown.name === 'note' && shown.theme.note && (
@@ -250,6 +310,7 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
       {shown.name === 'sitting' && asking && (
         <ConfirmLeave
           copy={copy}
+          keptAside={sitting.skipped.length > 0}
           onStay={() => setAsking(false)}
           onLeave={leave}
         />

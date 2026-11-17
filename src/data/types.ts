@@ -35,11 +35,14 @@ export interface PathCopy {
   cards: (count: number) => string // the size of a sub-theme
   left: (count: number) => string // cards still to answer right in a sitting
   leave: string // leaves a sitting without recording it
+  /** Sets the card on screen aside for good; it can be put back in settings. */
+  skipWord: string
   /** Asked before leaving a sitting that has answers; `leave` confirms. */
   leaveConfirm: {
     title: string
     body: string // says the sitting's answers will not be recorded
     stay: string // goes on with the sitting
+    keptAside: string // added when words were set aside: they stay aside
   }
   subThemeDone: string
   locked: string
@@ -56,6 +59,14 @@ export interface PathCopy {
     retried: (count: number) => string
     quizPassed: (right: number, total: number) => string
     quizFailed: (right: number, total: number) => string
+    setAside: (count: number) => string // cards set aside in this sitting
+  }
+  settings: {
+    title: string // also the header link
+    openPath: { label: string; help: string }
+    setAsideTitle: string
+    setAsideEmpty: string
+    restore: string // puts a card set aside back
   }
 }
 

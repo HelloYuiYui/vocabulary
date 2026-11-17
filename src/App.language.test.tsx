@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
+import { bg } from './data/bg/index.ts'
 import { LANGUAGE_KEY } from './storage/storage.ts'
 
 const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
@@ -52,12 +53,11 @@ describe('language switcher', () => {
       screen.getByRole('heading', { name: 'Тетрадка с думи' }),
     ).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('bg')
-    expect(regions()).toEqual([
-      'Представяне',
-      'Семейство и близки',
-      'Числа, дати, час',
-      'Описание',
-    ])
+    // The Bulgarian path, in its own order.
+    expect(regions()).toEqual(
+      bg.path.themes.map((id) => bg.themes.find((t) => t.id === id)?.name),
+    )
+    expect(regions()[0]).toBe('Представяне')
     // Every Bulgarian theme is on the path, so there is no old picker to open.
     expect(screen.queryByRole('checkbox')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Други теми' })).toBeNull()
@@ -94,6 +94,8 @@ describe('language switcher', () => {
       done: [],
       cards: {},
       notesSeen: ['predstavyane'],
+      skipped: [],
+      openPath: false,
     })
     // The old picker's saved data, Bulgarian and French, is left alone.
     expect(localStorage.getItem(BG_KEY)).toBe(bgV2)

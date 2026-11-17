@@ -167,6 +167,8 @@ describe('leaving a sitting', () => {
       done: [],
       cards: {},
       notesSeen: ['presentation'],
+      skipped: [],
+      openPath: false,
     })
 
     // Forward finds no sitting to come back to.

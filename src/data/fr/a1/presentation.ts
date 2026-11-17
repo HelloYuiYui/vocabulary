@@ -331,13 +331,6 @@ export const presentation: Theme = pathTheme({
         'I have to work tomorrow.',
       ),
       cloze(
-        'banque',
-        'a bank',
-        [a('une banque'), a('la banque')],
-        'Je travaille dans {une banque}.',
-        'I work in a bank.',
-      ),
-      cloze(
         'dans-la-vie',
         'for a living',
         [a('dans la vie')],
@@ -350,13 +343,6 @@ export const presentation: Theme = pathTheme({
         [a('au chômage'), a('sans emploi')],
         'Mon frère est {au chômage}.',
         'My brother is unemployed.',
-      ),
-      cloze(
-        'marie',
-        'married',
-        [a('marié'), a('mariée')],
-        'Mon oncle est {marié}.',
-        'My uncle is married.',
       ),
       cloze(
         'celibataire',

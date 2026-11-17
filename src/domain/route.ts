@@ -8,6 +8,7 @@ export type Page =
   | { name: 'note'; themeId: string; then?: string }
   | { name: 'sitting' }
   | { name: 'end' } // the end of a sitting, once it is recorded
+  | { name: 'settings' } // the open path and the cards set aside
 
 /** The homepage's address: before, or apart from, any language. */
 export const HOME = '#/'
@@ -35,6 +36,7 @@ function parsePage([name, ...rest]: string[]): Page | undefined {
   if (name === 'sitting' && rest.length === 0) return { name: 'sitting' }
   if (name === 'sitting' && rest.length === 1 && rest[0] === 'end')
     return { name: 'end' }
+  if (name === 'settings' && rest.length === 0) return { name: 'settings' }
   return undefined
 }
 
@@ -47,5 +49,6 @@ export function formatRoute({ lang, page }: Route): string {
   }
   if (page.name === 'sitting') parts.push('sitting')
   if (page.name === 'end') parts.push('sitting', 'end')
+  if (page.name === 'settings') parts.push('settings')
   return `#/${parts.join('/')}`
 }

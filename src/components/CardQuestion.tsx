@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from 'react'
 import { canOverride } from '../domain/grade.ts'
 import type { PathCopy } from '../data/types.ts'
 import { hidesGender, norm } from '../domain/normalise.ts'
@@ -17,6 +24,8 @@ interface CardQuestionProps {
   onDunno: () => void
   onNext: () => void
   onOverride: () => void
+  /** Sets the card aside for good ("je connais ce mot"); not in a quiz. */
+  onSkip?: () => void
   /** On the path: an item with a sentence is then shown as a cloze card. */
   pathCopy?: PathCopy
 }
@@ -29,6 +38,7 @@ export function CardQuestion({
   onDunno,
   onNext,
   onOverride,
+  onSkip,
   pathCopy,
 }: CardQuestionProps) {
   const copy = useCopy()
@@ -38,6 +48,11 @@ export function CardQuestion({
   const overrideRef = useRef<HTMLButtonElement>(null)
   const id = useId()
   const revealed = response !== undefined
+  // The next card's button takes this one's place, so the second click of a
+  // double click would set it aside too: only a single click counts.
+  const skip = (event: MouseEvent) => {
+    if (event.detail <= 1) onSkip?.()
+  }
   const sentence = pathCopy ? item.sentence : undefined
 
   // Once revealed, Enter anywhere goes to the next card, except on the
@@ -118,6 +133,11 @@ export function CardQuestion({
               {copy.card.check}
             </Button>
             <Button onClick={onDunno}>{copy.card.dunno}</Button>
+            {onSkip && pathCopy && (
+              <Button variant="ghost" onClick={skip}>
+                {pathCopy.skipWord}
+              </Button>
+            )}
           </Actions>
         )}
       </form>
@@ -135,6 +155,11 @@ export function CardQuestion({
             {canOverride(response.result.verdict) && (
               <Button ref={overrideRef} variant="ghost" onClick={onOverride}>
                 {copy.override}
+              </Button>
+            )}
+            {onSkip && pathCopy && (
+              <Button variant="ghost" onClick={skip}>
+                {pathCopy.skipWord}
               </Button>
             )}
           </Actions>

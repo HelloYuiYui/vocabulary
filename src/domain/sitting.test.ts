@@ -207,6 +207,20 @@ describe('quizCards', () => {
   const perSub = (cards: Entry[], s: number) =>
     cards.filter((c) => c.item.id?.startsWith(`s${s}-`)).length
 
+  it('draws only the cards it is allowed, still up to 20', () => {
+    const allowed = (id: string | undefined) =>
+      !id?.endsWith('-0') && !id?.endsWith('-1')
+    const cards = quizCards(themeOf([10, 10, 10]), Math.random, (item) =>
+      allowed(item.id),
+    )
+    expect(cards).toHaveLength(20)
+    expect(cards.every((c) => allowed(c.item.id))).toBe(true)
+  })
+
+  it('draws nothing when no card is allowed', () => {
+    expect(quizCards(themeOf([3]), Math.random, () => false)).toEqual([])
+  })
+
   it('draws at most 20 cards, spread across sub-themes', () => {
     const cards = quizCards(themeOf([10, 10, 10]))
     expect(QUIZ_SIZE).toBe(20)
@@ -237,5 +251,37 @@ describe('quizCards', () => {
   it('is empty for a theme without sub-themes', () => {
     const theme = { id: 't', name: 'T', level: 'A1' as const, desc: 'd' }
     expect(quizCards({ ...theme, items: [] })).toEqual([])
+  })
+})
+
+describe('skipping the card on screen', () => {
+  const skip: SittingAction = { type: 'skip' }
+
+  it('takes it out of the sitting before it is answered', () => {
+    const state = run(begin([A, B]), skip)
+    expect(state.queue).toEqual([1])
+    expect(state.skipped).toEqual([0])
+    expect(state.response).toBeUndefined()
+  })
+
+  it('takes it out after a wrong answer too, so it does not come back', () => {
+    const state = run(begin([A, B]), say('wrong'), skip, say('bravo'), next)
+    expect(state.finished).toBe(true)
+    expect(state.firstRight).toEqual({ 1: true })
+    expect(state.skipped).toEqual([0])
+  })
+
+  it('finishes the sitting when it was the last card', () => {
+    expect(run(begin([A]), skip).finished).toBe(true)
+  })
+
+  it('is not possible in a quiz', () => {
+    const quiz = begin([A, B], 'quiz')
+    expect(run(quiz, skip)).toBe(quiz)
+  })
+
+  it('leaves the sitting alone once it is over', () => {
+    const over = run(begin([A]), skip)
+    expect(run(over, skip)).toBe(over)
   })
 })

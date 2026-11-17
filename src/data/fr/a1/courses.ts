@@ -5,23 +5,25 @@ export const courses: Theme = pathTheme({
   id: 'courses',
   name: 'Nourriture et courses',
   level: 'A1',
-  desc: 'Acheter à manger, les quantités, commander au café.',
+  desc: 'Acheter à manger dans les commerces, les quantités et les prix.',
   note: {
-    title: 'Du, de la, des : les articles partitifs',
-    rule: "Use du (masculine), de la (feminine), de l' (before a vowel) or des (plural) for an unspecified amount of something: je prends du pain, de la confiture, de l'eau, des pommes. For something in general, after aimer, adorer, détester and préférer, use le, la, l', les: j'aime le fromage.",
+    title: 'Un kilo de, beaucoup de : les quantités',
+    rule: "After a word of quantity, use de (d' before a vowel) alone, instead of du, de la or des (see Au café): un kilo de pommes, une bouteille d'eau, un peu de sucre, beaucoup de fromage.",
     table: {
-      head: ['', 'some (an amount)', 'in general'],
+      head: ['quantity', 'example'],
       rows: [
-        ['masculine', 'du pain', 'le pain'],
-        ['feminine', 'de la confiture', 'la confiture'],
-        ['before a vowel', "de l'eau", "l'eau"],
-        ['plural', 'des pommes', 'les pommes'],
+        ['un kilo de', 'un kilo de pommes'],
+        ['cent grammes de', 'cent grammes de fromage'],
+        ['une bouteille de', "une bouteille d'eau"],
+        ['une tranche de', 'une tranche de jambon'],
+        ['une douzaine de', "une douzaine d'œufs"],
+        ['un peu de / beaucoup de', 'un peu de sucre, beaucoup de fromage'],
       ],
     },
     exceptions: [
-      "After a negation, du, de la, de l' and des become de or d': je ne prends pas de lait, je ne bois pas d'eau.",
-      "After a quantity, they become de or d': un kilo de pommes, une bouteille d'eau, beaucoup de sucre.",
-      "After aimer, adorer, détester and préférer, use le, la, les for the general idea: j'adore les pâtes, mais je prends des pâtes ce soir.",
+      "The same de follows a negation: je n'ai pas de lait, je n'achète pas de pain.",
+      'Combien also takes de alone: combien de pommes ? combien de fromage ?',
+      "De becomes d' before a vowel or a mute h: une bouteille d'eau, une douzaine d'œufs, un litre d'huile.",
     ],
   },
   subThemes: [
@@ -115,14 +117,6 @@ export const courses: Theme = pathTheme({
         [a('le chariot'), a('le caddie')],
         'Elle pousse {le chariot} dans le magasin.',
         'She pushes the trolley through the shop.',
-      ),
-      cloze(
-        'addition',
-        'the bill (at a restaurant)',
-        [a("l'addition", 'f')],
-        "{L'addition}, s'il vous plaît !",
-        'The bill, please!',
-        { gender: 'f' },
       ),
       cloze(
         'especes',
@@ -249,7 +243,7 @@ export const courses: Theme = pathTheme({
         'oeuf',
         'the egg',
         [a("l'œuf", 'm')],
-        'Je mange {un œuf} au petit déjeuner.',
+        'Je mange {un œuf} au petit-déjeuner.',
         'I eat an egg for breakfast.',
         {
           note: 'Un œuf [œf], des œufs [ø] : le f ne se prononce pas au pluriel.',
@@ -289,13 +283,6 @@ export const courses: Theme = pathTheme({
         [a('la confiture')],
         'Mon petit frère adore {la confiture} de fraises.',
         'My little brother loves strawberry jam.',
-      ),
-      cloze(
-        'gateau',
-        'the cake',
-        [a('le gâteau')],
-        'Pour mon anniversaire, il y a {un gâteau}.',
-        'For my birthday, there is a cake.',
       ),
     ]),
     sub('fruits-legumes', 'Fruits et légumes', [
@@ -374,7 +361,7 @@ export const courses: Theme = pathTheme({
         'At lunch, I eat a salad.',
       ),
     ]),
-    sub('epicerie-boissons', 'Épicerie et boissons', [
+    sub('epicerie-boissons', "L'épicerie", [
       cloze(
         'riz',
         'the rice',
@@ -412,35 +399,6 @@ export const courses: Theme = pathTheme({
         'Can you pass me the pepper?',
       ),
       cloze(
-        'eau',
-        'the water',
-        [a("l'eau", 'f')],
-        "Je préfère {l'eau} gazeuse.",
-        'I prefer sparkling water.',
-        { gender: 'f' },
-      ),
-      cloze(
-        'vin',
-        'the wine',
-        [a('le vin')],
-        'Mon père aime {le vin} rouge.',
-        'My father likes red wine.',
-      ),
-      cloze(
-        'biere',
-        'the beer',
-        [a('la bière')],
-        'Il prend {une bière} au café.',
-        'He has a beer at the café.',
-      ),
-      cloze(
-        'jus-orange',
-        'the orange juice',
-        [a("le jus d'orange")],
-        "Au petit déjeuner, je bois {un jus d'orange}.",
-        'At breakfast, I drink an orange juice.',
-      ),
-      cloze(
         'huile',
         'the oil',
         [a("l'huile", 'f')],
@@ -468,13 +426,6 @@ export const courses: Theme = pathTheme({
         'These bananas are ripe.',
       ),
       cloze(
-        'voudrais',
-        'I would like',
-        [a('je voudrais')],
-        "{Je voudrais} un café, s'il vous plaît.",
-        "I'd like a coffee, please.",
-      ),
-      cloze(
         'autre-chose',
         'something else',
         [a('autre chose')],
@@ -486,8 +437,8 @@ export const courses: Theme = pathTheme({
         'tout',
         'all',
         [a('tout')],
-        "C'est {tout}, merci.",
-        "That's all, thank you.",
+        'Dans ce supermarché, on trouve {tout}.',
+        'In this supermarket, you can find everything.',
       ),
       cloze(
         'vegetarien',

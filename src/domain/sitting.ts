@@ -1,7 +1,7 @@
 import { gradeItem } from './cloze.ts'
 import { canOverride, isCorrect, type GradeResult } from './grade.ts'
 import { shuffled, type Draft, type Entry, type Response } from './session.ts'
-import type { Theme } from './types.ts'
+import type { Item, Theme } from './types.ts'
 
 /**
  * learn: a sub-theme taken for the first time. practice: one taken again.
@@ -19,6 +19,7 @@ export interface SittingState {
   response: Response | undefined // the answer to queue[0], once given
   firstRight: Record<number, boolean> // card index -> was its first answer right
   tries: Record<number, number> // card index -> answers given so far
+  skipped: number[] // card indices set aside with "je connais ce mot"
   finished: boolean
 }
 
@@ -34,6 +35,7 @@ export type SittingAction =
   | { type: 'dunno' }
   | { type: 'override' }
   | { type: 'next' }
+  | { type: 'skip' } // sets the card on screen aside; not in a quiz
 
 export const initialSitting: SittingState = {
   kind: 'learn',
@@ -42,6 +44,7 @@ export const initialSitting: SittingState = {
   response: undefined,
   firstRight: {},
   tries: {},
+  skipped: [],
   finished: false,
 }
 
@@ -120,6 +123,20 @@ export function sittingReducer(
             : state.firstRight,
       }
     }
+    case 'skip': {
+      const [index, ...queue] = state.queue
+      if (index === undefined || state.kind === 'quiz') return state
+      const firstRight = { ...state.firstRight }
+      delete firstRight[index]
+      return {
+        ...state,
+        queue,
+        response: undefined,
+        firstRight,
+        skipped: [...state.skipped, index],
+        finished: queue.length === 0,
+      }
+    }
     case 'next': {
       const { response } = state
       const [index, ...rest] = state.queue
@@ -150,12 +167,18 @@ export const quizPassed = (state: SittingState): boolean =>
   state.cards.length > 0 &&
   rightFirstTime(state) / state.cards.length >= QUIZ_PASS
 
-/** A fresh draw for a theme's skip quiz: one card from each sub-theme in turn. */
+/**
+ * A fresh draw for a theme's skip quiz: one card from each sub-theme in turn,
+ * among the cards `allowed` keeps (by default, all of them).
+ */
 export function quizCards(
   theme: Theme,
   random: () => number = Math.random,
+  allowed: (item: Item) => boolean = () => true,
 ): Entry[] {
-  const piles = (theme.subThemes ?? []).map((s) => shuffled(s.items, random))
+  const piles = (theme.subThemes ?? []).map((s) =>
+    shuffled(s.items.filter(allowed), random),
+  )
   const cards: Entry[] = []
   for (let round = 0; cards.length < QUIZ_SIZE; round++) {
     const drawn = piles.flatMap((pile) => pile[round] ?? [])

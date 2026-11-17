@@ -3,7 +3,9 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
 import { LANGUAGE_KEY } from './storage/storage.ts'
+import { bg } from './data/bg/index.ts'
 import { fr } from './data/fr/index.ts'
+import { pl } from './data/pl/index.ts'
 
 const V2_KEY = 'cahier-vocab-v2' // the old picker's French progress
 
@@ -32,16 +34,23 @@ describe('French on the path', () => {
     expect(fr.path?.themes).toEqual([
       'presentation',
       'famille',
-      'chiffres-dates',
+      'cafe',
       'description',
-      'chez-soi',
       'routine',
+      'chiffres-dates',
       'courses',
       'ville',
       'transports',
       'meteo',
+      'nature',
       'loisirs',
       'vetements',
+      'chez-soi',
+      'vacances',
+      'ecrits-courts',
+      'raconter',
+      'corps',
+      'sante',
     ])
     setup()
     expect(
@@ -49,16 +58,23 @@ describe('French on the path', () => {
     ).toEqual([
       'Se présenter',
       'Famille et entourage',
-      'Chiffres, dates, heure',
+      'Au café',
       'Description simple',
-      'Chez soi',
       'Routine quotidienne',
+      'Chiffres, dates, heure',
       'Nourriture et courses',
       'La ville et les itinéraires',
       'Transports',
       'Météo et saisons',
+      'La nature et les animaux',
       'Goûts et loisirs',
       'Vêtements',
+      'Chez soi',
+      'Les vacances',
+      'Écrits courts',
+      'Raconter au passé',
+      'Le corps',
+      'Santé',
     ])
   })
 
@@ -153,28 +169,28 @@ describe('the French themes not on the path yet', () => {
     localStorage.setItem('cahier-vocab-legacy', 'true')
     setup()
     window.history.pushState({}, '', '/')
-    expect(screen.queryByText('Écrits courts')).toBeNull()
+    expect(screen.queryByText("Décrire quelqu'un")).toBeNull()
     expect(screen.queryByRole('button', { name: 'Autres thèmes' })).toBeNull()
     expect(screen.queryByRole('checkbox')).toBeNull()
   })
 
   it('are still in the language pack, ready to be converted', () => {
     const offPath = fr.themes.filter((t) => !fr.path.themes.includes(t.id))
-    expect(offPath.map((t) => t.id)).toContain('ecrits-courts')
-    expect(offPath).toHaveLength(4)
+    expect(offPath.map((t) => t.id)).toContain('portrait')
+    expect(offPath).toHaveLength(2)
   })
 })
 
 describe('the other languages', () => {
   it.each([
-    ['Български', 'Представяне'],
-    ['Polski', 'Przedstawianie się'],
+    ['Български', 'Представяне', bg.path.themes.length],
+    ['Polski', 'Przedstawianie się', pl.path.themes.length],
   ])(
     '%s is on the path too, with its first theme open',
-    async (name, first) => {
+    async (name, first, count) => {
       const user = setup()
       await user.click(screen.getByRole('button', { name }))
-      expect(screen.getAllByRole('region')).toHaveLength(4)
+      expect(screen.getAllByRole('region')).toHaveLength(count)
       expect(theme(first).getAllByRole('button').length).toBeGreaterThan(3)
       expect(screen.queryByRole('checkbox')).toBeNull()
     },

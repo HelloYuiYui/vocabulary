@@ -84,6 +84,8 @@ describe('learning a sub-theme', () => {
         't1/pere': { box: 1, due: '2026-11-13', seen: 0, right: 0 },
       },
       notesSeen: ['t1'],
+      skipped: [],
+      openPath: false,
     })
   })
 
@@ -338,6 +340,23 @@ describe('exporting cards as CSV', () => {
     expect(await files[0]?.blob.text()).toBe(MARKED_MERE + MARKED_PERE)
   })
 
+  it('leaves the words set aside out of both exports', async () => {
+    today(2026, 11, 14)
+    const files = catchDownloads()
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await user.type(screen.getByRole('textbox'), 'faux{Enter}')
+    await user.click(screen.getByRole('button', { name: 'Je connais ce mot' }))
+    await user.type(screen.getByRole('textbox'), 'faux{Enter}')
+    await user.keyboard('{Enter}')
+    await answer(user, 'le père')
+    await user.click(screen.getByRole('button', { name: ALL }))
+    await user.click(screen.getByRole('button', { name: MISSED }))
+    expect(await files[0]?.blob.text()).toBe(MARKED_PERE)
+    expect(await files[1]?.blob.text()).toBe(MARKED_PERE)
+  })
+
   it('exports only the cards missed at the first try', async () => {
     today(2026, 11, 14)
     const files = catchDownloads()
@@ -397,5 +416,168 @@ describe('exporting cards as CSV', () => {
     await answer(user, 'la mère')
     await user.click(screen.getByRole('button', { name: ALL }))
     expect(files[0]?.name).toBe('cahier-fr-revision-2026-11-14.csv')
+  })
+})
+
+const SKIP = 'Je connais ce mot'
+const settings = (user: UserEvent) =>
+  user.click(screen.getByRole('link', { name: 'Réglages' }))
+
+describe('setting a word aside ("je connais ce mot")', () => {
+  it('takes it out of the sitting and of review, until it is put back in the settings', async () => {
+    today(2026, 11, 12)
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    expect(screen.getByTestId('cloze-sentence')).toHaveTextContent('the mother')
+    await user.click(screen.getByRole('button', { name: SKIP }))
+    await answer(user, 'le père')
+    expect(screen.getByText('Séance terminée')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Un mot mis de côté. Les réglages, depuis le parcours, permettent de le remettre.',
+      ),
+    ).toBeInTheDocument()
+    await back(user)
+
+    expect(
+      theme('Thème un').getByRole('button', { name: /Premier/ }),
+    ).toHaveTextContent('fait')
+    expect(saved().skipped).toEqual(['t1/mere'])
+    expect(Object.keys(saved().cards ?? {})).toEqual(['t1/pere'])
+
+    await settings(user)
+    const aside = within(
+      screen.getByRole('region', { name: 'Mots mis de côté' }),
+    )
+    expect(aside.getByText('the mother')).toBeInTheDocument()
+    await user.click(aside.getByRole('button', { name: 'Remettre' }))
+    expect(aside.queryByText('the mother')).toBeNull()
+    expect(saved().skipped).toEqual([])
+    expect(saved().cards?.['t1/mere']?.due).toBe('2026-11-13')
+  })
+
+  it('can be used after answering, and the card does not come back', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await user.type(screen.getByRole('textbox'), 'faux{Enter}')
+    await user.click(screen.getByRole('button', { name: SKIP }))
+    await answer(user, 'le père')
+    expect(screen.getByText('Séance terminée')).toBeInTheDocument()
+  })
+
+  it('is not asked again when the sub-theme is taken again', async () => {
+    seed({ notesSeen: ['t1'], done: ['t1/s1'], skipped: ['t1/mere'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    expect(screen.getByTestId('cloze-sentence')).toHaveTextContent('the father')
+    expect(screen.getByText('reste 1 carte')).toBeInTheDocument()
+  })
+
+  it('is not offered in the skip quiz', async () => {
+    const { user } = setup()
+    await user.click(theme('Thème un').getByRole('button', { name: QUIZ }))
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: SKIP })).toBeNull()
+  })
+
+  it('leaves the settings list empty, with a word on how to fill it', async () => {
+    const { user } = setup()
+    await settings(user)
+    expect(
+      screen.getByRole('heading', { name: 'Réglages' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Aucun mot mis de côté/)).toBeInTheDocument()
+  })
+})
+
+describe('setting words aside: edge cases', () => {
+  it('shows a sub-theme whose words are all set aside as empty, and does not start it', () => {
+    seed({ done: ['t1/s1'], skipped: ['t1/mere', 't1/pere'] })
+    setup()
+    const button = theme('Thème un').getByRole('button', { name: /Premier/ })
+    expect(button).toHaveTextContent('0 cartes')
+    expect(button).toBeDisabled()
+  })
+
+  it('counts only the words left in a sub-theme', () => {
+    seed({ skipped: ['t1/mere'] })
+    setup()
+    expect(
+      theme('Thème un').getByRole('button', { name: /Premier/ }),
+    ).toHaveTextContent('1 carte')
+  })
+
+  it('offers no skip quiz when every word of the theme is set aside', () => {
+    seed({ skipped: ['t1/mere', 't1/pere', 't1/frere', 't1/soeur'] })
+    setup()
+    expect(theme('Thème un').queryByRole('button', { name: QUIZ })).toBeNull()
+  })
+
+  it('sets one word aside on a double click, not two', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await user.dblClick(screen.getByRole('button', { name: SKIP }))
+    expect(saved().skipped).toEqual(['t1/mere'])
+    expect(screen.getByTestId('cloze-sentence')).toHaveTextContent('the father')
+  })
+
+  it('says, before leaving, that the words set aside stay aside', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    await open(user, 'Thème un', /Premier/)
+    await user.click(screen.getByRole('button', { name: SKIP }))
+    await user.type(screen.getByRole('textbox'), 'faux{Enter}')
+    await user.click(screen.getByRole('button', { name: 'Arrêter' }))
+    expect(
+      within(screen.getByRole('dialog')).getByText(
+        /Les mots mis de côté le restent/,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('names each "Remettre" button by its word', async () => {
+    seed({ skipped: ['t1/mere', 't1/pere'] })
+    const { user } = setup()
+    await settings(user)
+    expect(
+      screen.getByRole('button', {
+        name: 'Remettre',
+        description: /the mother/,
+      }),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('the open path, in the settings', () => {
+  it('opens every theme, and closes them again', async () => {
+    const { user } = setup()
+    expect(theme('Thème deux').queryAllByRole('button')).toEqual([])
+    await settings(user)
+    const box = screen.getByRole('checkbox', { name: 'Ouvrir tous les thèmes' })
+    expect(box).not.toBeChecked()
+    await user.click(box)
+    expect(saved().openPath).toBe(true)
+    await back(user)
+    expect(
+      theme('Thème deux').getByRole('button', { name: /Animaux/ }),
+    ).toBeInTheDocument()
+
+    await settings(user)
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Ouvrir tous les thèmes' }),
+    )
+    await back(user)
+    expect(theme('Thème deux').queryAllByRole('button')).toEqual([])
+  })
+
+  it('is reached from the path but not during a sitting', async () => {
+    seed({ notesSeen: ['t1'] })
+    const { user } = setup()
+    expect(screen.getByRole('link', { name: 'Réglages' })).toBeInTheDocument()
+    await open(user, 'Thème un', /Premier/)
+    expect(screen.queryByRole('link', { name: 'Réglages' })).toBeNull()
   })
 })
