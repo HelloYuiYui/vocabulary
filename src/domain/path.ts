@@ -16,6 +16,8 @@ export interface PathProgress {
   notesSeen: string[] // ids of the themes whose grammar note has been shown
   skipped: string[] // cardKey() of each card set aside with "je connais ce mot"
   openPath: boolean // every theme open, the order only a suggestion
+  /** The handwriting picked in the settings, for a language that offers one. */
+  hand?: string
 }
 
 export const EMPTY_PROGRESS: PathProgress = {

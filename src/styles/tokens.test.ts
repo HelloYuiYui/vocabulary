@@ -101,3 +101,20 @@ describe('the palettes', () => {
     expect(new Set(inks).size).toBe(LANGUAGES.length)
   })
 })
+
+describe('the handwritings a learner can pick', () => {
+  const hands = LANGUAGES.flatMap(
+    (l) => l.path.copy.settings.hand?.options ?? [],
+  )
+
+  it('are offered by Bulgarian', () => {
+    expect(hands.length).toBeGreaterThanOrEqual(3)
+  })
+
+  it.each(hands)('each set the handwriting font: $id', ({ id }) => {
+    const start = css.indexOf(`[data-hand='${id}'] {`)
+    expect(start).toBeGreaterThanOrEqual(0)
+    const body = css.slice(start, css.indexOf('}', start))
+    expect(body).toMatch(/--font-hand:/)
+  })
+})

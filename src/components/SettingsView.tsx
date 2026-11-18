@@ -12,6 +12,8 @@ interface SettingsViewProps {
   progress: PathProgress
   copy: PathCopy
   onOpenPath: (open: boolean) => void
+  hand?: string // the handwriting in use, when the language offers a choice
+  onHand: (id: string) => void
   /** Puts a card set aside back. */
   onRestore: (themeId: string, itemId: string) => void
   onBack: () => void
@@ -23,6 +25,8 @@ export function SettingsView({
   progress,
   copy,
   onOpenPath,
+  hand,
+  onHand,
   onRestore,
   onBack,
 }: SettingsViewProps) {
@@ -62,6 +66,39 @@ export function SettingsView({
             </p>
           </div>
         </div>
+
+        {settings.hand && (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 font-bold text-text">
+              {settings.hand.label}
+            </legend>
+            {settings.hand.options.map((option) => (
+              <label
+                key={option.id}
+                className="grid cursor-pointer grid-cols-[auto_1fr] items-center gap-x-3"
+              >
+                <input
+                  type="radio"
+                  name={`${switchId}-hand`}
+                  value={option.id}
+                  checked={hand === option.id}
+                  onChange={() => onHand(option.id)}
+                  className="size-5 shrink-0 accent-ink"
+                />
+                <span className="text-text">{option.name}</span>
+                {/* The sample sets its own font, whatever the page's is. It
+                    is only to look at, so the radio is named by the option. */}
+                <span
+                  aria-hidden
+                  data-hand={option.id}
+                  className="col-start-2 font-hand text-[1.35rem] leading-[1.4] text-ink"
+                >
+                  {settings.hand?.sample}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        )}
 
         <section aria-labelledby={asideId} className="flex flex-col gap-3">
           {/* Focus comes here after "remettre", whose button is then gone. */}

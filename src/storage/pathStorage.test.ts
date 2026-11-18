@@ -75,6 +75,13 @@ describe('loadPath', () => {
     expect(loaded.openPath).toBe(false)
   })
 
+  it('keeps the chosen handwriting, if it is a name', () => {
+    put({ version: 1, hand: 'print' })
+    expect(loadPath(KEY, THEMES).hand).toBe('print')
+    put({ version: 1, hand: 3 })
+    expect(loadPath(KEY, THEMES)).toEqual(EMPTY_PROGRESS)
+  })
+
   it('drops a review state left behind for a card set aside', () => {
     put({ version: 1, cards: { 't1/a': CARD }, skipped: ['t1/a'] })
     expect(loadPath(KEY, THEMES).cards).toEqual({})

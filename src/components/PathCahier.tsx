@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { Language } from '../data/types.ts'
 import {
   cardKey,
@@ -96,6 +103,19 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
   const [run, setRun] = useState(0) // remounts the sitting on each start
   const [asking, setAsking] = useState(false) // whether to stop the sitting
   const sittingRef = useRef(sitting)
+
+  // The handwriting picked, or the first one if it is no longer offered.
+  const hands = copy.settings.hand?.options ?? []
+  const hand = (hands.find((h) => h.id === progress.hand) ?? hands[0])?.id
+  // On <html>, so that the font is right before the first paint.
+  useLayoutEffect(() => {
+    if (!hand) return
+    const root = document.documentElement
+    root.dataset.hand = hand
+    return () => {
+      delete root.dataset.hand
+    }
+  }, [hand])
 
   // The page comes from the address; another language's address is App's.
   const route = parseRoute(useHash())
@@ -256,6 +276,8 @@ export function PathCahier({ language, onLanguageChange }: PathCahierProps) {
           progress={progress}
           copy={copy}
           onOpenPath={(open) => setProgress((p) => ({ ...p, openPath: open }))}
+          hand={hand}
+          onHand={(id) => setProgress((p) => ({ ...p, hand: id }))}
           onRestore={(themeId, itemId) =>
             setProgress((p) =>
               restoreCard(p, themeId, itemId, pathThemes, new Date()),

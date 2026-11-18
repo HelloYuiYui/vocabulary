@@ -67,6 +67,15 @@ export interface PathCopy {
     setAsideTitle: string
     setAsideEmpty: string
     restore: string // puts a card set aside back
+    /**
+     * The handwritings the learner can pick for their own writing; the first
+     * is the default. tokens.css gives each id its font, under [data-hand].
+     */
+    hand?: {
+      label: string
+      sample: string // written in each handwriting, beside its name
+      options: { id: string; name: string }[]
+    }
   }
 }
 
