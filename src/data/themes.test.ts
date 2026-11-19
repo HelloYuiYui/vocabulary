@@ -5,7 +5,7 @@ import { fr } from './fr/index.ts'
 import { pl } from './pl/index.ts'
 import { a, cloze, pathTheme, plain, sentence, sub } from './helpers.ts'
 import { LANGUAGES } from './language.ts'
-import { pathProblems } from './pathChecks.ts'
+import { pathProblems, stressProblems } from './pathChecks.ts'
 
 const answersOf = (themes: Theme[]) =>
   themes.flatMap((t) =>
@@ -79,6 +79,72 @@ describe.each(LANGUAGES)('$code themes', ({ themes }) => {
 describe.each(LANGUAGES)('$code themes on the path', ({ code, themes }) => {
   it('have sound sub-themes and sentences', () => {
     expect(themes.flatMap((t) => pathProblems(t, code))).toEqual([])
+  })
+})
+
+// Bulgarian themes whose cards and grammar note mark the stressed syllable.
+// Add a theme here once its stress marks are written.
+const STRESS_MARKED = ['predstavyane']
+
+describe('Bulgarian stress marks', () => {
+  it('mark every word of more than one syllable in the marked themes', () => {
+    const marked = bg.themes.filter((t) => STRESS_MARKED.includes(t.id))
+    expect(marked.map((t) => t.id)).toEqual(STRESS_MARKED)
+    expect(marked.flatMap(stressProblems)).toEqual([])
+  })
+})
+
+describe('stressProblems', () => {
+  const themeWith = (...items: Parameters<typeof sub>[2]) =>
+    pathTheme({
+      id: 't',
+      name: 'T',
+      level: 'A1',
+      desc: 'd',
+      subThemes: [sub('s', 'S', items)],
+    })
+
+  it('finds nothing wrong with marked words and unmarked one-syllable words', () => {
+    const card = cloze('x', 'x', [a('ма́йка')], 'Това́ е {ма́йка} ѝ.', 'x', {
+      note: 'Ма́йка е „mother“.',
+    })
+    expect(stressProblems(themeWith(card))).toEqual([])
+  })
+
+  it('reports a word of more than one syllable without exactly one mark', () => {
+    const card = cloze('x', 'x', [a('майка')], 'То́ва́ е {ма́йка}.', 'x', {
+      note: 'Ма́йка е майка.',
+    })
+    expect(stressProblems(themeWith(card))).toEqual([
+      't: "x" needs one stress mark on "То́ва́"',
+      't: "x" needs one stress mark on "майка"',
+      't: "x" needs one stress mark on "майка"',
+    ])
+  })
+
+  it('reports a mark on a one-syllable word or on a consonant', () => {
+    const card = cloze('x', 'x', [a('ма́йка')], 'Е́ то {май́ка}.', 'x')
+    expect(stressProblems(themeWith(card))).toEqual([
+      't: "x" needs no stress mark on "Е́"',
+      't: "x" needs one stress mark on "май́ка"',
+    ])
+  })
+
+  it('checks the grammar note too', () => {
+    const theme = {
+      ...themeWith(cloze('x', 'x', [a('ма́йка')], '{Ма́йка}.', 'x')),
+      note: {
+        title: 'Съм и имам',
+        rule: 'Use и́мам.',
+        table: { head: ['', 'имам'], rows: [['аз', 'и́мам']] },
+        exceptions: ['Аз съм на двадесет.'],
+      },
+    }
+    expect(stressProblems(theme)).toEqual([
+      't: the grammar note needs one stress mark on "имам"',
+      't: the grammar note needs one stress mark on "имам"',
+      't: the grammar note needs one stress mark on "двадесет"',
+    ])
   })
 })
 

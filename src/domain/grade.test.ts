@@ -89,6 +89,18 @@ describe('grade in Bulgarian', () => {
   it('rejects a wrong word', () => {
     expect(grade('нервен', null, calm).verdict).toBe('bad')
   })
+
+  it('accepts a stress-marked word with or without its stress mark', () => {
+    const stressed = item(
+      a('споко́ен'),
+      a('споко́йна'),
+      a('Синъ́т ѝ е на три годи́ни.'),
+    )
+    expect(grade('спокоен', null, stressed).verdict).toBe('ok')
+    expect(grade('споко́ен', null, stressed).verdict).toBe('ok')
+    expect(grade('Синът ѝ е на три години', null, stressed).verdict).toBe('ok')
+    expect(grade('спокоина', null, stressed).verdict).toBe('accent')
+  })
 })
 
 describe('grade in Polish', () => {

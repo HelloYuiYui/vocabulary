@@ -67,7 +67,7 @@ describe('language switcher', () => {
       theme('Представяне').getByRole('button', { name: /Лични данни/ }),
     )
     expect(
-      screen.getByRole('heading', { name: 'Съм и имам' }),
+      screen.getByRole('heading', { name: 'Съм и и́мам' }),
     ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Продължи' }))
 
@@ -75,10 +75,15 @@ describe('language switcher', () => {
       screen.queryByRole('button', { name: 'Français' }),
     ).not.toBeInTheDocument()
     expect(screen.getByTestId('cloze-sentence')).toHaveTextContent(
-      'Моето first name е Мария.',
+      'Мо́ето first name е Мари́я.',
     )
+    // Typed without its stress mark, the word is simply right, and the
+    // sentence then shows it with the mark.
     await user.type(screen.getByRole('textbox'), 'име{Enter}')
     expect(screen.getAllByText('Вярно!')[0]).toBeInTheDocument()
+    expect(screen.getByTestId('cloze-sentence')).toHaveTextContent(
+      'Мо́ето и́ме е Мари́я.',
+    )
     await user.keyboard('{Enter}')
     await user.click(screen.getByRole('button', { name: 'Спри' }))
     expect(
