@@ -1,6 +1,11 @@
-/** Lower-cases and folds curly apostrophes, hyphens and punctuation into plain spacing. */
+/**
+ * Lower-cases and folds curly apostrophes, hyphens and punctuation into plain
+ * spacing. Drops the stress marks written on Cyrillic vowels (и́ме), which the
+ * cards show but the learner need not type.
+ */
 export const norm = (s: string): string =>
   s
+    .replace(/(\p{Script=Cyrillic})́/gu, '$1')
     .toLowerCase()
     .replace(/[’`ʼ]/g, "'")
     .replace(/[-‑–]/g, ' ')

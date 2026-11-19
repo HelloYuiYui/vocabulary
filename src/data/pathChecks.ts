@@ -20,6 +20,57 @@ const LATIN = /[a-z]/i
 // Catches letters from other alphabets, and accents Polish doesn't use.
 const POLISH = /^[a-ząćęłńóśźż0-9 ,.!?:;()„”"'’–-]+$/i
 
+// A Bulgarian word, with any stress marks (U+0301) written on its vowels.
+const CYRILLIC_WORD = /[\p{Script=Cyrillic}́]+/gu
+const SYLLABLE = /[аъоуеиюяѝ]/giu
+const STRESS = /́/gu
+const STRESSED_VOWEL = /[аъоуеиюя]́/giu
+
+const count = (text: string, pattern: RegExp): number =>
+  (text.match(pattern) ?? []).length
+
+/** What is wrong with the stress marks of the Bulgarian words in a text. */
+const stressSlips = (text: string): string[] =>
+  (text.match(CYRILLIC_WORD) ?? []).flatMap((word) => {
+    const marks = count(word, STRESS)
+    if (count(word, SYLLABLE) < 2)
+      return marks > 0 ? [`needs no stress mark on "${word}"`] : []
+    return marks === 1 && count(word, STRESSED_VOWEL) === 1
+      ? []
+      : [`needs one stress mark on "${word}"`]
+  })
+
+/**
+ * What is wrong with the stress marks of a Bulgarian theme whose cards show
+ * them: every word of more than one syllable carries exactly one, on a vowel,
+ * and one-syllable words carry none. Covers the sentences, the dictionary
+ * forms, the card notes and the grammar note. Used by the data tests.
+ */
+export function stressProblems(theme: Theme): string[] {
+  const problems: string[] = []
+  for (const item of theme.items) {
+    const texts = [
+      item.sentence?.text.replace(/[{}]/g, '') ?? '',
+      ...item.answers.map((answer) => answer.text),
+      item.note ?? '',
+    ]
+    for (const slip of texts.flatMap(stressSlips))
+      problems.push(`${theme.id}: "${item.id ?? item.en}" ${slip}`)
+  }
+  const { note } = theme
+  if (note) {
+    const texts = [
+      note.title,
+      note.rule,
+      ...(note.table ? [...note.table.head, ...note.table.rows.flat()] : []),
+      ...(note.exceptions ?? []),
+    ]
+    for (const slip of texts.flatMap(stressSlips))
+      problems.push(`${theme.id}: the grammar note ${slip}`)
+  }
+  return problems
+}
+
 /**
  * What is wrong with a theme's sub-themes and cloze sentences, one line per
  * problem; empty for a theme without sub-themes. Used by the data tests.
