@@ -102,6 +102,18 @@ describe('the palettes', () => {
   })
 })
 
+describe('the Bulgarian typefaces', () => {
+  const start = css.indexOf(":root[lang='bg'] {")
+  const block = css.slice(start, css.indexOf('}', start))
+  const html = readFileSync(resolve('index.html'), 'utf8')
+
+  it('set headings and text in Sofia Sans, which index.html loads', () => {
+    expect(block).toMatch(/--font-display:\s*'Sofia Sans',/)
+    expect(block).toMatch(/--font-body:\s*'Sofia Sans',/)
+    expect(html).toMatch(/family=Sofia\+Sans:wght@[\d;]+/)
+  })
+})
+
 describe('the handwritings a learner can pick', () => {
   const hands = LANGUAGES.flatMap(
     (l) => l.path.copy.settings.hand?.options ?? [],
