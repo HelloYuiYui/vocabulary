@@ -82,8 +82,12 @@
  */
 
 /* Bulgarian: white, green, red. Green ink, the red margin of the flag's third
-   band; "right" moves to teal so that it is not lost in the green ink. */
+   band; "right" moves to teal so that it is not lost in the green ink.
+   Sofia Sans, by Bulgarian designers, draws the Bulgarian letter forms
+   (lang='bg' turns them on) and has Cyrillic in every weight. */
 :root[lang='bg'] {
+  --font-display: 'Sofia Sans', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Sofia Sans', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
   --paper: #f3f8f4;
   --sheet: #fbfdfb;
   --ink: #0a5234;
